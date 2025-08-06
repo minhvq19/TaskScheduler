@@ -95,14 +95,13 @@ export default function PublicDisplay() {
         <div className="text-yellow-400 text-lg font-bold">
           BIDV 🟡 NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
         </div>
-        <div className="text-white text-base">
+        <div className="text-white text-base text-center font-bold">
           Chi nhánh Sở giao dịch 1
         </div>
         <div className="text-yellow-400 text-xl font-bold mt-2">
           KẾ HOẠCH CÔNG TÁC
         </div>
       </div>
-
       {/* Schedule Table */}
       <div className="p-4">
         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
@@ -170,7 +169,6 @@ export default function PublicDisplay() {
           ))}
         </div>
       </div>
-
       {/* Footer with current time */}
       <div className="fixed bottom-4 right-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded">
         <div className="text-lg font-bold">
