@@ -51,7 +51,7 @@ export default function WorkSchedule() {
     queryKey: ["/api/departments"],
   });
 
-  const boardDept = departments.find(d => d.name.includes("Ban Giám đốc"));
+  const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
   const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
