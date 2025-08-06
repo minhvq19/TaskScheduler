@@ -53,7 +53,7 @@ export default function SystemConfigPage() {
   // Create configuration mutation
   const createConfigMutation = useMutation({
     mutationFn: async (data: InsertSystemConfig) => {
-      return await apiRequest("/api/system-config", "POST", data);
+      return await apiRequest("POST", "/api/system-config", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
@@ -77,7 +77,7 @@ export default function SystemConfigPage() {
   // Update configuration mutation
   const updateConfigMutation = useMutation({
     mutationFn: async ({ key, data }: { key: string; data: Partial<InsertSystemConfig> }) => {
-      return await apiRequest(`/api/system-config/${key}`, "PUT", data);
+      return await apiRequest("PUT", `/api/system-config/${key}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
@@ -101,7 +101,7 @@ export default function SystemConfigPage() {
   // Delete configuration mutation
   const deleteConfigMutation = useMutation({
     mutationFn: async (key: string) => {
-      return await apiRequest(`/api/system-config/${key}`, "DELETE");
+      return await apiRequest("DELETE", `/api/system-config/${key}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
