@@ -43,11 +43,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      // Check for local authentication first
+      if (req.session?.user) {
+        const localUser = req.session.user;
+        const userWithGroup = await storage.getSystemUserWithGroup(localUser.id);
+        res.json({
+          id: localUser.id,
+          username: localUser.username,
+          userGroupId: localUser.userGroupId,
+          userGroup: userWithGroup?.userGroup
+        });
+        return;
+      }
+      
+      // Check for Replit authentication
+      if (req.isAuthenticated() && req.user?.claims) {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        res.json(user);
+        return;
+      }
+      
+      // No authentication found
+      res.status(401).json({ message: "Unauthorized" });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

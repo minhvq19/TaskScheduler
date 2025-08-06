@@ -466,6 +466,19 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getSystemUserWithGroup(id: string) {
+    const [result] = await db
+      .select({
+        user: systemUsers,
+        userGroup: userGroups,
+      })
+      .from(systemUsers)
+      .leftJoin(userGroups, eq(systemUsers.userGroupId, userGroups.id))
+      .where(eq(systemUsers.id, id));
+    
+    return result;
+  }
+
   async authenticateSystemUser(username: string, password: string): Promise<SystemUser | null> {
     const user = await this.getSystemUserByUsername(username);
     if (!user) return null;
