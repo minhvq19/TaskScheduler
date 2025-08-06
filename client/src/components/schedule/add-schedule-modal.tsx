@@ -19,9 +19,12 @@ import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Departmen
 import { z } from "zod";
 import { format } from "date-fns";
 
-const formSchema = insertWorkScheduleSchema.extend({
-  startDateTime: z.string(),
-  endDateTime: z.string(),
+const formSchema = z.object({
+  staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
+  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu"),
+  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc"),
+  workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
+  customContent: z.string().max(200).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -151,6 +154,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   const onSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', form.formState.errors);
+    console.log('Form isValid:', form.formState.isValid);
     
     // Validate end time is after start time
     if (new Date(data.endDateTime) <= new Date(data.startDateTime)) {
