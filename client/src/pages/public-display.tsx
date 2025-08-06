@@ -201,6 +201,37 @@ export default function PublicDisplay() {
           })}
         </div>
       ))}
+      
+      {/* Color Legend */}
+      <div className="bg-gray-50 p-3 border-t border-gray-300">
+        <div className="text-xs font-bold text-gray-700 mb-2 text-center">GHI CHÚ MÀU SẮC</div>
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#4a90a4" }}></div>
+            <span>Làm việc tại CN</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#f59e0b" }}></div>
+            <span>Nghỉ phép</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#ef4444" }}></div>
+            <span>Trực lãnh đạo</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#10b981" }}></div>
+            <span>Đi công tác trong nước</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#8b5cf6" }}></div>
+            <span>Đi công tác nước ngoài</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#6b7280" }}></div>
+            <span>Khác</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
