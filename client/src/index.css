@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(189, 100%, 21%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* BIDV Colors */
+  --bidv-teal: hsl(178, 100%, 21%);
+  --bidv-yellow: hsl(47, 100%, 59%);
+  --bidv-blue: hsl(220, 100%, 35%);
+  --bidv-light: hsl(216, 100%, 59%);
+  --bidv-gray: hsl(215, 25%, 45%);
+  --bidv-light-gray: hsl(215, 25%, 95%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(189, 100%, 21%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-bidv-teal {
+    color: var(--bidv-teal);
+  }
+  
+  .text-bidv-yellow {
+    color: var(--bidv-yellow);
+  }
+  
+  .text-bidv-blue {
+    color: var(--bidv-blue);
+  }
+  
+  .text-bidv-light {
+    color: var(--bidv-light);
+  }
+  
+  .text-bidv-gray {
+    color: var(--bidv-gray);
+  }
+  
+  .bg-bidv-teal {
+    background-color: var(--bidv-teal);
+  }
+  
+  .bg-bidv-yellow {
+    background-color: var(--bidv-yellow);
+  }
+  
+  .bg-bidv-blue {
+    background-color: var(--bidv-blue);
+  }
+  
+  .bg-bidv-light {
+    background-color: var(--bidv-light);
+  }
+  
+  .bg-bidv-gray {
+    background-color: var(--bidv-gray);
+  }
+  
+  .bg-bidv-light-gray {
+    background-color: var(--bidv-light-gray);
+  }
+  
+  .border-bidv-teal {
+    border-color: var(--bidv-teal);
+  }
+  
+  .hover\:bg-bidv-teal:hover {
+    background-color: var(--bidv-teal);
+  }
+  
+  .hover\:bg-bidv-blue:hover {
+    background-color: var(--bidv-blue);
+  }
+  
+  .focus\:ring-bidv-teal:focus {
+    --tw-ring-color: var(--bidv-teal);
+  }
+  
+  .focus\:border-bidv-teal:focus {
+    border-color: var(--bidv-teal);
+  }
+}
+
+/* Work schedule colors */
+.schedule-work-at-office {
+  background-color: transparent;
+}
+
+.schedule-vacation {
+  background-color: hsl(333, 71%, 41%); /* #9f224e */
+}
+
+.schedule-leadership-duty {
+  background-color: hsl(26, 91%, 58%); /* #f58732 */
+}
+
+.schedule-domestic-business-trip {
+  background-color: hsl(201, 100%, 33%); /* #0071a6 */
+}
+
+.schedule-international-business-trip {
+  background-color: hsl(135, 53%, 43%); /* #32a852 */
+}
