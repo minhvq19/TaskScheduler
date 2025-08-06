@@ -143,7 +143,11 @@ export default function PublicDisplay() {
                       {schedule.customContent && (
                         <p className="text-gray-300 mb-2">{schedule.customContent}</p>
                       )}
-                      <p className="text-gray-300">Cán bộ: [Tên cán bộ]</p>
+                      <p className="text-gray-300">
+                        {format(new Date(schedule.startDateTime), "dd/MM/yyyy", { locale: vi })} 
+                        {new Date(schedule.startDateTime).toDateString() !== new Date(schedule.endDateTime).toDateString() && 
+                          ` - ${format(new Date(schedule.endDateTime), "dd/MM/yyyy", { locale: vi })}`}
+                      </p>
                     </div>
                   );
                 })

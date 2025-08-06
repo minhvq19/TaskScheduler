@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay } from "date-fns";
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import AddScheduleModal from "./add-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
@@ -110,10 +110,16 @@ export default function WorkSchedule() {
   };
 
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
-    return schedules.filter(schedule => 
-      schedule.staffId === staffId && 
-      isSameDay(new Date(schedule.startDateTime), day)
-    );
+    return schedules.filter(schedule => {
+      const startDate = new Date(schedule.startDateTime);
+      const endDate = new Date(schedule.endDateTime);
+      const checkDay = new Date(day);
+      
+      // Check if the day falls within the schedule range (inclusive)
+      return schedule.staffId === staffId && 
+             checkDay >= startOfDay(startDate) && 
+             checkDay <= startOfDay(endDate);
+    });
   };
 
   return (

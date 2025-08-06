@@ -152,10 +152,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   }, [schedule, form]);
 
   const onSubmit = (data: FormData) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form errors:', form.formState.errors);
-    console.log('Form isValid:', form.formState.isValid);
-    
     // Validate end time is after start time
     if (new Date(data.endDateTime) <= new Date(data.startDateTime)) {
       toast({

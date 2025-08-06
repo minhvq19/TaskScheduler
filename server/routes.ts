@@ -294,15 +294,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/work-schedules', requireAuth, async (req, res) => {
     try {
-      console.log('User in req:', req.user);
-      console.log('Request body:', req.body);
       const validatedData = insertWorkScheduleSchema.parse({
         ...req.body,
         startDateTime: new Date(req.body.startDateTime),
         endDateTime: new Date(req.body.endDateTime),
         createdBy: req.user?.id || 'admin-user',
       });
-      console.log('Validated data:', validatedData);
 
       // Check daily limit (max 5 schedules per staff per day)
       const startOfDay = new Date(validatedData.startDateTime);
@@ -498,20 +495,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/public/display-data', async (req, res) => {
     try {
       const today = new Date();
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(today);
-      endOfDay.setHours(23, 59, 59, 999);
+      const currentTime = new Date();
+      
+      // Get schedules that are active today (including multi-day schedules)
+      // Look for schedules that start up to 30 days ago and end up to 30 days from now
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      const thirtyDaysFromNow = new Date(today);
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-      const workSchedules = await storage.getWorkSchedules(startOfDay, endOfDay);
-      const meetingSchedules = await storage.getMeetingSchedules(startOfDay, endOfDay);
-      const otherEvents = await storage.getOtherEvents(startOfDay, endOfDay);
+      const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, thirtyDaysFromNow);
+      const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, thirtyDaysFromNow);
+      const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, thirtyDaysFromNow);
+
+      // Filter schedules that are active today
+      const startOfToday = new Date(today);
+      startOfToday.setHours(0, 0, 0, 0);
+      const endOfToday = new Date(today);
+      endOfToday.setHours(23, 59, 59, 999);
+
+      const workSchedules = allWorkSchedules.filter(schedule => {
+        const start = new Date(schedule.startDateTime);
+        const end = new Date(schedule.endDateTime);
+        // Include if the schedule overlaps with today
+        return start <= endOfToday && end >= startOfToday;
+      });
+
+      const meetingSchedules = allMeetingSchedules.filter(schedule => {
+        const start = new Date(schedule.startDateTime);
+        const end = new Date(schedule.endDateTime);
+        return start <= endOfToday && end >= startOfToday;
+      });
+
+      const otherEvents = allOtherEvents.filter(event => {
+        const start = new Date(event.startDateTime);
+        const end = new Date(event.endDateTime);
+        return start <= endOfToday && end >= startOfToday;
+      });
 
       res.json({
         workSchedules,
         meetingSchedules,
         otherEvents,
-        currentTime: new Date().toISOString(),
+        currentTime: currentTime.toISOString(),
       });
     } catch (error) {
       console.error("Error fetching public display data:", error);
