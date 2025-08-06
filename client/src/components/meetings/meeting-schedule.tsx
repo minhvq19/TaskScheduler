@@ -62,7 +62,7 @@ export default function MeetingSchedule() {
     queryKey: ["/api/meeting-schedules", selectedRoom],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedRoom) {
+      if (selectedRoom && selectedRoom !== 'all') {
         params.append('roomId', selectedRoom);
       }
       
@@ -265,7 +265,7 @@ export default function MeetingSchedule() {
                   <SelectValue placeholder="Tất cả phòng họp" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tất cả phòng họp</SelectItem>
+                  <SelectItem value="all">Tất cả phòng họp</SelectItem>
                   {rooms.map((room) => (
                     <SelectItem key={room.id} value={room.id}>
                       {room.name}

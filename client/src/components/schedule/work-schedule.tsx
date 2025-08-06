@@ -31,7 +31,7 @@ export default function WorkSchedule() {
         startDate: weekStart.toISOString(),
         endDate: weekEnd.toISOString(),
       });
-      if (selectedStaff) {
+      if (selectedStaff && selectedStaff !== 'all') {
         params.append('staffId', selectedStaff);
       }
       
@@ -165,7 +165,7 @@ export default function WorkSchedule() {
                   <SelectValue placeholder="Tất cả cán bộ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tất cả cán bộ</SelectItem>
+                  <SelectItem value="all">Tất cả cán bộ</SelectItem>
                   {boardStaff.map((staff) => (
                     <SelectItem key={staff.id} value={staff.id}>
                       {staff.positionShort} {staff.fullName}
