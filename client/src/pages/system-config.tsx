@@ -12,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Settings, Plus, Edit2, Trash2, Save, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -28,7 +35,7 @@ interface ConfigFormData {
 export default function SystemConfigPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<SystemConfig | null>(null);
   const [formData, setFormData] = useState<ConfigFormData>({
     key: "",
@@ -50,7 +57,8 @@ export default function SystemConfigPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
-      setIsAddingNew(false);
+      setIsDialogOpen(false);
+      setEditingConfig(null);
       resetForm();
       toast({
         title: "Thành công",
@@ -73,6 +81,7 @@ export default function SystemConfigPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
+      setIsDialogOpen(false);
       setEditingConfig(null);
       resetForm();
       toast({
@@ -149,12 +158,18 @@ export default function SystemConfigPage() {
       description: config.description || "",
       category: config.category,
     });
-    setIsAddingNew(false);
+    setIsDialogOpen(true);
+  };
+
+  const startAdd = () => {
+    setEditingConfig(null);
+    resetForm();
+    setIsDialogOpen(true);
   };
 
   const cancelEdit = () => {
     setEditingConfig(null);
-    setIsAddingNew(false);
+    setIsDialogOpen(false);
     resetForm();
   };
 
@@ -188,7 +203,7 @@ export default function SystemConfigPage() {
           <h1 className="text-2xl font-bold">Quản trị tham số hệ thống</h1>
         </div>
         <Button
-          onClick={() => setIsAddingNew(true)}
+          onClick={startAdd}
           className="flex items-center space-x-2"
           data-testid="button-add-config"
         >
@@ -197,16 +212,15 @@ export default function SystemConfigPage() {
         </Button>
       </div>
 
-      {/* Add/Edit Form */}
-      {(isAddingNew || editingConfig) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
+      {/* Edit/Add Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
               {editingConfig ? "Chỉnh sửa tham số" : "Thêm tham số mới"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="key">Khóa tham số</Label>
                 <Input
@@ -303,9 +317,8 @@ export default function SystemConfigPage() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Configuration List */}
       {isLoading ? (
