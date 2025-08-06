@@ -277,11 +277,11 @@ export default function UserManagement() {
     }
   };
 
-  const handlePermissionChange = (functionKey: string, permission: "EDIT" | "VIEW" | "") => {
+  const handlePermissionChange = (functionKey: string, permission: "EDIT" | "VIEW" | "NONE") => {
     const currentPermissions = groupForm.getValues("permissions");
     const newPermissions = { ...currentPermissions };
     
-    if (permission === "") {
+    if (permission === "NONE") {
       delete newPermissions[functionKey];
     } else {
       newPermissions[functionKey] = permission;
@@ -675,20 +675,20 @@ export default function UserManagement() {
               </Label>
               <div className="border rounded-lg p-4 space-y-4 max-h-64 overflow-y-auto">
                 {availableFunctions.map((func) => {
-                  const currentPermission = groupForm.watch("permissions")[func.key] || "";
+                  const currentPermission = groupForm.watch("permissions")[func.key] || "NONE";
                   
                   return (
                     <div key={func.key} className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">{func.label}</span>
                       <Select
                         value={currentPermission}
-                        onValueChange={(value) => handlePermissionChange(func.key, value as "EDIT" | "VIEW" | "")}
+                        onValueChange={(value) => handlePermissionChange(func.key, value as "EDIT" | "VIEW" | "NONE")}
                       >
                         <SelectTrigger className="w-32" data-testid={`select-permission-${func.key}`}>
                           <SelectValue placeholder="Chọn quyền" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Không có</SelectItem>
+                          <SelectItem value="NONE">Không có</SelectItem>
                           <SelectItem value="VIEW">Chỉ xem</SelectItem>
                           <SelectItem value="EDIT">Sửa</SelectItem>
                         </SelectContent>

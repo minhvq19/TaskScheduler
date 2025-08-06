@@ -78,7 +78,7 @@ export default function StaffManagement() {
   const filteredStaff = staff.filter((member) => {
     const matchesSearch = member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = !selectedDepartment || member.departmentId === selectedDepartment;
+    const matchesDepartment = !selectedDepartment || selectedDepartment === 'all' || member.departmentId === selectedDepartment;
     return matchesSearch && matchesDepartment;
   });
 
@@ -128,7 +128,7 @@ export default function StaffManagement() {
                   <SelectValue placeholder="Tất cả phòng ban" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tất cả phòng ban</SelectItem>
+                  <SelectItem value="all">Tất cả phòng ban</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
