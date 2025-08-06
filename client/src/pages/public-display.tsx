@@ -160,9 +160,7 @@ export default function PublicDisplay() {
                       ))
                     ) : (
                       <div className="text-gray-400 text-xs p-2">
-                        {/* Default content for empty cells */}
-                        {dayIndex === 0 && rowIndex === 0 && "Ở công ty (cả ngày)"}
-                        {dayIndex > 0 && rowIndex === 4 && "Nghỉ phép"}
+                        {/* Empty cell - no schedule */}
                       </div>
                     )}
                   </div>
