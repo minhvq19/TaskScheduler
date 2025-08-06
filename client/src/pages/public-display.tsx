@@ -90,8 +90,8 @@ export default function PublicDisplay() {
 
   return (
     <div className="min-h-screen bg-teal-900" data-testid="public-display">
-      {/* Header */}
-      <div className="bg-teal-900 text-center py-4">
+      {/* Header with time in top right */}
+      <div className="bg-teal-900 text-center py-4 relative">
         <div className="text-yellow-400 text-lg font-bold">
           BIDV 🟡 NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
         </div>
@@ -101,23 +101,33 @@ export default function PublicDisplay() {
         <div className="text-yellow-400 text-xl font-bold mt-2">
           KẾ HOẠCH CÔNG TÁC
         </div>
+        
+        {/* Time display in top right corner */}
+        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded">
+          <div className="text-base font-bold">
+            {format(currentTime, "HH:mm:ss", { locale: vi })}
+          </div>
+          <div className="text-xs">
+            {format(currentTime, "dd/MM/yyyy", { locale: vi })}
+          </div>
+        </div>
       </div>
       {/* Schedule Table */}
-      <div className="p-4">
+      <div className="p-2">
         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
           {/* Table Header */}
           <div className="grid grid-cols-8 bg-orange-500">
-            <div className="p-3 text-white font-bold text-center border-r border-orange-600">
-              Lãnh đạo/ Ngày
+            <div className="p-2 text-white font-bold text-center border-r border-orange-600">
+              <div className="text-sm">Lãnh đạo/ Ngày</div>
             </div>
             {days.map((day, index) => {
               const dayOfWeek = day.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
               const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
               
               return (
-                <div key={index} className="p-3 text-white font-bold text-center border-r border-orange-600">
-                  <div>{dayNames[dayOfWeek]}</div>
-                  <div className="text-sm">{format(day, "dd/MM", { locale: vi })}</div>
+                <div key={index} className="p-2 text-white font-bold text-center border-r border-orange-600">
+                  <div className="text-sm">{dayNames[dayOfWeek]}</div>
+                  <div className="text-xs">{format(day, "dd/MM", { locale: vi })}</div>
                 </div>
               );
             })}
@@ -127,11 +137,11 @@ export default function PublicDisplay() {
           {staff
             .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
             .map((staffMember, rowIndex) => (
-            <div key={staffMember.id} className="grid grid-cols-8 border-b border-gray-300">
+            <div key={staffMember.id} className="grid grid-cols-8 border-b border-gray-200">
               {/* Staff Name Column */}
-              <div className="p-4 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center">
+              <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center">
                 <div>
-                  <div className="text-sm">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+                  <div className="text-xs">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
                 </div>
               </div>
               
@@ -140,30 +150,37 @@ export default function PublicDisplay() {
                 const schedules = getSchedulesForStaffAndDay(staffMember.id, day);
                 
                 return (
-                  <div key={dayIndex} className="p-2 border-r border-gray-300 min-h-[100px] relative">
+                  <div key={dayIndex} className="p-0.5 border-r border-gray-300 min-h-[70px] relative">
                     {schedules.length > 0 ? (
-                      schedules.map((schedule) => (
-                        <div
-                          key={schedule.id}
-                          className="text-xs mb-1 p-2 rounded text-white font-medium"
-                          style={{
-                            backgroundColor: getWorkScheduleColor(schedule.workType),
-                            fontSize: "10px",
-                            lineHeight: "1.2"
-                          }}
-                        >
-                          <div className="font-bold">{schedule.workType}</div>
-                          {schedule.customContent && (
-                            <div className="mt-1 opacity-90">{schedule.customContent}</div>
-                          )}
-                          <div className="mt-1 opacity-75">
-                            {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })} - 
-                            {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                      <div className="space-y-0.5">
+                        {schedules.slice(0, 8).map((schedule, idx) => (
+                          <div
+                            key={schedule.id}
+                            className="text-xs p-0.5 rounded text-white font-medium"
+                            style={{
+                              backgroundColor: getWorkScheduleColor(schedule.workType),
+                              fontSize: "7px",
+                              lineHeight: "1.0"
+                            }}
+                          >
+                            <div className="font-bold truncate">{schedule.workType}</div>
+                            {schedule.customContent && (
+                              <div className="truncate opacity-90 text-[6px]">{schedule.customContent}</div>
+                            )}
+                            <div className="opacity-75 text-[6px]">
+                              {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
+                              {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        ))}
+                        {schedules.length > 8 && (
+                          <div className="text-[6px] text-gray-500 text-center">
+                            +{schedules.length - 8} more
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <div className="text-gray-400 text-xs p-2">
+                      <div className="text-gray-400 text-xs p-0.5">
                         {/* Empty cell - no schedule */}
                       </div>
                     )}
@@ -174,15 +191,7 @@ export default function PublicDisplay() {
           ))}
         </div>
       </div>
-      {/* Footer with current time */}
-      <div className="fixed bottom-4 right-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded">
-        <div className="text-lg font-bold">
-          {format(currentTime, "HH:mm:ss", { locale: vi })}
-        </div>
-        <div className="text-sm">
-          {format(currentTime, "EEEE, dd/MM/yyyy", { locale: vi })}
-        </div>
-      </div>
+
     </div>
   );
 }
