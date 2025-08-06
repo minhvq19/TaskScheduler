@@ -507,40 +507,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date();
       const currentTime = new Date();
       
-      // Get schedules that are active today (including multi-day schedules)
+      // Get schedules for the next 7 days (today + 6 days)
       // Look for schedules that start up to 30 days ago and end up to 30 days from now
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(today.getDate() - 30);
-      const thirtyDaysFromNow = new Date(today);
-      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      const sevenDaysFromNow = new Date(today);
+      sevenDaysFromNow.setDate(today.getDate() + 7);
 
-      const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, thirtyDaysFromNow);
-      const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, thirtyDaysFromNow);
-      const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, thirtyDaysFromNow);
+      const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, sevenDaysFromNow);
+      const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, sevenDaysFromNow);
+      const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, sevenDaysFromNow);
 
-      // Filter schedules that are active today
+      // Filter schedules that are active in the next 7 days
       const startOfToday = new Date(today);
       startOfToday.setHours(0, 0, 0, 0);
-      const endOfToday = new Date(today);
-      endOfToday.setHours(23, 59, 59, 999);
+      const endOfSevenDays = new Date(sevenDaysFromNow);
+      endOfSevenDays.setHours(23, 59, 59, 999);
 
       const workSchedules = allWorkSchedules.filter(schedule => {
         const start = new Date(schedule.startDateTime);
         const end = new Date(schedule.endDateTime);
-        // Include if the schedule overlaps with today
-        return start <= endOfToday && end >= startOfToday;
+        // Include if the schedule overlaps with the next 7 days
+        return start <= endOfSevenDays && end >= startOfToday;
       });
 
       const meetingSchedules = allMeetingSchedules.filter(schedule => {
         const start = new Date(schedule.startDateTime);
         const end = new Date(schedule.endDateTime);
-        return start <= endOfToday && end >= startOfToday;
+        return start <= endOfSevenDays && end >= startOfToday;
       });
 
       const otherEvents = allOtherEvents.filter(event => {
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
-        return start <= endOfToday && end >= startOfToday;
+        return start <= endOfSevenDays && end >= startOfToday;
       });
 
       res.json({

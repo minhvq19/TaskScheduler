@@ -121,7 +121,7 @@ export default function PublicDisplay() {
 
           {/* Table Body */}
           {staff
-            .filter(s => s.department && s.department.name === "Ban Giám đốc")
+            .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
             .map((staffMember, rowIndex) => (
             <div key={staffMember.id} className="grid grid-cols-8 border-b border-gray-300">
               {/* Staff Name Column */}
