@@ -243,6 +243,7 @@ export const insertEventCategorySchema = createInsertSchema(eventCategories).omi
 
 export const insertWorkScheduleSchema = createInsertSchema(workSchedules).omit({
   id: true,
+  createdBy: true,
   createdAt: true,
   updatedAt: true,
   updatedBy: true,

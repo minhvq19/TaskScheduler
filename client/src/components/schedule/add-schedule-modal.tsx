@@ -152,9 +152,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   }, [schedule, form]);
 
   const onSubmit = (data: FormData) => {
-    console.log("Form submission data:", data);
-    console.log("Form errors:", form.formState.errors);
-    
     // Validate end time is after start time
     if (new Date(data.endDateTime) <= new Date(data.startDateTime)) {
       toast({
@@ -319,19 +316,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                console.log("Debug - Current form values:", form.getValues());
-                console.log("Debug - Form errors:", form.formState.errors);
-                console.log("Debug - Form valid:", form.formState.isValid);
-                console.log("Debug - boardStaff:", boardStaff);
-              }}
-              data-testid="button-debug"
-            >
-              Debug
-            </Button>
             <Button
               type="button"
               variant="outline"
