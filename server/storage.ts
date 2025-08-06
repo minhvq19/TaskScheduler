@@ -116,6 +116,24 @@ export interface IStorage {
   getSchedulePermissionsByStaff(staffId: string): Promise<SchedulePermission[]>;
   createSchedulePermission(permission: InsertSchedulePermission): Promise<SchedulePermission>;
   deleteSchedulePermission(id: string): Promise<void>;
+
+  // Dashboard analytics operations
+  getDashboardStats(): Promise<{
+    totalStaff: number;
+    totalDepartments: number;
+    thisWeekSchedules: number;
+    thisMonthSchedules: number;
+    scheduleByCategoryData: { name: string; value: number; color: string }[];
+    scheduleByWeekData: { week: string; schedules: number }[];
+    departmentStaffData: { department: string; staff: number }[];
+    upcomingSchedules: {
+      id: string;
+      staffName: string;
+      workType: string;
+      startDateTime: string;
+      endDateTime: string;
+    }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -562,6 +580,152 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSchedulePermission(id: string): Promise<void> {
     await db.delete(schedulePermissions).where(eq(schedulePermissions.id, id));
+  }
+
+  // Dashboard analytics operations
+  async getDashboardStats() {
+    const today = new Date();
+    const startOfWeekDate = new Date(today);
+    startOfWeekDate.setDate(today.getDate() - today.getDay() + 1); // Monday
+    startOfWeekDate.setHours(0, 0, 0, 0);
+    
+    const endOfWeekDate = new Date(startOfWeekDate);
+    endOfWeekDate.setDate(startOfWeekDate.getDate() + 6);
+    endOfWeekDate.setHours(23, 59, 59, 999);
+
+    const startOfMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    // Get basic counts
+    const [totalStaffResult] = await db.select({ count: count() }).from(staff);
+    const [totalDepartmentsResult] = await db.select({ count: count() }).from(departments);
+
+    // Get this week schedules
+    const thisWeekSchedules = await db
+      .select({ count: count() })
+      .from(workSchedules)
+      .where(
+        and(
+          gte(workSchedules.startDateTime, startOfWeekDate),
+          lte(workSchedules.startDateTime, endOfWeekDate)
+        )
+      );
+
+    // Get this month schedules
+    const thisMonthSchedules = await db
+      .select({ count: count() })
+      .from(workSchedules)
+      .where(
+        and(
+          gte(workSchedules.startDateTime, startOfMonthDate),
+          lte(workSchedules.startDateTime, endOfMonthDate)
+        )
+      );
+
+    // Get schedule by category data
+    const schedulesByCategory = await db
+      .select({
+        workType: workSchedules.workType,
+        count: count()
+      })
+      .from(workSchedules)
+      .groupBy(workSchedules.workType);
+
+    const colors = {
+      "Làm việc tại CN": "#4a90a4",
+      "Nghỉ phép": "#f59e0b", 
+      "Trực lãnh đạo": "#ef4444",
+      "Đi công tác trong nước": "#10b981",
+      "Đi công tác nước ngoài": "#8b5cf6",
+      "Khác": "#6b7280"
+    };
+
+    const scheduleByCategoryData = schedulesByCategory.map(item => ({
+      name: item.workType,
+      value: item.count,
+      color: colors[item.workType as keyof typeof colors] || '#6b7280'
+    }));
+
+    // Get department staff data
+    const departmentStaffData = await db
+      .select({
+        departmentName: departments.name,
+        staffCount: count()
+      })
+      .from(staff)
+      .leftJoin(departments, eq(staff.departmentId, departments.id))
+      .groupBy(departments.name)
+      .orderBy(departments.name);
+
+    // Get schedule trends by week (last 8 weeks)
+    const scheduleByWeekData = [];
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - (today.getDay() - 1) - (i * 7)); // Monday of that week
+      weekStart.setHours(0, 0, 0, 0);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const [weekSchedules] = await db
+        .select({ count: count() })
+        .from(workSchedules)
+        .where(
+          and(
+            gte(workSchedules.startDateTime, weekStart),
+            lte(workSchedules.startDateTime, weekEnd)
+          )
+        );
+
+      scheduleByWeekData.push({
+        week: `${weekStart.getDate().toString().padStart(2, '0')}/${(weekStart.getMonth() + 1).toString().padStart(2, '0')}`,
+        schedules: weekSchedules.count
+      });
+    }
+
+    // Get upcoming schedules (next 7 days)
+    const sevenDaysFromNow = new Date(today);
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+
+    const upcomingSchedulesData = await db
+      .select({
+        id: workSchedules.id,
+        staffName: staff.fullName,
+        workType: workSchedules.workType,
+        startDateTime: workSchedules.startDateTime,
+        endDateTime: workSchedules.endDateTime
+      })
+      .from(workSchedules)
+      .leftJoin(staff, eq(workSchedules.staffId, staff.id))
+      .where(
+        and(
+          gte(workSchedules.startDateTime, today),
+          lte(workSchedules.startDateTime, sevenDaysFromNow)
+        )
+      )
+      .orderBy(workSchedules.startDateTime)
+      .limit(10);
+
+    return {
+      totalStaff: totalStaffResult.count,
+      totalDepartments: totalDepartmentsResult.count,
+      thisWeekSchedules: thisWeekSchedules[0].count,
+      thisMonthSchedules: thisMonthSchedules[0].count,
+      scheduleByCategoryData,
+      scheduleByWeekData,
+      departmentStaffData: departmentStaffData.map(item => ({
+        department: item.departmentName || 'Chưa phân bổ',
+        staff: item.staffCount
+      })),
+      upcomingSchedules: upcomingSchedulesData.map(item => ({
+        id: item.id,
+        staffName: item.staffName || 'N/A',
+        workType: item.workType,
+        startDateTime: item.startDateTime.toISOString(),
+        endDateTime: item.endDateTime.toISOString()
+      }))
+    };
   }
 }
 
