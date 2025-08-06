@@ -16,6 +16,7 @@ function Router() {
     <Switch>
       {/* Public display route - always accessible */}
       <Route path="/display" component={PublicDisplay} />
+      <Route path="/public-display" component={PublicDisplay} />
       
       {/* Protected routes */}
       {isLoading ? (
