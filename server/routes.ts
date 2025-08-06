@@ -492,6 +492,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ currentTime: new Date().toISOString() });
   });
 
+  app.get('/api/public/staff', async (req, res) => {
+    try {
+      const staff = await storage.getStaff();
+      res.json(staff);
+    } catch (error) {
+      console.error("Error fetching public staff data:", error);
+      res.status(500).json({ message: "Failed to fetch staff data" });
+    }
+  });
+
   app.get('/api/public/display-data', async (req, res) => {
     try {
       const today = new Date();
