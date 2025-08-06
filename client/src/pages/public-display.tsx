@@ -110,12 +110,17 @@ export default function PublicDisplay() {
             <div className="p-3 text-white font-bold text-center border-r border-orange-600">
               Lãnh đạo/ Ngày
             </div>
-            {days.map((day, index) => (
-              <div key={index} className="p-3 text-white font-bold text-center border-r border-orange-600">
-                <div>T{index + 2}</div>
-                <div className="text-sm">{format(day, "dd/MM", { locale: vi })}</div>
-              </div>
-            ))}
+            {days.map((day, index) => {
+              const dayOfWeek = day.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+              const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+              
+              return (
+                <div key={index} className="p-3 text-white font-bold text-center border-r border-orange-600">
+                  <div>{dayNames[dayOfWeek]}</div>
+                  <div className="text-sm">{format(day, "dd/MM", { locale: vi })}</div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Table Body */}
