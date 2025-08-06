@@ -12,6 +12,7 @@ import WorkSchedule from "@/components/schedule/work-schedule";
 import MeetingSchedule from "@/components/meetings/meeting-schedule";
 import UserManagement from "@/components/users/user-management";
 import PermissionManagement from "@/components/permissions/permission-management";
+import SystemConfig from "@/pages/system-config";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 
@@ -25,7 +26,8 @@ type Section =
   | "meeting-schedule"
   | "other-events"
   | "user-management"
-  | "permissions";
+  | "permissions"
+  | "system-config";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -87,6 +89,8 @@ export default function Dashboard() {
         return <UserManagement />;
       case "permissions":
         return <PermissionManagement />;
+      case "system-config":
+        return <SystemConfig />;
       default:
         return (
           <div className="space-y-6">
@@ -219,9 +223,9 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900" data-testid="text-user-name">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName} ${user.lastName}`
-                  : user?.email || "Người dùng"}
+                {(user as any)?.firstName && (user as any)?.lastName 
+                  ? `${(user as any).firstName} ${(user as any).lastName}`
+                  : (user as any)?.email || "Người dùng"}
               </p>
               <p className="text-xs text-bidv-gray" data-testid="text-user-role">
                 Quản trị viên hệ thống
@@ -243,7 +247,7 @@ export default function Dashboard() {
 
       <div className="flex">
         {/* Sidebar */}
-        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <Sidebar activeSection={activeSection} onSectionChange={(section: string) => setActiveSection(section as Section)} />
 
         {/* Main Content */}
         <main className="flex-1 p-6">

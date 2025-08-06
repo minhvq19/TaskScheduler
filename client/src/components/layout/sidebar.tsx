@@ -12,6 +12,7 @@ import {
   Key,
   Tv,
   LayoutDashboard,
+  Settings,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -48,6 +49,7 @@ const menuItems = [
     items: [
       { id: "user-management", label: "Quản lý người dùng", icon: UserCog },
       { id: "permissions", label: "Phân quyền", icon: Key },
+      { id: "system-config", label: "Tham số hệ thống", icon: Settings },
     ],
   },
 ];

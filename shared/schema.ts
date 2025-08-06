@@ -309,3 +309,24 @@ export type SystemUser = typeof systemUsers.$inferSelect;
 export type InsertSystemUser = z.infer<typeof insertSystemUserSchema>;
 export type SchedulePermission = typeof schedulePermissions.$inferSelect;
 export type InsertSchedulePermission = z.infer<typeof insertSchedulePermissionSchema>;
+
+// System Configuration table for managing parameters
+export const systemConfig = pgTable("system_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull().unique(),
+  value: varchar("value").notNull(),
+  type: varchar("type").notNull(), // 'string', 'number', 'boolean', 'color'
+  description: varchar("description"),
+  category: varchar("category").notNull(), // 'display', 'branding', 'colors', 'timing'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSystemConfigSchema = createInsertSchema(systemConfig).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;

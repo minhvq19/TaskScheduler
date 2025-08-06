@@ -10,6 +10,7 @@ import {
   userGroups,
   systemUsers,
   schedulePermissions,
+  systemConfig,
   type User,
   type UpsertUser,
   type Department,
@@ -32,6 +33,8 @@ import {
   type InsertSystemUser,
   type SchedulePermission,
   type InsertSchedulePermission,
+  type SystemConfig,
+  type InsertSystemConfig,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, count, like } from "drizzle-orm";
@@ -116,6 +119,13 @@ export interface IStorage {
   getSchedulePermissionsByStaff(staffId: string): Promise<SchedulePermission[]>;
   createSchedulePermission(permission: InsertSchedulePermission): Promise<SchedulePermission>;
   deleteSchedulePermission(id: string): Promise<void>;
+
+  // System configuration operations
+  getSystemConfigs(): Promise<SystemConfig[]>;
+  getSystemConfig(key: string): Promise<SystemConfig | undefined>;
+  createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig>;
+  updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig>;
+  deleteSystemConfig(key: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -562,6 +572,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSchedulePermission(id: string): Promise<void> {
     await db.delete(schedulePermissions).where(eq(schedulePermissions.id, id));
+  }
+
+  // System configuration operations
+  async getSystemConfigs(): Promise<SystemConfig[]> {
+    return await db.select().from(systemConfig).orderBy(asc(systemConfig.category), asc(systemConfig.key));
+  }
+
+  async getSystemConfig(key: string): Promise<SystemConfig | undefined> {
+    const [config] = await db.select().from(systemConfig).where(eq(systemConfig.key, key));
+    return config;
+  }
+
+  async createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig> {
+    const [newConfig] = await db.insert(systemConfig).values(config).returning();
+    return newConfig;
+  }
+
+  async updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig> {
+    const [updatedConfig] = await db
+      .update(systemConfig)
+      .set({ ...config, updatedAt: new Date() })
+      .where(eq(systemConfig.key, key))
+      .returning();
+    return updatedConfig;
+  }
+
+  async deleteSystemConfig(key: string): Promise<void> {
+    await db.delete(systemConfig).where(eq(systemConfig.key, key));
   }
 }
 

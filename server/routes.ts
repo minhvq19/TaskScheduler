@@ -13,6 +13,7 @@ import {
   insertUserGroupSchema,
   insertSystemUserSchema,
   insertSchedulePermissionSchema,
+  insertSystemConfigSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -552,6 +553,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching public display data:", error);
       res.status(500).json({ message: "Failed to fetch display data" });
+    }
+  });
+
+  // System Configuration routes
+  app.get('/api/system-config', async (req, res) => {
+    try {
+      const configs = await storage.getSystemConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error("Error fetching system configs:", error);
+      res.status(500).json({ message: "Failed to fetch system configs" });
+    }
+  });
+
+  app.get('/api/system-config/:key', async (req, res) => {
+    try {
+      const { key } = req.params;
+      const config = await storage.getSystemConfig(key);
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching system config:", error);
+      res.status(500).json({ message: "Failed to fetch system config" });
+    }
+  });
+
+  app.post('/api/system-config', async (req, res) => {
+    try {
+      const configData = insertSystemConfigSchema.parse(req.body);
+      const config = await storage.createSystemConfig(configData);
+      res.status(201).json(config);
+    } catch (error) {
+      console.error("Error creating system config:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create system config" });
+    }
+  });
+
+  app.put('/api/system-config/:key', async (req, res) => {
+    try {
+      const { key } = req.params;
+      const configData = insertSystemConfigSchema.partial().parse(req.body);
+      const config = await storage.updateSystemConfig(key, configData);
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating system config:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update system config" });
+    }
+  });
+
+  app.delete('/api/system-config/:key', async (req, res) => {
+    try {
+      const { key } = req.params;
+      await storage.deleteSystemConfig(key);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting system config:", error);
+      res.status(500).json({ message: "Failed to delete system config" });
     }
   });
 
