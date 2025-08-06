@@ -78,8 +78,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        startDateTime: new Date(data.startDateTime),
-        endDateTime: new Date(data.endDateTime),
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
@@ -107,8 +105,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        startDateTime: new Date(data.startDateTime),
-        endDateTime: new Date(data.endDateTime),
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);

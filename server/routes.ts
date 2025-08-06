@@ -296,6 +296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertWorkScheduleSchema.parse({
         ...req.body,
+        startDateTime: new Date(req.body.startDateTime),
+        endDateTime: new Date(req.body.endDateTime),
         createdBy: req.user.id,
       });
 
@@ -329,6 +331,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const validatedData = insertWorkScheduleSchema.partial().parse({
         ...req.body,
+        startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : undefined,
+        endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : undefined,
         updatedBy: req.user.id,
       });
       const schedule = await storage.updateWorkSchedule(id, validatedData);
