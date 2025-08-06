@@ -1,236 +1,255 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Users, Building2, TrendingUp, Clock, MapPin } from "lucide-react";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
-import { vi } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, LogOut, Clock } from "lucide-react";
+import Sidebar from "@/components/layout/sidebar";
+import StaffManagement from "@/components/staff/staff-management";
+import DepartmentManagement from "@/components/departments/department-management";
+import EventManagement from "@/components/events/event-management";
+import RoomManagement from "@/components/rooms/room-management";
+import WorkSchedule from "@/components/schedule/work-schedule";
+import MeetingSchedule from "@/components/meetings/meeting-schedule";
+import UserManagement from "@/components/users/user-management";
+import PermissionManagement from "@/components/permissions/permission-management";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 
-interface DashboardStats {
-  totalStaff: number;
-  totalDepartments: number;
-  thisWeekSchedules: number;
-  thisMonthSchedules: number;
-  scheduleByCategoryData: { name: string; value: number; color: string }[];
-  scheduleByWeekData: { week: string; schedules: number }[];
-  departmentStaffData: { department: string; staff: number }[];
-  upcomingSchedules: {
-    id: string;
-    staffName: string;
-    workType: string;
-    startDateTime: string;
-    endDateTime: string;
-  }[];
-}
-
-const COLORS = {
-  "Làm việc tại CN": "#4a90a4",
-  "Nghỉ phép": "#f59e0b", 
-  "Trực lãnh đạo": "#ef4444",
-  "Đi công tác trong nước": "#10b981",
-  "Đi công tác nước ngoài": "#8b5cf6",
-  "Khác": "#6b7280"
-};
+type Section = 
+  | "dashboard"
+  | "staff-management"
+  | "department-management"
+  | "event-management"
+  | "room-management"
+  | "work-schedule"
+  | "meeting-schedule"
+  | "other-events"
+  | "user-management"
+  | "permissions";
 
 export default function Dashboard() {
-  const { data: stats, isLoading } = useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats"],
-    refetchInterval: 300000, // Refresh every 5 minutes
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState<Section>("dashboard");
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Đăng xuất thành công",
+        description: "Hẹn gặp lại bạn!",
+      });
+      window.location.href = "/";
+    },
+    onError: (error) => {
+      toast({
+        title: "Lỗi đăng xuất",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu thống kê...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600">Không thể tải dữ liệu thống kê</p>
-      </div>
-    );
-  }
+  const openPublicDisplay = () => {
+    window.open("/display", "_blank");
+  };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6" data-testid="dashboard">
-      {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Analytics</h1>
-        <p className="text-gray-600">Thống kê và báo cáo tổng quan hệ thống quản lý lịch công tác</p>
-      </div>
+  const renderContent = () => {
+    switch (activeSection) {
+      case "staff-management":
+        return <StaffManagement />;
+      case "department-management":
+        return <DepartmentManagement />;
+      case "event-management":
+        return <EventManagement />;
+      case "room-management":
+        return <RoomManagement />;
+      case "work-schedule":
+        return <WorkSchedule />;
+      case "meeting-schedule":
+        return <MeetingSchedule />;
+      case "user-management":
+        return <UserManagement />;
+      case "permissions":
+        return <PermissionManagement />;
+      default:
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900" data-testid="text-dashboard-title">
+                Dashboard
+              </h2>
+              <div className="text-sm text-bidv-gray flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                <span id="current-time" data-testid="text-current-time">
+                  {currentTime.toLocaleString('vi-VN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card data-testid="card-total-staff">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng số nhân viên</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStaff}</div>
-            <p className="text-xs text-gray-600">Nhân viên đang hoạt động</p>
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-total-departments">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Số phòng ban</CardTitle>
-            <Building2 className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDepartments}</div>
-            <p className="text-xs text-gray-600">Phòng ban và đơn vị</p>
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-week-schedules">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lịch tuần này</CardTitle>
-            <CalendarDays className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisWeekSchedules}</div>
-            <p className="text-xs text-gray-600">Lịch công tác trong tuần</p>
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-month-schedules">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lịch tháng này</CardTitle>
-            <TrendingUp className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisMonthSchedules}</div>
-            <p className="text-xs text-gray-600">Tổng lịch trong tháng</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Schedule by Category Pie Chart */}
-        <Card data-testid="chart-schedule-category">
-          <CardHeader>
-            <CardTitle>Phân bổ theo loại công việc</CardTitle>
-            <CardDescription>Thống kê lịch công tác theo từng loại</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={stats.scheduleByCategoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {stats.scheduleByCategoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Department Staff Bar Chart */}
-        <Card data-testid="chart-department-staff">
-          <CardHeader>
-            <CardTitle>Nhân viên theo phòng ban</CardTitle>
-            <CardDescription>Phân bổ nhân viên trong các phòng ban</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.departmentStaffData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="department" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="staff" fill="#4a90a4" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Schedule Trends */}
-      <Card data-testid="chart-schedule-trends">
-        <CardHeader>
-          <CardTitle>Xu hướng lịch công tác theo tuần</CardTitle>
-          <CardDescription>Thống kê số lượng lịch trong 8 tuần gần đây</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={stats.scheduleByWeekData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="schedules" stroke="#10b981" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Upcoming Schedules */}
-      <Card data-testid="upcoming-schedules">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Lịch công tác sắp tới
-          </CardTitle>
-          <CardDescription>10 lịch công tác gần nhất trong 7 ngày tới</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {stats.upcomingSchedules.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">Không có lịch công tác nào trong 7 ngày tới</p>
-          ) : (
-            <div className="space-y-3">
-              {stats.upcomingSchedules.map((schedule) => (
-                <div key={schedule.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: COLORS[schedule.workType as keyof typeof COLORS] || '#6b7280' }}
-                      ></div>
-                    </div>
-                    <div>
-                      <p className="font-medium">{schedule.staffName}</p>
-                      <p className="text-sm text-gray-600">{schedule.workType}</p>
-                    </div>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-total-staff">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Tổng cán bộ</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-staff-count">0</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {format(new Date(schedule.startDateTime), "dd/MM", { locale: vi })} - 
-                      {format(new Date(schedule.endDateTime), "dd/MM", { locale: vi })}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })} - 
-                      {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
-                    </p>
+                  <div className="bg-blue-100 p-3 rounded-lg">
+                    <i className="fas fa-users text-bidv-blue text-xl"></i>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-today-schedules">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Lịch hôm nay</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-schedule-count">0</p>
+                  </div>
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <i className="fas fa-calendar-check text-green-600 text-xl"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-meeting-rooms">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Phòng họp</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-room-count">0</p>
+                  </div>
+                  <div className="bg-purple-100 p-3 rounded-lg">
+                    <i className="fas fa-door-open text-purple-600 text-xl"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-monthly-events">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Sự kiện tháng</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-event-count">0</p>
+                  </div>
+                  <div className="bg-orange-100 p-3 rounded-lg">
+                    <i className="fas fa-star text-orange-600 text-xl"></i>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  onClick={() => setActiveSection("work-schedule")}
+                  className="bg-bidv-teal hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                  data-testid="button-work-schedule"
+                >
+                  <CalendarDays className="w-6 h-6 mb-2" />
+                  <span>Quản lý lịch công tác</span>
+                </Button>
+                
+                <Button
+                  onClick={() => setActiveSection("meeting-schedule")}
+                  className="bg-bidv-blue hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                  data-testid="button-meeting-schedule"
+                >
+                  <i className="fas fa-calendar-plus text-xl mb-2"></i>
+                  <span>Lịch phòng họp</span>
+                </Button>
+                
+                <Button
+                  onClick={openPublicDisplay}
+                  className="bg-orange-500 hover:bg-orange-600 text-white p-4 h-auto flex flex-col items-center"
+                  data-testid="button-public-display"
+                >
+                  <i className="fas fa-tv text-xl mb-2"></i>
+                  <span>Màn hình công cộng</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 bg-bidv-teal rounded-lg flex items-center justify-center">
+              <CalendarDays className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900" data-testid="text-system-title">
+                Hệ thống Quản lý Lịch Công tác
+              </h1>
+              <p className="text-sm text-bidv-gray" data-testid="text-organization-name">
+                BIDV Chi nhánh Sở giao dịch 1
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-900" data-testid="text-user-name">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}`
+                  : user?.email || "Người dùng"}
+              </p>
+              <p className="text-xs text-bidv-gray" data-testid="text-user-role">
+                Quản trị viên hệ thống
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              className="hover:bg-gray-100"
+              data-testid="button-logout"
+            >
+              <LogOut className="text-bidv-gray" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+
+        {/* Main Content */}
+        <main className="flex-1 p-6">
+          {renderContent()}
+        </main>
+      </div>
     </div>
   );
 }
