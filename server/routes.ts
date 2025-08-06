@@ -295,12 +295,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/work-schedules', requireAuth, async (req, res) => {
     try {
       console.log('User in req:', req.user);
+      console.log('Request body:', req.body);
       const validatedData = insertWorkScheduleSchema.parse({
         ...req.body,
         startDateTime: new Date(req.body.startDateTime),
         endDateTime: new Date(req.body.endDateTime),
         createdBy: req.user?.id || 'admin-user',
       });
+      console.log('Validated data:', validatedData);
 
       // Check daily limit (max 5 schedules per staff per day)
       const startOfDay = new Date(validatedData.startDateTime);
