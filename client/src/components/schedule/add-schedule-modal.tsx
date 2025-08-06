@@ -47,6 +47,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       staffId: "",
       startDateTime: "",
@@ -187,7 +188,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               </Label>
               <Select
                 value={form.watch("staffId")}
-                onValueChange={(value) => form.setValue("staffId", value)}
+                onValueChange={(value) => form.setValue("staffId", value, { shouldValidate: true })}
               >
                 <SelectTrigger data-testid="select-staff">
                   <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
@@ -251,7 +252,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               </Label>
               <Select
                 value={form.watch("workType")}
-                onValueChange={(value) => form.setValue("workType", value)}
+                onValueChange={(value) => form.setValue("workType", value, { shouldValidate: true })}
               >
                 <SelectTrigger data-testid="select-work-type">
                   <SelectValue placeholder="Chọn nội dung công tác" />
