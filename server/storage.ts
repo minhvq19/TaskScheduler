@@ -176,12 +176,12 @@ export class DatabaseStorage implements IStorage {
         employeeId: staff.employeeId,
         fullName: staff.fullName,
         position: staff.position,
+        positionShort: staff.positionShort,
         departmentId: staff.departmentId,
         displayOrder: staff.displayOrder,
         password: staff.password,
         createdAt: staff.createdAt,
         updatedAt: staff.updatedAt,
-        positionShort: staff.positionShort,
         birthDate: staff.birthDate,
         notes: staff.notes,
         department: {

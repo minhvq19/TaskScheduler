@@ -127,7 +127,7 @@ export default function PublicDisplay() {
               {/* Staff Name Column */}
               <div className="p-4 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center">
                 <div>
-                  <div className="text-sm">PGD. {staffMember.fullName}</div>
+                  <div className="text-sm">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
                 </div>
               </div>
               
