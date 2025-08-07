@@ -10,6 +10,7 @@ import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, 
 import { vi } from "date-fns/locale";
 import AddScheduleModal from "./add-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
+import { useSystemColors } from "@/hooks/useSystemColors";
 
 export default function WorkSchedule() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -18,6 +19,7 @@ export default function WorkSchedule() {
   const [selectedStaff, setSelectedStaff] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getWorkScheduleColor } = useSystemColors();
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 }); // Sunday
@@ -116,16 +118,15 @@ export default function WorkSchedule() {
     setCurrentWeek(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
   };
 
-  const getScheduleColor = (workType: string) => {
-    const colors = {
-      "Làm việc tại CN": "bg-transparent border border-gray-300",
-      "Nghỉ phép": "schedule-vacation text-white",
-      "Trực lãnh đạo": "schedule-leadership-duty text-white",
-      "Đi công tác trong nước": "schedule-domestic-business-trip text-white",
-      "Đi công tác nước ngoài": "schedule-international-business-trip text-white",
-      "Khác": "bg-purple-100 text-purple-800"
+  const getScheduleStyle = (workType: string) => {
+    const bgColor = getWorkScheduleColor(workType);
+    const isTransparent = workType === "Làm việc tại CN";
+    
+    return {
+      backgroundColor: isTransparent ? "transparent" : bgColor,
+      color: isTransparent ? "#374151" : "white", // text-gray-700 or white
+      border: isTransparent ? "1px solid #d1d5db" : "none" // gray-300 border for transparent
     };
-    return colors[workType as keyof typeof colors] || "bg-gray-100";
   };
 
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
@@ -238,7 +239,8 @@ export default function WorkSchedule() {
                           {daySchedules.map((schedule) => (
                             <div
                               key={schedule.id}
-                              className={`p-1 rounded text-xs mb-1 relative group cursor-pointer ${getScheduleColor(schedule.workType)}`}
+                              className="p-1 rounded text-xs mb-1 relative group cursor-pointer"
+                              style={getScheduleStyle(schedule.workType)}
                               data-testid={`schedule-${schedule.id}`}
                             >
                               <div className="font-medium">
@@ -286,20 +288,24 @@ export default function WorkSchedule() {
               <span className="text-sm">Làm việc tại CN</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 schedule-vacation rounded"></div>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
               <span className="text-sm">Nghỉ phép</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 schedule-leadership-duty rounded"></div>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
               <span className="text-sm">Trực lãnh đạo</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 schedule-domestic-business-trip rounded"></div>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
               <span className="text-sm">Đi công tác trong nước</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 schedule-international-business-trip rounded"></div>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
               <span className="text-sm">Đi công tác nước ngoài</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
+              <span className="text-sm">Khác</span>
             </div>
           </div>
         </CardContent>

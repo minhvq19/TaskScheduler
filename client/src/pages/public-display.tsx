@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, addDays, startOfDay, eachDayOfInterval } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useSystemColors } from "@/hooks/useSystemColors";
 
 interface DisplayData {
   workSchedules: any[];
@@ -82,17 +83,7 @@ export default function PublicDisplay() {
     refetchInterval: 60000,
   });
 
-  const getWorkScheduleColor = (workType: string) => {
-    const colors = {
-      "Làm việc tại CN": "#4a90a4", // Teal blue like in image
-      "Nghỉ phép": "#f59e0b", // Yellow/orange
-      "Trực lãnh đạo": "#ef4444", // Red
-      "Đi công tác trong nước": "#10b981", // Green
-      "Đi công tác nước ngoài": "#8b5cf6", // Purple
-      "Khác": "#6b7280" // Gray
-    };
-    return colors[workType as keyof typeof colors] || "#4a90a4";
-  };
+  const { getWorkScheduleColor } = useSystemColors();
 
   // Function to get schedules for a specific staff and day
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
