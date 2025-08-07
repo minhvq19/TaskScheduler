@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,8 @@ import type { SchedulePermission, SystemUser, Staff, Department } from "@shared/
 
 export default function PermissionManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUserId, setEditingUserId] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const { toast } = useToast();
@@ -105,6 +107,16 @@ export default function PermissionManagement() {
     },
   });
 
+  const handleEdit = (userId: string) => {
+    const userPermissions = groupedPermissions[userId] || [];
+    const currentStaffIds = userPermissions.map(p => p.staffId);
+    
+    setEditingUserId(userId);
+    setSelectedUser(userId);
+    setSelectedStaff(currentStaffIds);
+    setShowEditModal(true);
+  };
+
   const handleDelete = (userId: string) => {
     const user = systemUsers.find(u => u.id === userId);
     const userPermissions = groupedPermissions[userId] || [];
@@ -147,6 +159,61 @@ export default function PermissionManagement() {
       userId: selectedUser,
       staffIds: selectedStaff,
     });
+  };
+
+  const handleUpdatePermission = () => {
+    if (!editingUserId || selectedStaff.length === 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn ít nhất một cán bộ.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const currentPermissions = groupedPermissions[editingUserId] || [];
+    const currentStaffIds = currentPermissions.map(p => p.staffId);
+    
+    // Find permissions to delete (removed staff)
+    const toDelete = currentPermissions.filter(p => !selectedStaff.includes(p.staffId));
+    
+    // Find permissions to add (new staff)
+    const toAdd = selectedStaff.filter(staffId => !currentStaffIds.includes(staffId));
+
+    const promises = [];
+    
+    // Delete removed permissions
+    toDelete.forEach(permission => {
+      promises.push(apiRequest("DELETE", `/api/schedule-permissions/${permission.id}`));
+    });
+    
+    // Add new permissions
+    toAdd.forEach(staffId => {
+      promises.push(apiRequest("POST", "/api/schedule-permissions", {
+        userId: editingUserId,
+        staffId,
+      }));
+    });
+
+    Promise.all(promises)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/schedule-permissions"] });
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật phân quyền thành công.",
+        });
+        setShowEditModal(false);
+        setEditingUserId("");
+        setSelectedUser("");
+        setSelectedStaff([]);
+      })
+      .catch((error) => {
+        toast({
+          title: "Lỗi",
+          description: error.message || "Không thể cập nhật phân quyền.",
+          variant: "destructive",
+        });
+      });
   };
 
   const handleStaffToggle = (staffId: string) => {
@@ -238,16 +305,28 @@ export default function PermissionManagement() {
                           <Badge className="bg-green-100 text-green-800">Hoạt động</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(userId)}
-                            className="text-red-600 hover:text-red-700"
-                            data-testid={`button-delete-${userId}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Xóa
-                          </Button>
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(userId)}
+                              className="text-blue-600 hover:text-blue-700"
+                              data-testid={`button-edit-${userId}`}
+                            >
+                              <Edit className="w-4 h-4" />
+                              Sửa
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(userId)}
+                              className="text-red-600 hover:text-red-700"
+                              data-testid={`button-delete-${userId}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Xóa
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -260,7 +339,16 @@ export default function PermissionManagement() {
       </Card>
 
       {/* Add Permission Modal */}
-      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+      <Dialog 
+        open={showAddModal} 
+        onOpenChange={(open) => {
+          setShowAddModal(open);
+          if (!open) {
+            setSelectedUser("");
+            setSelectedStaff([]);
+          }
+        }}
+      >
         <DialogContent className="max-w-2xl" data-testid="modal-add-permission">
           <DialogHeader>
             <DialogTitle data-testid="text-modal-title">Phân quyền mới</DialogTitle>
@@ -332,6 +420,78 @@ export default function PermissionManagement() {
                 data-testid="button-submit"
               >
                 {createPermissionMutation.isPending ? "Đang xử lý..." : "Phân quyền"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Permission Modal */}
+      <Dialog 
+        open={showEditModal} 
+        onOpenChange={(open) => {
+          setShowEditModal(open);
+          if (!open) {
+            setEditingUserId("");
+            setSelectedUser("");
+            setSelectedStaff([]);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl" data-testid="modal-edit-permission">
+          <DialogHeader>
+            <DialogTitle data-testid="text-edit-modal-title">
+              Chỉnh sửa phân quyền - {systemUsers.find(u => u.id === editingUserId)?.username}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">
+                Chọn cán bộ có thể nhập lịch *
+              </Label>
+              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                {boardStaff.length === 0 ? (
+                  <div className="text-center text-gray-500 py-4">
+                    Chưa có cán bộ Ban Giám đốc nào
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {boardStaff.map((staff) => (
+                      <div key={staff.id} className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id={`edit-staff-${staff.id}`}
+                          checked={selectedStaff.includes(staff.id)}
+                          onChange={() => handleStaffToggle(staff.id)}
+                          className="h-4 w-4 text-bidv-teal focus:ring-bidv-teal border-gray-300 rounded"
+                          data-testid={`edit-checkbox-staff-${staff.id}`}
+                        />
+                        <label htmlFor={`edit-staff-${staff.id}`} className="text-sm text-gray-900 cursor-pointer">
+                          {staff.positionShort} {staff.fullName}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditModal(false)}
+                data-testid="button-edit-cancel"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleUpdatePermission}
+                className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+                data-testid="button-edit-submit"
+              >
+                Cập nhật
               </Button>
             </div>
           </div>
