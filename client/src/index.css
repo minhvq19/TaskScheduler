@@ -133,23 +133,23 @@
   }
 }
 
-/* Work schedule colors */
+/* Work schedule colors - UPDATED to match system_config database values */
 .schedule-work-at-office {
   background-color: transparent;
 }
 
 .schedule-vacation {
-  background-color: hsl(333, 71%, 41%); /* #9f224e */
+  background-color: #9f224e; /* Updated to match database */
 }
 
 .schedule-leadership-duty {
-  background-color: hsl(26, 91%, 58%); /* #f58732 */
+  background-color: #f58732; /* Updated to match database */
 }
 
 .schedule-domestic-business-trip {
-  background-color: hsl(201, 100%, 33%); /* #0071a6 */
+  background-color: #0071a6; /* Updated to match database */
 }
 
 .schedule-international-business-trip {
-  background-color: hsl(135, 53%, 43%); /* #32a852 */
+  background-color: #32a852; /* Updated to match database */
 }
