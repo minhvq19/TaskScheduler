@@ -52,10 +52,10 @@ export const staff = pgTable("staff", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   employeeId: varchar("employee_id").notNull().unique(),
   fullName: varchar("full_name").notNull(),
-  password: varchar("password").notNull(),
   position: varchar("position").notNull(),
   positionShort: varchar("position_short").notNull(),
   departmentId: varchar("department_id").notNull(),
+  systemUserId: varchar("system_user_id").unique(), // Link to systemUsers for login
   birthDate: timestamp("birth_date"),
   displayOrder: integer("display_order").default(0),
   notes: text("notes"),
@@ -187,6 +187,10 @@ export const staffRelations = relations(staff, ({ one, many }) => ({
     fields: [staff.departmentId],
     references: [departments.id],
   }),
+  systemUser: one(systemUsers, {
+    fields: [staff.systemUserId],
+    references: [systemUsers.id],
+  }),
   workSchedules: many(workSchedules),
   schedulePermissions: many(schedulePermissions),
 }));
@@ -217,6 +221,20 @@ export const meetingScheduleRelations = relations(meetingSchedules, ({ one }) =>
   }),
 }));
 
+export const systemUserRelations = relations(systemUsers, ({ one, many }) => ({
+  userGroup: one(userGroups, {
+    fields: [systemUsers.userGroupId],
+    references: [userGroups.id],
+  }),
+  staff: one(staff, {
+    fields: [systemUsers.id],
+    references: [staff.systemUserId],
+  }),
+  workSchedulesCreated: many(workSchedules, { relationName: "createdBy" }),
+  workSchedulesUpdated: many(workSchedules, { relationName: "updatedBy" }),
+  schedulePermissions: many(schedulePermissions),
+}));
+
 export const userGroupRelations = relations(userGroups, ({ many }) => ({
   systemUsers: many(systemUsers),
   menuPermissions: many(menuPermissions),
@@ -227,16 +245,6 @@ export const menuPermissionRelations = relations(menuPermissions, ({ one }) => (
     fields: [menuPermissions.userGroupId],
     references: [userGroups.id],
   }),
-}));
-
-export const systemUserRelations = relations(systemUsers, ({ one, many }) => ({
-  userGroup: one(userGroups, {
-    fields: [systemUsers.userGroupId],
-    references: [userGroups.id],
-  }),
-  workSchedulesCreated: many(workSchedules, { relationName: "createdBy" }),
-  workSchedulesUpdated: many(workSchedules, { relationName: "updatedBy" }),
-  schedulePermissions: many(schedulePermissions),
 }));
 
 export const schedulePermissionRelations = relations(schedulePermissions, ({ one }) => ({
@@ -262,7 +270,8 @@ export const insertStaffSchema = createInsertSchema(staff).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  password: z.string().min(11).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),
+  // Remove password field from staff schema - now handled through systemUsers
+  systemUserId: z.string().optional(),
 });
 
 export const insertMeetingRoomSchema = createInsertSchema(meetingRooms).omit({

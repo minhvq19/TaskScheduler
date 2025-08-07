@@ -209,8 +209,8 @@ export class DatabaseStorage implements IStorage {
         position: staff.position,
         positionShort: staff.positionShort,
         departmentId: staff.departmentId,
+        systemUserId: staff.systemUserId,
         displayOrder: staff.displayOrder,
-        password: staff.password,
         createdAt: staff.createdAt,
         updatedAt: staff.updatedAt,
         birthDate: staff.birthDate,
@@ -218,10 +218,16 @@ export class DatabaseStorage implements IStorage {
         department: {
           id: departments.id,
           name: departments.name,
+        },
+        systemUser: {
+          id: systemUsers.id,
+          username: systemUsers.username,
+          userGroupId: systemUsers.userGroupId,
         }
       })
       .from(staff)
       .leftJoin(departments, eq(staff.departmentId, departments.id))
+      .leftJoin(systemUsers, eq(staff.systemUserId, systemUsers.id))
       .orderBy(asc(staff.displayOrder), asc(staff.fullName));
     
     return result as Staff[];
@@ -245,23 +251,72 @@ export class DatabaseStorage implements IStorage {
     return staffMember;
   }
 
-  async createStaff(staffData: InsertStaff): Promise<Staff> {
-    const hashedPassword = await bcrypt.hash(staffData.password, 10);
+  async createStaff(staffData: InsertStaff & { username?: string; password?: string; userGroupId?: string }): Promise<Staff> {
+    // First create the system user if credentials provided
+    let systemUserId = null;
+    if (staffData.username && staffData.password && staffData.userGroupId) {
+      const hashedPassword = await bcrypt.hash(staffData.password, 10);
+      const [newSystemUser] = await db
+        .insert(systemUsers)
+        .values({
+          username: staffData.username,
+          password: hashedPassword,
+          userGroupId: staffData.userGroupId,
+        })
+        .returning();
+      systemUserId = newSystemUser.id;
+    }
+
+    // Create staff record
+    const { username, password, userGroupId, ...staffOnlyData } = staffData;
     const [newStaff] = await db
       .insert(staff)
-      .values({ ...staffData, password: hashedPassword })
+      .values({ ...staffOnlyData, systemUserId })
       .returning();
     return newStaff;
   }
 
-  async updateStaff(id: string, staffData: Partial<InsertStaff>): Promise<Staff> {
-    const updateData = { ...staffData };
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+  async updateStaff(id: string, staffData: Partial<InsertStaff> & { username?: string; password?: string; userGroupId?: string }): Promise<Staff> {
+    // Get current staff to check if they have a system user
+    const [currentStaff] = await db.select().from(staff).where(eq(staff.id, id));
+    if (!currentStaff) {
+      throw new Error("Staff not found");
     }
+
+    // Handle system user update/creation
+    if (staffData.username || staffData.password || staffData.userGroupId) {
+      if (currentStaff.systemUserId) {
+        // Update existing system user
+        const updateUserData: any = {};
+        if (staffData.username) updateUserData.username = staffData.username;
+        if (staffData.password) updateUserData.password = await bcrypt.hash(staffData.password, 10);
+        if (staffData.userGroupId) updateUserData.userGroupId = staffData.userGroupId;
+        
+        await db
+          .update(systemUsers)
+          .set({ ...updateUserData, updatedAt: new Date() })
+          .where(eq(systemUsers.id, currentStaff.systemUserId));
+      } else if (staffData.username && staffData.password && staffData.userGroupId) {
+        // Create new system user
+        const hashedPassword = await bcrypt.hash(staffData.password, 10);
+        const [newSystemUser] = await db
+          .insert(systemUsers)
+          .values({
+            username: staffData.username,
+            password: hashedPassword,
+            userGroupId: staffData.userGroupId,
+          })
+          .returning();
+        
+        staffData.systemUserId = newSystemUser.id;
+      }
+    }
+
+    // Update staff record
+    const { username, password, userGroupId, ...staffOnlyData } = staffData;
     const [updatedStaff] = await db
       .update(staff)
-      .set({ ...updateData, updatedAt: new Date() })
+      .set({ ...staffOnlyData, updatedAt: new Date() })
       .where(eq(staff.id, id))
       .returning();
     return updatedStaff;
