@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, startOfDay, eachDayOfInterval } from "date-fns";
+import { format, addDays, startOfDay, eachDayOfInterval, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSystemColors } from "@/hooks/useSystemColors";
 
@@ -85,6 +85,12 @@ export default function PublicDisplay() {
 
   const { getWorkScheduleColor } = useSystemColors();
 
+  // Function to check if date is weekend
+  const isWeekend = (date: Date) => {
+    const day = getDay(date); // 0 = Sunday, 6 = Saturday
+    return day === 0 || day === 6; // Sunday or Saturday
+  };
+
   // Function to get schedules for a specific staff and day
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
     if (!displayData?.workSchedules) return [];
@@ -151,10 +157,14 @@ export default function PublicDisplay() {
           {/* Schedule Columns for each day */}
           {days.map((day, dayIndex) => {
             const schedules = getSchedulesForStaffAndDay(staffMember.id, day);
+            const isWeekendDay = isWeekend(day);
             
             return (
-              <div key={dayIndex} className="p-0.5 border-r border-gray-300 min-h-[70px] relative">
-                {schedules.length > 0 ? (
+              <div 
+                key={dayIndex} 
+                className={`p-0.5 border-r border-gray-300 min-h-[70px] relative ${isWeekendDay ? 'bg-gray-400' : ''}`}
+              >
+                {!isWeekendDay && schedules.length > 0 ? (
                   <div className="space-y-0.5">
                     {schedules.slice(0, 8).map((schedule, idx) => (
                       <div
@@ -184,7 +194,7 @@ export default function PublicDisplay() {
                   </div>
                 ) : (
                   <div className="text-gray-400 text-xs p-0.5">
-                    {/* Empty cell - no schedule */}
+                    {/* Empty cell - no schedule or weekend */}
                   </div>
                 )}
               </div>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay } from "date-fns";
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import AddScheduleModal from "./add-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
@@ -129,6 +129,11 @@ export default function WorkSchedule() {
     };
   };
 
+  const isWeekend = (date: Date) => {
+    const day = getDay(date); // 0 = Sunday, 6 = Saturday
+    return day === 0 || day === 6; // Sunday or Saturday
+  };
+
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
     return schedules.filter(schedule => {
       const startDate = new Date(schedule.startDateTime);
@@ -234,9 +239,14 @@ export default function WorkSchedule() {
                     </div>
                     {weekDays.map((day) => {
                       const daySchedules = getSchedulesForStaffAndDay(staff.id, day);
+                      const isWeekendDay = isWeekend(day);
+                      
                       return (
-                        <div key={day.toISOString()} className="p-2 border border-gray-200 min-h-20 bg-white">
-                          {daySchedules.map((schedule) => (
+                        <div 
+                          key={day.toISOString()} 
+                          className={`p-2 border border-gray-200 min-h-20 ${isWeekendDay ? 'bg-gray-200' : 'bg-white'}`}
+                        >
+                          {!isWeekendDay && daySchedules.map((schedule) => (
                             <div
                               key={schedule.id}
                               className="p-1 rounded text-xs mb-1 relative group cursor-pointer"
