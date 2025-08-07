@@ -79,11 +79,13 @@ export default function GroupPermissionsManagement() {
   // Fetch user groups
   const { data: userGroups = [], isLoading } = useQuery<UserGroup[]>({
     queryKey: ["/api/user-groups"],
+    queryFn: () => apiRequest("/api/user-groups"),
   });
 
   // Fetch menu permissions for selected group
   const { data: groupPermissions = [], isLoading: isLoadingPermissions } = useQuery<MenuPermission[]>({
     queryKey: ["/api/menu-permissions", selectedGroupId],
+    queryFn: () => apiRequest(`/api/menu-permissions?groupId=${selectedGroupId}`),
     enabled: !!selectedGroupId,
   });
 
@@ -97,31 +99,46 @@ export default function GroupPermissionsManagement() {
 
   // Initialize menu permissions form when permissions data changes
   useEffect(() => {
-    if (groupPermissions.length > 0) {
-      const permissionsMap: MenuPermissionForm = {};
-      groupPermissions.forEach(permission => {
-        permissionsMap[permission.menuId] = {
-          canView: permission.canView || false,
-          canCreate: permission.canCreate || false,
-          canEdit: permission.canEdit || false,
-          canDelete: permission.canDelete || false,
-        };
-      });
-      setMenuPermissions(permissionsMap);
-    } else {
-      // Initialize empty permissions for all menus
-      const emptyPermissions: MenuPermissionForm = {};
-      AVAILABLE_MENUS.forEach(menu => {
-        emptyPermissions[menu.id] = {
-          canView: false,
-          canCreate: false,
-          canEdit: false,
-          canDelete: false,
-        };
-      });
-      setMenuPermissions(emptyPermissions);
+    if (selectedGroupId) {
+      if (groupPermissions.length > 0) {
+        const permissionsMap: MenuPermissionForm = {};
+        groupPermissions.forEach(permission => {
+          permissionsMap[permission.menuId] = {
+            canView: permission.canView || false,
+            canCreate: permission.canCreate || false,
+            canEdit: permission.canEdit || false,
+            canDelete: permission.canDelete || false,
+          };
+        });
+        
+        // Initialize missing menus with empty permissions
+        AVAILABLE_MENUS.forEach(menu => {
+          if (!permissionsMap[menu.id]) {
+            permissionsMap[menu.id] = {
+              canView: false,
+              canCreate: false,
+              canEdit: false,
+              canDelete: false,
+            };
+          }
+        });
+        
+        setMenuPermissions(permissionsMap);
+      } else if (!isLoadingPermissions) {
+        // Initialize empty permissions for all menus when no permissions exist
+        const emptyPermissions: MenuPermissionForm = {};
+        AVAILABLE_MENUS.forEach(menu => {
+          emptyPermissions[menu.id] = {
+            canView: false,
+            canCreate: false,
+            canEdit: false,
+            canDelete: false,
+          };
+        });
+        setMenuPermissions(emptyPermissions);
+      }
     }
-  }, [groupPermissions]);
+  }, [groupPermissions, selectedGroupId, isLoadingPermissions]);
 
   // Create user group mutation
   const createUserGroupMutation = useMutation({
