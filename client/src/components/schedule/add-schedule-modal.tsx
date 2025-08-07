@@ -35,6 +35,7 @@ const workTypes = [
   { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
   { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
   { value: "Đi công tác nước ngoài", label: "Đi công tác nước ngoài" },
+  { value: "Tiếp khách VIP", label: "Tiếp khách VIP" },
   { value: "Khác", label: "Khác" },
 ];
 

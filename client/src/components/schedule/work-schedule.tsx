@@ -304,6 +304,10 @@ export default function WorkSchedule() {
               <span className="text-sm">Đi công tác nước ngoài</span>
             </div>
             <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Tiếp khách VIP") }}></div>
+              <span className="text-sm">Tiếp khách VIP</span>
+            </div>
+            <div className="flex items-center space-x-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
               <span className="text-sm">Khác</span>
             </div>
