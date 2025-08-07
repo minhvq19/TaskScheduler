@@ -41,9 +41,13 @@ export default function WorkSchedule() {
       if (!response.ok) {
         throw new Error(`Failed to fetch schedules: ${response.status} ${response.statusText}`);
       }
-      return response.json();
+      const data = await response.json();
+      console.log('Loaded schedules:', data);
+      return data;
     },
   });
+
+  console.log('Current schedules state:', schedules, 'Loading:', isLoadingSchedules);
 
   // Fetch staff (filter for Ban Giám đốc)
   const { data: allStaff = [] } = useQuery<Staff[]>({
