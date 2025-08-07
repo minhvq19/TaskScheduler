@@ -308,24 +308,39 @@ export class DatabaseStorage implements IStorage {
 
   // Work schedules operations
   async getWorkSchedules(startDate?: Date, endDate?: Date, staffId?: string): Promise<WorkSchedule[]> {
-    let query = db.select().from(workSchedules);
-    
     const conditions = [];
-    if (startDate) {
-      conditions.push(gte(workSchedules.startDateTime, startDate));
+    
+    // Fix date range logic: find schedules that overlap with the given period
+    // A schedule overlaps if: schedule.start <= period.end AND schedule.end >= period.start
+    if (startDate && endDate) {
+      conditions.push(
+        and(
+          lte(workSchedules.startDateTime, endDate),   // Schedule starts before or during period
+          gte(workSchedules.endDateTime, startDate)    // Schedule ends after or during period
+        )
+      );
+    } else if (startDate) {
+      conditions.push(gte(workSchedules.endDateTime, startDate));  // Schedule ends after start
+    } else if (endDate) {
+      conditions.push(lte(workSchedules.startDateTime, endDate));   // Schedule starts before end
     }
-    if (endDate) {
-      conditions.push(lte(workSchedules.endDateTime, endDate));
-    }
+    
     if (staffId) {
       conditions.push(eq(workSchedules.staffId, staffId));
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db
+        .select()
+        .from(workSchedules)
+        .where(and(...conditions))
+        .orderBy(asc(workSchedules.startDateTime));
     }
 
-    return await query.orderBy(asc(workSchedules.startDateTime));
+    return await db
+      .select()
+      .from(workSchedules)
+      .orderBy(asc(workSchedules.startDateTime));
   }
 
   async getWorkSchedule(id: string): Promise<WorkSchedule | undefined> {

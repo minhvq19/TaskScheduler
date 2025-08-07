@@ -25,7 +25,7 @@ export default function WorkSchedule() {
 
   // Fetch work schedules for current week
   const { data: schedules = [], isLoading: isLoadingSchedules } = useQuery<WorkSchedule[]>({
-    queryKey: ["/api/work-schedules", weekStart.toISOString(), weekEnd.toISOString(), selectedStaff || "all"],
+    queryKey: ["/api/work-schedules", weekStart.toISOString(), weekEnd.toISOString(), selectedStaff || "all", "v2"],
     queryFn: async () => {
       const params = new URLSearchParams({
         startDate: weekStart.toISOString(),
@@ -42,7 +42,7 @@ export default function WorkSchedule() {
         throw new Error(`Failed to fetch schedules: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
-      console.log('Loaded schedules:', data);
+      console.log('Loaded schedules with fixed filtering:', data);
       return data;
     },
   });
@@ -70,6 +70,10 @@ export default function WorkSchedule() {
   // Check if we have the schedule for PGĐ Lê Văn Đức specifically
   const ducSchedules = schedules.filter(s => s.staffId === "2e18ec7c-9735-4a76-941d-e945a3e75921");
   console.log('PGĐ Lê Văn Đức schedules:', ducSchedules);
+  
+  // Also check all schedules with "Nghỉ phép"
+  const vacationSchedules = schedules.filter(s => s.workType === "Nghỉ phép");
+  console.log('All vacation schedules:', vacationSchedules);
 
   // Delete schedule mutation
   const deleteScheduleMutation = useMutation({
