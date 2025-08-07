@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import {
   insertDepartmentSchema,
   insertStaffSchema,
+  updateStaffSchema,
   insertMeetingRoomSchema,
   insertEventCategorySchema,
   insertWorkScheduleSchema,
@@ -204,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/staff/:id', requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      const validatedData = insertStaffSchema.partial().parse(req.body);
+      const validatedData = updateStaffSchema.parse(req.body);
       const staff = await storage.updateStaff(id, validatedData);
       res.json(staff);
     } catch (error) {
