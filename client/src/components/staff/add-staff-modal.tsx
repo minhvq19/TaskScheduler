@@ -58,7 +58,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
   });
 
   // Fetch system users to check if staff has user account
-  const { data: systemUsers = [] } = useQuery({
+  const { data: systemUsers = [] } = useQuery<any[]>({
     queryKey: ["/api/system-users"],
   });
 
@@ -117,9 +117,9 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
   });
 
   useEffect(() => {
-    if (staff) {
+    if (staff && systemUsers.length > 0) {
       // Check if staff has existing user account
-      const hasUserAccount = systemUsers.some(user => user.username === staff.employeeId);
+      const hasUserAccount = systemUsers.some((user: any) => user.username === staff.employeeId);
       
       form.reset({
         fullName: staff.fullName,
@@ -133,7 +133,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         notes: staff.notes || "",
         createUserAccount: hasUserAccount,
       });
-    } else {
+    } else if (!staff) {
       form.reset({
         fullName: "",
         employeeId: "",
@@ -147,7 +147,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         createUserAccount: false,
       });
     }
-  }, [staff, form, systemUsers]);
+  }, [staff, systemUsers]);
 
   const onSubmit = (data: FormData) => {
     // For new staff, password is required

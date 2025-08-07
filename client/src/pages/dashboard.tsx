@@ -12,6 +12,7 @@ import WorkSchedule from "@/components/schedule/work-schedule";
 import MeetingSchedule from "@/components/meetings/meeting-schedule";
 import UserManagement from "@/components/users/user-management";
 import PermissionManagement from "@/components/permissions/permission-management";
+import UserGroupManagement from "@/components/permissions/user-group-management";
 import HolidayManagement from "@/components/holidays/holiday-management";
 import SystemConfig from "@/pages/system-config";
 import { apiRequest } from "@/lib/queryClient";
@@ -28,6 +29,7 @@ type Section =
   | "other-events"
   | "user-management"
   | "permissions"
+  | "user-groups"
   | "holiday-management"
   | "system-config";
 
@@ -90,6 +92,8 @@ export default function Dashboard() {
 
       case "permissions":
         return <PermissionManagement />;
+      case "user-groups":
+        return <UserGroupManagement />;
       case "holiday-management":
         return <HolidayManagement />;
       case "system-config":

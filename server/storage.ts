@@ -34,8 +34,8 @@ import {
   type InsertSystemUser,
   type SchedulePermission,
   type InsertSchedulePermission,
-  type SystemConfig,
-  type InsertSystemConfig,
+  type SystemConfigs,
+  type InsertSystemConfigs,
   type Holiday,
   type InsertHoliday,
 } from "@shared/schema";
@@ -481,33 +481,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(otherEvents).where(eq(otherEvents.id, id));
   }
 
-  // User groups operations
-  async getUserGroups(): Promise<UserGroup[]> {
-    return await db.select().from(userGroups).orderBy(asc(userGroups.name));
-  }
 
-  async getUserGroup(id: string): Promise<UserGroup | undefined> {
-    const [group] = await db.select().from(userGroups).where(eq(userGroups.id, id));
-    return group;
-  }
-
-  async createUserGroup(group: InsertUserGroup): Promise<UserGroup> {
-    const [newGroup] = await db.insert(userGroups).values(group).returning();
-    return newGroup;
-  }
-
-  async updateUserGroup(id: string, group: Partial<InsertUserGroup>): Promise<UserGroup> {
-    const [updatedGroup] = await db
-      .update(userGroups)
-      .set({ ...group, updatedAt: new Date() })
-      .where(eq(userGroups.id, id))
-      .returning();
-    return updatedGroup;
-  }
-
-  async deleteUserGroup(id: string): Promise<void> {
-    await db.delete(userGroups).where(eq(userGroups.id, id));
-  }
 
   // System users operations
   async getSystemUsers(): Promise<SystemUser[]> {
@@ -600,21 +574,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   // System configuration operations
-  async getSystemConfigs(): Promise<SystemConfig[]> {
+  async getSystemConfigs(): Promise<SystemConfigs[]> {
     return await db.select().from(systemConfig).orderBy(asc(systemConfig.category), asc(systemConfig.key));
   }
 
-  async getSystemConfig(key: string): Promise<SystemConfig | undefined> {
+  async getSystemConfig(key: string): Promise<SystemConfigs | undefined> {
     const [config] = await db.select().from(systemConfig).where(eq(systemConfig.key, key));
     return config;
   }
 
-  async createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig> {
+  async createSystemConfig(config: InsertSystemConfigs): Promise<SystemConfigs> {
     const [newConfig] = await db.insert(systemConfig).values(config).returning();
     return newConfig;
   }
 
-  async updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig> {
+  async updateSystemConfig(key: string, config: Partial<InsertSystemConfigs>): Promise<SystemConfigs> {
     const [updatedConfig] = await db
       .update(systemConfig)
       .set({ ...config, updatedAt: new Date() })
@@ -654,6 +628,8 @@ export class DatabaseStorage implements IStorage {
   async deleteHoliday(id: string): Promise<void> {
     await db.delete(holidays).where(eq(holidays.id, id));
   }
+
+
 }
 
 export const storage = new DatabaseStorage();

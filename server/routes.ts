@@ -490,6 +490,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/schedule-permissions/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSchedulePermission(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting schedule permission:", error);
+      res.status(500).json({ message: "Failed to delete schedule permission" });
+    }
+  });
+
+  // User groups routes
+  app.get('/api/user-groups', requireAuth, async (req, res) => {
+    try {
+      const userGroups = await storage.getUserGroups();
+      res.json(userGroups);
+    } catch (error) {
+      console.error("Error fetching user groups:", error);
+      res.status(500).json({ message: "Failed to fetch user groups" });
+    }
+  });
+
+  app.post('/api/user-groups', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertUserGroupSchema.parse(req.body);
+      const userGroup = await storage.createUserGroup(validatedData);
+      res.status(201).json(userGroup);
+    } catch (error) {
+      console.error("Error creating user group:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create user group" });
+    }
+  });
+
+  app.put('/api/user-groups/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertUserGroupSchema.partial().parse(req.body);
+      const userGroup = await storage.updateUserGroup(id, validatedData);
+      res.json(userGroup);
+    } catch (error) {
+      console.error("Error updating user group:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update user group" });
+    }
+  });
+
+  app.delete('/api/user-groups/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteUserGroup(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user group:", error);
+      res.status(500).json({ message: "Failed to delete user group" });
+    }
+  });
+
   // Public display endpoints (no auth required)
   app.get('/api/public/current-time', (req, res) => {
     res.json({ currentTime: new Date().toISOString() });
@@ -585,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/system-config', async (req, res) => {
     try {
-      const configData = insertSystemConfigSchema.parse(req.body);
+      const configData = insertSystemConfigsSchema.parse(req.body);
       const config = await storage.createSystemConfig(configData);
       res.status(201).json(config);
     } catch (error) {
@@ -600,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/system-config/:key', async (req, res) => {
     try {
       const { key } = req.params;
-      const configData = insertSystemConfigSchema.partial().parse(req.body);
+      const configData = insertSystemConfigsSchema.partial().parse(req.body);
       const config = await storage.updateSystemConfig(key, configData);
       res.json(config);
     } catch (error) {
@@ -710,6 +772,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting holiday:", error);
       res.status(500).json({ message: "Failed to delete holiday" });
+    }
+  });
+
+  // User Group routes
+  app.get('/api/user-groups', async (req, res) => {
+    try {
+      const userGroups = await storage.getUserGroups();
+      res.json(userGroups);
+    } catch (error) {
+      console.error("Error fetching user groups:", error);
+      res.status(500).json({ message: "Failed to fetch user groups" });
+    }
+  });
+
+  app.get('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userGroup = await storage.getUserGroup(id);
+      if (!userGroup) {
+        return res.status(404).json({ message: "User group not found" });
+      }
+      res.json(userGroup);
+    } catch (error) {
+      console.error("Error fetching user group:", error);
+      res.status(500).json({ message: "Failed to fetch user group" });
+    }
+  });
+
+  app.post('/api/user-groups', async (req, res) => {
+    try {
+      const groupData = insertUserGroupSchema.parse(req.body);
+      const userGroup = await storage.createUserGroup(groupData);
+      res.status(201).json(userGroup);
+    } catch (error) {
+      console.error("Error creating user group:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create user group" });
+    }
+  });
+
+  app.put('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const groupData = insertUserGroupSchema.partial().parse(req.body);
+      const userGroup = await storage.updateUserGroup(id, groupData);
+      res.json(userGroup);
+    } catch (error) {
+      console.error("Error updating user group:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update user group" });
+    }
+  });
+
+  app.delete('/api/user-groups/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteUserGroup(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user group:", error);
+      res.status(500).json({ message: "Failed to delete user group" });
     }
   });
 

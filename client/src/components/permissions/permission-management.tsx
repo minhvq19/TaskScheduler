@@ -51,7 +51,7 @@ export default function PermissionManagement() {
     queryKey: ["/api/departments"],
   });
 
-  const boardDept = departments.find(d => d.name.includes("Ban Giám đốc"));
+  const boardDept = departments.find(d => d.name.includes("Ban giám đốc"));
   const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id);
 
   // Create permission mutation
