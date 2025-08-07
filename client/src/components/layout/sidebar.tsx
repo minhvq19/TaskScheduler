@@ -62,16 +62,16 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   };
 
   return (
-    <aside className="w-64 bg-white shadow-sm h-screen sticky top-0">
-      <nav className="p-6 space-y-2">
+    <aside className="w-64 bg-gradient-to-b from-gray-50 to-white shadow-lg h-screen sticky top-0">
+      <nav className="p-6 space-y-3">
         {/* Dashboard */}
         <Button
           variant={activeSection === "dashboard" ? "default" : "ghost"}
           className={cn(
-            "w-full justify-start space-x-3",
+            "w-full justify-start space-x-3 rounded-xl transition-all duration-300 transform hover:scale-105",
             activeSection === "dashboard" 
-              ? "bg-bidv-light-gray text-bidv-teal" 
-              : "text-gray-700 hover:bg-gray-100"
+              ? "bg-gradient-to-r from-[#006b68] to-[#008a85] text-white hover:from-[#005a57] hover:to-[#007974] shadow-lg border border-[#005a57]" 
+              : "text-gray-700 hover:bg-gradient-to-r hover:from-[#006b68] hover:to-[#008a85] hover:text-white hover:shadow-md hover:border hover:border-[#005a57]"
           )}
           onClick={() => onSectionChange("dashboard")}
           data-testid="nav-dashboard"
@@ -82,19 +82,21 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
 
         {/* Menu sections */}
         {menuItems.slice(1).map((section, sectionIndex) => (
-          <div key={sectionIndex} className="pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3 bg-[#006b68] text-[#ffffff]">
-              {section.category}
-            </p>
+          <div key={sectionIndex} className="pt-6">
+            <div className="bg-gradient-to-r from-[#006b68] to-[#008a85] text-white px-4 py-2.5 rounded-xl mb-4 shadow-lg border border-[#005a57]">
+              <p className="text-xs font-bold uppercase tracking-wider">
+                {section.category}
+              </p>
+            </div>
             {section.items?.map((item) => (
               <Button
                 key={item.id}
                 variant={activeSection === item.id ? "default" : "ghost"}
                 className={cn(
-                  "w-full justify-start space-x-3 mb-1",
+                  "w-full justify-start space-x-3 mb-2 rounded-xl transition-all duration-300 transform hover:scale-105",
                   activeSection === item.id 
-                    ? "bg-bidv-light-gray text-bidv-teal" 
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-gradient-to-r from-[#006b68] to-[#008a85] text-white hover:from-[#005a57] hover:to-[#007974] shadow-lg border border-[#005a57]" 
+                    : "text-gray-700 hover:bg-gradient-to-r hover:from-[#006b68] hover:to-[#008a85] hover:text-white hover:shadow-md hover:border hover:border-[#005a57]"
                 )}
                 onClick={() => onSectionChange(item.id)}
                 data-testid={`nav-${item.id}`}
@@ -107,10 +109,10 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         ))}
 
         {/* Public Display Button */}
-        <div className="pt-4">
+        <div className="pt-6">
           <Button
             variant="outline"
-            className="w-full justify-start space-x-3 text-orange-600 border-orange-200 hover:bg-orange-50"
+            className="w-full justify-start space-x-3 rounded-xl text-orange-600 border-orange-300 hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:text-white hover:border-orange-500 transition-all duration-300 transform hover:scale-105 shadow-md"
             onClick={openPublicDisplay}
             data-testid="nav-public-display"
           >
