@@ -74,6 +74,7 @@ export default function Dashboard() {
   };
 
   const renderContent = () => {
+    console.log("Active section:", activeSection);
     switch (activeSection) {
       case "staff-management":
         return <StaffManagement />;
@@ -94,6 +95,7 @@ export default function Dashboard() {
       case "holiday-management":
         return <HolidayManagement />;
       case "system-config":
+        console.log("Rendering SystemConfig component");
         return <SystemConfig />;
       default:
         return (
