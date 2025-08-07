@@ -196,15 +196,15 @@ export default function SystemConfigPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-white min-h-screen">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Settings className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Quản trị tham số hệ thống</h1>
+          <Settings className="h-6 w-6 text-bidv-teal" />
+          <h1 className="text-2xl font-bold text-gray-900">Quản trị tham số hệ thống</h1>
         </div>
         <Button
           onClick={startAdd}
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-2 bg-bidv-teal hover:bg-bidv-teal/90 text-white"
           data-testid="button-add-config"
         >
           <Plus className="h-4 w-4" />
