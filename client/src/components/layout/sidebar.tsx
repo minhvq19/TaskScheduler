@@ -62,8 +62,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen sticky top-0 border-r border-gray-200">
-      <nav className="p-6 space-y-4">
+    <aside className="w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen sticky top-0 border-r border-gray-200 overflow-hidden flex flex-col">
+      <nav className="p-6 space-y-4 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {/* Dashboard */}
         <Button
           variant={activeSection === "dashboard" ? "default" : "ghost"}
