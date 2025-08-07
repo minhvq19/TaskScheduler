@@ -95,7 +95,7 @@ export default function PublicDisplay() {
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
     if (!displayData?.workSchedules) return [];
     
-    return displayData.workSchedules.filter(schedule => {
+    const daySchedules = displayData.workSchedules.filter(schedule => {
       if (schedule.staffId !== staffId) return false;
       
       const scheduleStart = startOfDay(new Date(schedule.startDateTime));
@@ -105,6 +105,29 @@ export default function PublicDisplay() {
       // Check if the day falls within the schedule range (inclusive)
       return checkDay >= scheduleStart && checkDay <= scheduleEnd;
     });
+
+    // For board directors, if no schedule exists for a weekday, add default "Làm việc tại CN"
+    const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+    const staffMember = staff.find(s => s.id === staffId);
+    const isBoardMember = staffMember && staffMember.department?.name.toLowerCase().includes("giám đốc");
+    
+    if (!isWeekend && isBoardMember && daySchedules.length === 0) {
+      // Add default work schedule
+      daySchedules.push({
+        id: `default-${staffId}-${day.toISOString()}`,
+        staffId: staffId,
+        startDateTime: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 8, 0).toISOString(),
+        endDateTime: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 17, 30).toISOString(),
+        workType: "Làm việc tại CN",
+        customContent: null,
+        createdBy: "system",
+        createdAt: new Date().toISOString(),
+        updatedBy: null,
+        updatedAt: new Date().toISOString()
+      } as any);
+    }
+
+    return daySchedules;
   };
 
   const renderScheduleContent = () => {
@@ -162,33 +185,43 @@ export default function PublicDisplay() {
             return (
               <div 
                 key={dayIndex} 
-                className={`p-0.5 border-r border-gray-300 min-h-[70px] relative ${isWeekendDay ? 'bg-gray-400' : ''}`}
+                className="p-0.5 border-r border-gray-300 min-h-[70px] relative"
+                style={{ backgroundColor: isWeekendDay ? '#9ca3af' : '#006b68' }}
               >
                 {!isWeekendDay && schedules.length > 0 ? (
                   <div className="space-y-0.5">
-                    {schedules.slice(0, 8).map((schedule, idx) => (
-                      <div
-                        key={schedule.id}
-                        className="text-xs p-0.5 rounded text-white font-medium"
-                        style={{
-                          backgroundColor: getWorkScheduleColor(schedule.workType),
-                          fontSize: "7px",
-                          lineHeight: "1.0"
-                        }}
-                      >
-                        <div className="font-bold truncate">{schedule.workType}</div>
-                        {schedule.customContent && (
-                          <div className="truncate opacity-90 text-[6px]">{schedule.customContent}</div>
-                        )}
-                        <div className="opacity-75 text-[6px]">
-                          {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
-                          {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                    {schedules.slice(0, 8).map((schedule, idx) => {
+                      const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
+                      
+                      return (
+                        <div
+                          key={schedule.id}
+                          className="text-xs p-0.5 rounded text-white font-medium"
+                          style={{
+                            backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
+                            fontSize: "7px",
+                            lineHeight: "1.0",
+                            opacity: isWorkAtBranch ? 0 : 1
+                          }}
+                        >
+                          {!isWorkAtBranch && (
+                            <>
+                              <div className="font-bold truncate">{schedule.workType}</div>
+                              {schedule.customContent && (
+                                <div className="truncate opacity-90 text-[6px]">{schedule.customContent}</div>
+                              )}
+                              <div className="opacity-75 text-[6px]">
+                                {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
+                                {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                              </div>
+                            </>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                    {schedules.length > 8 && (
+                      );
+                    })}
+                    {schedules.filter(s => s.workType !== "Làm việc tại CN").length > 8 && (
                       <div className="text-[6px] text-gray-500 text-center">
-                        +{schedules.length - 8} more
+                        +{schedules.filter(s => s.workType !== "Làm việc tại CN").length - 8} more
                       </div>
                     )}
                   </div>

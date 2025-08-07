@@ -120,12 +120,12 @@ export default function WorkSchedule() {
 
   const getScheduleStyle = (workType: string) => {
     const bgColor = getWorkScheduleColor(workType);
-    const isTransparent = workType === "Làm việc tại CN";
+    const isWorkAtBranch = workType === "Làm việc tại CN";
     
     return {
-      backgroundColor: isTransparent ? "transparent" : bgColor,
-      color: isTransparent ? "#374151" : "white", // text-gray-700 or white
-      border: isTransparent ? "1px solid #d1d5db" : "none" // gray-300 border for transparent
+      backgroundColor: isWorkAtBranch ? "transparent" : bgColor,
+      color: isWorkAtBranch ? "transparent" : "white", // Hide text for work at branch
+      border: isWorkAtBranch ? "none" : "none"
     };
   };
 
@@ -135,7 +135,7 @@ export default function WorkSchedule() {
   };
 
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
-    return schedules.filter(schedule => {
+    const daySchedules = schedules.filter(schedule => {
       const startDate = new Date(schedule.startDateTime);
       const endDate = new Date(schedule.endDateTime);
       const checkDay = new Date(day);
@@ -145,6 +145,29 @@ export default function WorkSchedule() {
              checkDay >= startOfDay(startDate) && 
              checkDay <= startOfDay(endDate);
     });
+
+    // For board directors, if no schedule exists for a weekday, add default "Làm việc tại CN"
+    const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+    const staff = boardStaff.find(s => s.id === staffId);
+    const isBoardMember = staff && (staff as any).department?.name.toLowerCase().includes("giám đốc");
+    
+    if (!isWeekend && isBoardMember && daySchedules.length === 0) {
+      // Add default work schedule
+      daySchedules.push({
+        id: `default-${staffId}-${day.toISOString()}`,
+        staffId: staffId,
+        startDateTime: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 8, 0).toISOString(),
+        endDateTime: new Date(day.getFullYear(), day.getMonth(), day.getDate(), 17, 30).toISOString(),
+        workType: "Làm việc tại CN",
+        customContent: null,
+        createdBy: "system",
+        createdAt: new Date().toISOString(),
+        updatedBy: null,
+        updatedAt: new Date().toISOString()
+      } as any);
+    }
+
+    return daySchedules;
   };
 
   return (
@@ -244,44 +267,56 @@ export default function WorkSchedule() {
                       return (
                         <div 
                           key={day.toISOString()} 
-                          className={`p-2 border border-gray-200 min-h-20 ${isWeekendDay ? 'bg-gray-200' : 'bg-white'}`}
+                          className={`p-2 border border-gray-200 min-h-20 ${isWeekendDay ? 'bg-gray-200' : ''}`}
+                          style={{ backgroundColor: isWeekendDay ? '#d1d5db' : '#006b68' }}
                         >
-                          {!isWeekendDay && daySchedules.map((schedule) => (
-                            <div
-                              key={schedule.id}
-                              className="p-1 rounded text-xs mb-1 relative group cursor-pointer"
-                              style={getScheduleStyle(schedule.workType)}
-                              data-testid={`schedule-${schedule.id}`}
-                            >
-                              <div className="font-medium">
-                                {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
-                                {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                          {!isWeekendDay && daySchedules.map((schedule) => {
+                            const isDefaultSchedule = schedule.id.startsWith('default-');
+                            const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
+                            
+                            return (
+                              <div
+                                key={schedule.id}
+                                className="p-1 rounded text-xs mb-1 relative group cursor-pointer"
+                                style={getScheduleStyle(schedule.workType)}
+                                data-testid={`schedule-${schedule.id}`}
+                              >
+                                {!isWorkAtBranch && (
+                                  <>
+                                    <div className="font-medium">
+                                      {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
+                                      {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                                    </div>
+                                    <div className="truncate">
+                                      {schedule.workType === "Khác" && schedule.customContent 
+                                        ? schedule.customContent 
+                                        : schedule.workType}
+                                    </div>
+                                  </>
+                                )}
+                                
+                                {/* Action buttons - only show for real schedules, not default ones */}
+                                {!isDefaultSchedule && (
+                                  <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
+                                    <button
+                                      onClick={() => handleEdit(schedule)}
+                                      className="text-blue-600 hover:text-blue-800 p-1"
+                                      data-testid={`button-edit-schedule-${schedule.id}`}
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(schedule.id)}
+                                      className="text-red-600 hover:text-red-800 p-1"
+                                      data-testid={`button-delete-schedule-${schedule.id}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                              <div className="truncate">
-                                {schedule.workType === "Khác" && schedule.customContent 
-                                  ? schedule.customContent 
-                                  : schedule.workType}
-                              </div>
-                              
-                              {/* Action buttons */}
-                              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
-                                <button
-                                  onClick={() => handleEdit(schedule)}
-                                  className="text-blue-600 hover:text-blue-800 p-1"
-                                  data-testid={`button-edit-schedule-${schedule.id}`}
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(schedule.id)}
-                                  className="text-red-600 hover:text-red-800 p-1"
-                                  data-testid={`button-delete-schedule-${schedule.id}`}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       );
                     })}
