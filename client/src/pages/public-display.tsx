@@ -331,9 +331,7 @@ export default function PublicDisplay() {
     <div className="min-h-screen bg-teal-900" data-testid="public-display">
       {/* Header with time in top right */}
       <div className="bg-teal-900 text-center py-4 relative">
-        <div className="text-yellow-400 text-lg font-bold">
-          BIDV 🟡 NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
-        </div>
+        <div className="text-yellow-400 text-lg font-bold">NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-white text-base text-center font-bold">
           Chi nhánh Sở giao dịch 1
         </div>
@@ -361,7 +359,6 @@ export default function PublicDisplay() {
       <div className="p-2">
         {renderScheduleContent()}
       </div>
-
     </div>
   );
 }
