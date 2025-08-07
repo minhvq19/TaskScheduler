@@ -99,6 +99,22 @@ const defaultConfigs = [
     type: 'boolean',
     description: 'Hiển thị ghi chú màu sắc',
     category: 'display'
+  },
+
+  // Work hours configuration
+  {
+    key: 'work_hours.start_time',
+    value: '08:00',
+    type: 'string',
+    description: 'Giờ bắt đầu làm việc hàng ngày',
+    category: 'timing'
+  },
+  {
+    key: 'work_hours.end_time',
+    value: '17:30',
+    type: 'string',
+    description: 'Giờ kết thúc làm việc hàng ngày',
+    category: 'timing'
   }
 ];
 

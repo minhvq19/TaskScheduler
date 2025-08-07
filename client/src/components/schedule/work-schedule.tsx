@@ -8,7 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
-import AddScheduleModal from "./add-schedule-modal";
+import EnhancedScheduleModal from "./enhanced-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
 import { useSystemColors } from "@/hooks/useSystemColors";
 
@@ -427,7 +427,7 @@ export default function WorkSchedule() {
       </Card>
 
       {/* Add/Edit Schedule Modal */}
-      <AddScheduleModal
+      <EnhancedScheduleModal
         isOpen={showAddModal}
         onClose={handleCloseModal}
         schedule={editingSchedule}

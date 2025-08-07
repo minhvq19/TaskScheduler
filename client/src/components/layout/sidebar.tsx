@@ -13,6 +13,7 @@ import {
   Tv,
   LayoutDashboard,
   Settings,
+  CalendarDays,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -42,6 +43,7 @@ const menuItems = [
       { id: "work-schedule", label: "Lịch công tác", icon: CalendarCheck },
       { id: "meeting-schedule", label: "Lịch phòng họp", icon: CalendarPlus },
       { id: "other-events", label: "Sự kiện khác", icon: Calendar },
+      { id: "holiday-management", label: "Quản lý ngày lễ", icon: CalendarDays },
     ],
   },
   {

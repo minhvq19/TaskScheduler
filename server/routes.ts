@@ -14,6 +14,7 @@ import {
   insertSystemUserSchema,
   insertSchedulePermissionSchema,
   insertSystemConfigSchema,
+  insertHolidaySchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -618,6 +619,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting system config:", error);
       res.status(500).json({ message: "Failed to delete system config" });
+    }
+  });
+
+  // Holiday routes
+  app.get('/api/holidays', async (req, res) => {
+    try {
+      const holidays = await storage.getHolidays();
+      res.json(holidays);
+    } catch (error) {
+      console.error("Error fetching holidays:", error);
+      res.status(500).json({ message: "Failed to fetch holidays" });
+    }
+  });
+
+  app.get('/api/holidays/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const holiday = await storage.getHoliday(id);
+      if (!holiday) {
+        return res.status(404).json({ message: "Holiday not found" });
+      }
+      res.json(holiday);
+    } catch (error) {
+      console.error("Error fetching holiday:", error);
+      res.status(500).json({ message: "Failed to fetch holiday" });
+    }
+  });
+
+  app.post('/api/holidays', async (req, res) => {
+    try {
+      const holidayData = insertHolidaySchema.parse(req.body);
+      const holiday = await storage.createHoliday(holidayData);
+      res.status(201).json(holiday);
+    } catch (error) {
+      console.error("Error creating holiday:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create holiday" });
+    }
+  });
+
+  app.put('/api/holidays/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const holidayData = insertHolidaySchema.partial().parse(req.body);
+      const holiday = await storage.updateHoliday(id, holidayData);
+      res.json(holiday);
+    } catch (error) {
+      console.error("Error updating holiday:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update holiday" });
+    }
+  });
+
+  app.delete('/api/holidays/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteHoliday(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting holiday:", error);
+      res.status(500).json({ message: "Failed to delete holiday" });
     }
   });
 

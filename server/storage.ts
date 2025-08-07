@@ -11,6 +11,7 @@ import {
   systemUsers,
   schedulePermissions,
   systemConfig,
+  holidays,
   type User,
   type UpsertUser,
   type Department,
@@ -35,6 +36,8 @@ import {
   type InsertSchedulePermission,
   type SystemConfig,
   type InsertSystemConfig,
+  type Holiday,
+  type InsertHoliday,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, count, like } from "drizzle-orm";
@@ -126,6 +129,13 @@ export interface IStorage {
   createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig>;
   updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig>;
   deleteSystemConfig(key: string): Promise<void>;
+
+  // Holiday operations
+  getHolidays(): Promise<Holiday[]>;
+  getHoliday(id: string): Promise<Holiday | undefined>;
+  createHoliday(holiday: InsertHoliday): Promise<Holiday>;
+  updateHoliday(id: string, holiday: Partial<InsertHoliday>): Promise<Holiday>;
+  deleteHoliday(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -615,6 +625,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSystemConfig(key: string): Promise<void> {
     await db.delete(systemConfig).where(eq(systemConfig.key, key));
+  }
+
+  // Holiday operations
+  async getHolidays(): Promise<Holiday[]> {
+    return await db.select().from(holidays).orderBy(asc(holidays.date));
+  }
+
+  async getHoliday(id: string): Promise<Holiday | undefined> {
+    const [holiday] = await db.select().from(holidays).where(eq(holidays.id, id));
+    return holiday;
+  }
+
+  async createHoliday(holiday: InsertHoliday): Promise<Holiday> {
+    const [newHoliday] = await db.insert(holidays).values(holiday).returning();
+    return newHoliday;
+  }
+
+  async updateHoliday(id: string, holiday: Partial<InsertHoliday>): Promise<Holiday> {
+    const [updatedHoliday] = await db
+      .update(holidays)
+      .set({ ...holiday, updatedAt: new Date() })
+      .where(eq(holidays.id, id))
+      .returning();
+    return updatedHoliday;
+  }
+
+  async deleteHoliday(id: string): Promise<void> {
+    await db.delete(holidays).where(eq(holidays.id, id));
   }
 }
 

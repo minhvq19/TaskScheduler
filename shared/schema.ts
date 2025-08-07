@@ -141,6 +141,15 @@ export const systemUsers = pgTable("system_users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Holidays table
+export const holidays = pgTable("holidays", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  date: timestamp("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schedule input permissions table
 export const schedulePermissions = pgTable("schedule_permissions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -328,5 +337,14 @@ export const insertSystemConfigSchema = createInsertSchema(systemConfig).omit({
   updatedAt: true,
 });
 
+export const insertHolidaySchema = createInsertSchema(holidays).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type SystemConfig = typeof systemConfig.$inferSelect;
+
+export type Holiday = typeof holidays.$inferSelect;
+export type InsertHoliday = z.infer<typeof insertHolidaySchema>;
 export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
