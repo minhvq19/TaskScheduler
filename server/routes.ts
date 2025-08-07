@@ -299,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         startDateTime: new Date(req.body.startDateTime),
         endDateTime: new Date(req.body.endDateTime),
-        createdBy: req.user?.id || 'admin-user',
+        createdBy: (req.user as any)?.id || 'admin-user',
       });
 
       // Check daily limit (max 5 schedules per staff per day)
@@ -334,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : undefined,
         endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : undefined,
-        updatedBy: req.user.id,
+        updatedBy: (req.user as any)?.id || 'admin-user',
       });
       const schedule = await storage.updateWorkSchedule(id, validatedData);
       res.json(schedule);

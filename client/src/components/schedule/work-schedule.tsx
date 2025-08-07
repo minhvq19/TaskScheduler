@@ -25,20 +25,7 @@ export default function WorkSchedule() {
 
   // Fetch work schedules for current week
   const { data: schedules = [], isLoading: isLoadingSchedules } = useQuery<WorkSchedule[]>({
-    queryKey: ["/api/work-schedules", weekStart.toISOString(), weekEnd.toISOString(), selectedStaff],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: weekStart.toISOString(),
-        endDate: weekEnd.toISOString(),
-      });
-      if (selectedStaff && selectedStaff !== 'all') {
-        params.append('staffId', selectedStaff);
-      }
-      
-      const response = await fetch(`/api/work-schedules?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch schedules');
-      return response.json();
-    },
+    queryKey: ["/api/work-schedules", { startDate: weekStart.toISOString(), endDate: weekEnd.toISOString(), staffId: selectedStaff || undefined }],
   });
 
   // Fetch staff (filter for Ban Giám đốc)
