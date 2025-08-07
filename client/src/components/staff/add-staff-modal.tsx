@@ -117,7 +117,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
   });
 
   useEffect(() => {
-    if (staff && systemUsers.length > 0) {
+    if (staff) {
       // Check if staff has existing user account
       const hasUserAccount = systemUsers.some((user: any) => user.username === staff.employeeId);
       

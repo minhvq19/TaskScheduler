@@ -124,10 +124,10 @@ export interface IStorage {
   deleteSchedulePermission(id: string): Promise<void>;
 
   // System configuration operations
-  getSystemConfigs(): Promise<SystemConfig[]>;
-  getSystemConfig(key: string): Promise<SystemConfig | undefined>;
-  createSystemConfig(config: InsertSystemConfig): Promise<SystemConfig>;
-  updateSystemConfig(key: string, config: Partial<InsertSystemConfig>): Promise<SystemConfig>;
+  getSystemConfigs(): Promise<SystemConfigs[]>;
+  getSystemConfig(key: string): Promise<SystemConfigs | undefined>;
+  createSystemConfig(config: InsertSystemConfigs): Promise<SystemConfigs>;
+  updateSystemConfig(key: string, config: Partial<InsertSystemConfigs>): Promise<SystemConfigs>;
   deleteSystemConfig(key: string): Promise<void>;
 
   // Holiday operations
@@ -396,8 +396,6 @@ export class DatabaseStorage implements IStorage {
 
   // Meeting schedules operations
   async getMeetingSchedules(startDate?: Date, endDate?: Date, roomId?: string): Promise<MeetingSchedule[]> {
-    let query = db.select().from(meetingSchedules);
-    
     const conditions = [];
     if (startDate) {
       conditions.push(gte(meetingSchedules.startDateTime, startDate));
@@ -410,10 +408,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(meetingSchedules).where(and(...conditions)).orderBy(asc(meetingSchedules.startDateTime));
     }
 
-    return await query.orderBy(asc(meetingSchedules.startDateTime));
+    return await db.select().from(meetingSchedules).orderBy(asc(meetingSchedules.startDateTime));
   }
 
   async getMeetingSchedule(id: string): Promise<MeetingSchedule | undefined> {
@@ -441,8 +439,6 @@ export class DatabaseStorage implements IStorage {
 
   // Other events operations
   async getOtherEvents(startDate?: Date, endDate?: Date): Promise<OtherEvent[]> {
-    let query = db.select().from(otherEvents);
-    
     const conditions = [];
     if (startDate) {
       conditions.push(gte(otherEvents.startDateTime, startDate));
@@ -452,10 +448,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(otherEvents).where(and(...conditions)).orderBy(asc(otherEvents.startDateTime));
     }
 
-    return await query.orderBy(asc(otherEvents.startDateTime));
+    return await db.select().from(otherEvents).orderBy(asc(otherEvents.startDateTime));
   }
 
   async getOtherEvent(id: string): Promise<OtherEvent | undefined> {
@@ -629,7 +625,33 @@ export class DatabaseStorage implements IStorage {
     await db.delete(holidays).where(eq(holidays.id, id));
   }
 
+  // User group operations
+  async getUserGroups(): Promise<UserGroup[]> {
+    return await db.select().from(userGroups).orderBy(asc(userGroups.name));
+  }
 
+  async getUserGroup(id: string): Promise<UserGroup | undefined> {
+    const [group] = await db.select().from(userGroups).where(eq(userGroups.id, id));
+    return group;
+  }
+
+  async createUserGroup(group: InsertUserGroup): Promise<UserGroup> {
+    const [newGroup] = await db.insert(userGroups).values(group).returning();
+    return newGroup;
+  }
+
+  async updateUserGroup(id: string, group: Partial<InsertUserGroup>): Promise<UserGroup> {
+    const [updatedGroup] = await db
+      .update(userGroups)
+      .set({ ...group, updatedAt: new Date() })
+      .where(eq(userGroups.id, id))
+      .returning();
+    return updatedGroup;
+  }
+
+  async deleteUserGroup(id: string): Promise<void> {
+    await db.delete(userGroups).where(eq(userGroups.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
