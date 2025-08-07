@@ -62,8 +62,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-gray-50 to-white shadow-lg h-screen sticky top-0">
-      <nav className="p-6 space-y-3">
+    <aside className="w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen sticky top-0 border-r border-gray-200">
+      <nav className="p-6 space-y-4">
         {/* Dashboard */}
         <Button
           variant={activeSection === "dashboard" ? "default" : "ghost"}
@@ -76,8 +76,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           onClick={() => onSectionChange("dashboard")}
           data-testid="nav-dashboard"
         >
-          <LayoutDashboard className="w-4 h-4" />
-          <span className="font-medium">Dashboard</span>
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="font-semibold">Dashboard</span>
         </Button>
 
         {/* Menu sections */}
@@ -101,8 +101,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
                 onClick={() => onSectionChange(item.id)}
                 data-testid={`nav-${item.id}`}
               >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
               </Button>
             ))}
           </div>
@@ -116,8 +116,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
             onClick={openPublicDisplay}
             data-testid="nav-public-display"
           >
-            <Tv className="w-4 h-4" />
-            <span>Màn hình công cộng</span>
+            <Tv className="w-5 h-5" />
+            <span className="font-medium">Màn hình công cộng</span>
           </Button>
         </div>
       </nav>
