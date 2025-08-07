@@ -21,6 +21,7 @@ import { z } from "zod";
 const formSchema = insertStaffSchema.extend({
   birthDate: z.string().optional(),
   password: z.string().optional(), // Override to make password optional for editing
+  createUserAccount: z.boolean().optional(), // For creating user account
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -47,12 +48,18 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
       birthDate: "",
       displayOrder: 0,
       notes: "",
+      createUserAccount: false,
     },
   });
 
   // Fetch departments for dropdown
   const { data: departments = [] } = useQuery<Department[]>({
     queryKey: ["/api/departments"],
+  });
+
+  // Fetch system users to check if staff has user account
+  const { data: systemUsers = [] } = useQuery({
+    queryKey: ["/api/system-users"],
   });
 
   // Create staff mutation
@@ -111,6 +118,9 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
 
   useEffect(() => {
     if (staff) {
+      // Check if staff has existing user account
+      const hasUserAccount = systemUsers.some(user => user.username === staff.employeeId);
+      
       form.reset({
         fullName: staff.fullName,
         employeeId: staff.employeeId,
@@ -121,6 +131,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         birthDate: staff.birthDate ? new Date(staff.birthDate).toISOString().split('T')[0] : "",
         displayOrder: staff.displayOrder || 0,
         notes: staff.notes || "",
+        createUserAccount: hasUserAccount,
       });
     } else {
       form.reset({
@@ -133,9 +144,10 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         birthDate: "",
         displayOrder: 0,
         notes: "",
+        createUserAccount: false,
       });
     }
-  }, [staff, form]);
+  }, [staff, form, systemUsers]);
 
   const onSubmit = (data: FormData) => {
     // For new staff, password is required
@@ -365,6 +377,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
                   <input
                     type="checkbox"
                     id="userAccess"
+                    {...form.register("createUserAccount")}
                     className="rounded border-gray-300 focus:ring-bidv-teal"
                     data-testid="checkbox-user-access"
                   />
