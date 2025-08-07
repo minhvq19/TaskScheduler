@@ -16,6 +16,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -147,7 +148,8 @@ export default function GroupPermissionsManagement() {
         ...data,
         permissions: {} // Keep existing permissions field for compatibility
       };
-      return await apiRequest(`/api/user-groups`, "POST", groupData);
+      const result = await apiRequest(`/api/user-groups`, "POST", groupData);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-groups"] });
@@ -158,10 +160,11 @@ export default function GroupPermissionsManagement() {
       setIsDialogOpen(false);
       form.reset();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Create user group error:", error);
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi tạo nhóm quyền",
+        description: error?.message || "Có lỗi xảy ra khi tạo nhóm quyền",
         variant: "destructive",
       });
     },
@@ -182,10 +185,11 @@ export default function GroupPermissionsManagement() {
       setEditingGroup(null);
       form.reset();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Update user group error:", error);
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi cập nhật nhóm quyền",
+        description: error?.message || "Có lỗi xảy ra khi cập nhật nhóm quyền",
         variant: "destructive",
       });
     },
@@ -217,10 +221,11 @@ export default function GroupPermissionsManagement() {
         description: "Lưu quyền truy cập thành công",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Save permissions error:", error);
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi lưu quyền truy cập",
+        description: error?.message || "Có lỗi xảy ra khi lưu quyền truy cập",
         variant: "destructive",
       });
     },
@@ -241,16 +246,20 @@ export default function GroupPermissionsManagement() {
         setSelectedGroupId(null);
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Delete user group error:", error);
       toast({
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi xóa nhóm quyền",
+        description: error?.message || "Có lỗi xảy ra khi xóa nhóm quyền",
         variant: "destructive",
       });
     },
   });
 
   const handleSubmit = (data: UserGroupFormData) => {
+    console.log("Form data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     if (editingGroup) {
       updateUserGroupMutation.mutate(data);
     } else {
@@ -324,6 +333,11 @@ export default function GroupPermissionsManagement() {
                   <DialogTitle>
                     {editingGroup ? "Chỉnh sửa nhóm quyền" : "Thêm nhóm quyền mới"}
                   </DialogTitle>
+                  <DialogDescription>
+                    {editingGroup 
+                      ? "Cập nhật thông tin nhóm quyền đã chọn" 
+                      : "Tạo nhóm quyền mới để quản lý phân quyền hệ thống"}
+                  </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                   <div className="space-y-2">
