@@ -208,27 +208,27 @@ export default function PublicDisplay() {
         <div className="text-xs font-bold text-gray-700 mb-2 text-center">GHI CHÚ MÀU SẮC</div>
         <div className="grid grid-cols-3 gap-2 text-xs">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#4a90a4" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
             <span>Làm việc tại CN</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#f59e0b" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
             <span>Nghỉ phép</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#ef4444" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
             <span>Trực lãnh đạo</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#10b981" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
             <span>Đi công tác trong nước</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#8b5cf6" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
             <span>Đi công tác nước ngoài</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: "#6b7280" }}></div>
+            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
             <span>Khác</span>
           </div>
         </div>
