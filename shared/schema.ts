@@ -146,6 +146,9 @@ export const holidays = pgTable("holidays", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   date: timestamp("date").notNull(),
+  isRecurring: boolean("is_recurring").default(false), // Lặp lại hàng năm
+  monthDay: varchar("month_day"), // MM-DD format cho ngày lễ định kỳ
+  description: varchar("description"), // Mô tả ngày lễ
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -649,10 +649,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/holidays', async (req, res) => {
     try {
-      // Convert date string to Date object before validation
+      // Convert date string to Date object and extract month-day for recurring holidays
+      const date = new Date(req.body.date);
+      const monthDay = req.body.isRecurring ? 
+        `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : 
+        null;
+
       const requestData = {
         ...req.body,
-        date: new Date(req.body.date)
+        date: date,
+        monthDay: monthDay
       };
       const holidayData = insertHolidaySchema.parse(requestData);
       const holiday = await storage.createHoliday(holidayData);
@@ -669,11 +675,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/holidays/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      // Convert date string to Date object if present
-      const requestData = {
-        ...req.body,
-        ...(req.body.date && { date: new Date(req.body.date) })
-      };
+      // Convert date string to Date object if present and handle month-day for recurring
+      let requestData = { ...req.body };
+      
+      if (req.body.date) {
+        const date = new Date(req.body.date);
+        requestData.date = date;
+        
+        if (req.body.isRecurring) {
+          requestData.monthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        } else {
+          requestData.monthDay = null;
+        }
+      }
+      
       const holidayData = insertHolidaySchema.partial().parse(requestData);
       const holiday = await storage.updateHoliday(id, holidayData);
       res.json(holiday);

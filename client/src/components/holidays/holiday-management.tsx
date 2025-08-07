@@ -19,11 +19,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { type Holiday } from "@shared/schema";
 import { format } from "date-fns";
-import { Plus, Edit, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,6 +33,8 @@ import { z } from "zod";
 const holidaySchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên ngày lễ"),
   date: z.string().min(1, "Vui lòng chọn ngày"),
+  isRecurring: z.boolean().default(false),
+  description: z.string().optional(),
 });
 
 type HolidayFormData = z.infer<typeof holidaySchema>;
@@ -51,6 +55,8 @@ export default function HolidayManagement() {
     defaultValues: {
       name: "",
       date: "",
+      isRecurring: false,
+      description: "",
     },
   });
 
@@ -132,6 +138,8 @@ export default function HolidayManagement() {
     form.reset({
       name: holiday.name,
       date: format(new Date(holiday.date), "yyyy-MM-dd"),
+      isRecurring: holiday.isRecurring || false,
+      description: holiday.description || "",
     });
     setIsDialogOpen(true);
   };
@@ -204,6 +212,33 @@ export default function HolidayManagement() {
                 )}
               </div>
 
+              {/* Recurring checkbox */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isRecurring"
+                  checked={form.watch("isRecurring")}
+                  onCheckedChange={(checked) => form.setValue("isRecurring", checked as boolean)}
+                  data-testid="checkbox-recurring"
+                />
+                <Label htmlFor="isRecurring" className="text-sm">
+                  Lặp lại hàng năm (tự động áp dụng cho các năm tiếp theo)
+                </Label>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Mô tả</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Mô tả chi tiết về ngày lễ (tùy chọn)"
+                  {...form.register("description")}
+                  data-testid="textarea-description"
+                />
+                {form.formState.errors.description && (
+                  <p className="text-sm text-red-500">{form.formState.errors.description.message}</p>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
@@ -241,6 +276,8 @@ export default function HolidayManagement() {
               <TableRow>
                 <TableHead>Tên ngày lễ</TableHead>
                 <TableHead>Ngày</TableHead>
+                <TableHead>Lặp lại</TableHead>
+                <TableHead>Mô tả</TableHead>
                 <TableHead>Ngày tạo</TableHead>
                 <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
@@ -251,6 +288,21 @@ export default function HolidayManagement() {
                   <TableCell className="font-medium">{holiday.name}</TableCell>
                   <TableCell>
                     {format(new Date(holiday.date), "dd/MM/yyyy")}
+                  </TableCell>
+                  <TableCell>
+                    {holiday.isRecurring ? (
+                      <div className="flex items-center text-green-600">
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        Hàng năm
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">Không</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600 max-w-xs truncate">
+                      {holiday.description || "-"}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {format(new Date(holiday.createdAt!), "dd/MM/yyyy HH:mm")}

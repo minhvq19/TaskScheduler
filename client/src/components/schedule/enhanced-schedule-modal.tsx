@@ -112,7 +112,23 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   // Validation functions
   const isHoliday = (dateString: string) => {
     const date = new Date(dateString);
-    return holidays.some(holiday => isSameDay(new Date(holiday.date), date));
+    return holidays.some(holiday => {
+      const holidayDate = new Date(holiday.date);
+      
+      // Check exact date match
+      if (isSameDay(holidayDate, date)) {
+        return true;
+      }
+      
+      // Check recurring holiday (same month-day but different year)
+      if (holiday.isRecurring) {
+        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, '0')}-${String(holidayDate.getDate()).padStart(2, '0')}`;
+        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        return holidayMonthDay === checkMonthDay;
+      }
+      
+      return false;
+    });
   };
 
   const isValidWorkDay = (dateString: string) => {
