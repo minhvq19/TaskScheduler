@@ -83,7 +83,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         {/* Menu sections */}
         {menuItems.slice(1).map((section, sectionIndex) => (
           <div key={sectionIndex} className="pt-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3 bg-[#006b68] text-[#ffffff]">
               {section.category}
             </p>
             {section.items?.map((item) => (
