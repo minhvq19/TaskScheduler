@@ -10,6 +10,7 @@ interface SystemConfig {
 export const useSystemColors = () => {
   const { data: configs = [] } = useQuery<SystemConfig[]>({
     queryKey: ["/api/system-config"],
+    refetchInterval: 5000, // Refresh every 5 seconds to pick up color changes
   });
 
   const colorConfigs = configs.filter(config => config.category === "colors");
