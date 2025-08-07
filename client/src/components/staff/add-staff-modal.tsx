@@ -147,7 +147,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         createUserAccount: false,
       });
     }
-  }, [staff, systemUsers]);
+  }, [staff, systemUsers.length]);
 
   const onSubmit = (data: FormData) => {
     // For new staff, password is required

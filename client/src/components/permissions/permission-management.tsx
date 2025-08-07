@@ -105,9 +105,31 @@ export default function PermissionManagement() {
     },
   });
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa phân quyền này?")) {
-      deletePermissionMutation.mutate(id);
+  const handleDelete = (userId: string) => {
+    const user = systemUsers.find(u => u.id === userId);
+    const userPermissions = groupedPermissions[userId] || [];
+    
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tất cả phân quyền của ${user?.username || 'người dùng này'}?`)) {
+      // Delete all permissions for this user
+      const deletePromises = userPermissions.map(permission => 
+        apiRequest("DELETE", `/api/schedule-permissions/${permission.id}`)
+      );
+      
+      Promise.all(deletePromises)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/schedule-permissions"] });
+          toast({
+            title: "Thành công",
+            description: "Đã xóa tất cả phân quyền của người dùng.",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: "Lỗi",
+            description: error.message || "Không thể xóa phân quyền.",
+            variant: "destructive",
+          });
+        });
     }
   };
 
@@ -183,7 +205,6 @@ export default function PermissionManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Người được phân quyền</TableHead>
-                    <TableHead>Có thể nhập lịch cho</TableHead>
                     <TableHead>Ngày phân quyền</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead className="text-right">Thao tác</TableHead>
@@ -209,18 +230,7 @@ export default function PermissionManagement() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {userPermissions.map((permission) => {
-                              const staff = boardStaff.find(s => s.id === permission.staffId);
-                              return (
-                                <Badge key={permission.id} variant="secondary" className="text-xs">
-                                  {staff ? `${staff.positionShort} ${staff.fullName}` : "Cán bộ không xác định"}
-                                </Badge>
-                              );
-                            })}
-                          </div>
-                        </TableCell>
+
                         <TableCell className="text-sm text-gray-900">
                           {new Date(firstPermission.createdAt).toLocaleDateString('vi-VN')}
                         </TableCell>
@@ -228,20 +238,16 @@ export default function PermissionManagement() {
                           <Badge className="bg-green-100 text-green-800">Hoạt động</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-1">
-                            {userPermissions.map((permission) => (
-                              <Button
-                                key={permission.id}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(permission.id)}
-                                className="text-red-600 hover:text-red-700"
-                                data-testid={`button-delete-${permission.id}`}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            ))}
-                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(userId)}
+                            className="text-red-600 hover:text-red-700"
+                            data-testid={`button-delete-${userId}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Xóa
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
