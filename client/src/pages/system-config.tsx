@@ -196,7 +196,7 @@ export default function SystemConfigPage() {
   };
 
   return (
-    <div className="space-y-6 p-6 bg-white min-h-screen">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Settings className="h-6 w-6 text-bidv-teal" />
@@ -322,43 +322,47 @@ export default function SystemConfigPage() {
 
       {/* Configuration List */}
       {isLoading ? (
-        <div>Đang tải...</div>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bidv-teal"></div>
+          <span className="ml-2 text-gray-600">Đang tải...</span>
+        </div>
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedConfigs).map(([category, configs]) => (
-            <Card key={category}>
-              <CardHeader>
-                <CardTitle>
+            <Card key={category} className="shadow-sm border border-gray-200">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="text-lg font-semibold text-gray-800">
                   {categoryNames[category as keyof typeof categoryNames] || category}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-4">
                   {configs.map((config) => (
                     <div
                       key={config.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                       data-testid={`config-item-${config.key}`}
                     >
-                      <div className="flex-1">
-                        <div className="font-medium">{config.key}</div>
-                        <div className="text-sm text-gray-600">
-                          {config.description}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 mb-1">{config.key}</div>
+                        <div className="text-sm text-gray-600 mb-2">
+                          {config.description || 'Không có mô tả'}
                         </div>
-                        <div className="mt-2">
-                          <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-mono bg-blue-50 text-blue-800 px-3 py-1 rounded-md border">
                             {config.value}
                           </span>
-                          <span className="ml-2 text-xs text-gray-500">
-                            ({config.type})
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                            {config.type}
                           </span>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-2 ml-4">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => startEdit(config)}
+                          className="hover:bg-blue-50 hover:border-blue-300"
                           data-testid={`button-edit-${config.key}`}
                         >
                           <Edit2 className="h-4 w-4" />
@@ -367,6 +371,7 @@ export default function SystemConfigPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(config.key)}
+                          className="hover:bg-red-50 hover:border-red-300 text-red-600"
                           data-testid={`button-delete-${config.key}`}
                         >
                           <Trash2 className="h-4 w-4" />
