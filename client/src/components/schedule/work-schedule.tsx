@@ -47,8 +47,6 @@ export default function WorkSchedule() {
     },
   });
 
-  console.log('Current schedules state:', schedules, 'Loading:', isLoadingSchedules);
-
   // Fetch staff (filter for Ban Giám đốc)
   const { data: allStaff = [] } = useQuery<Staff[]>({
     queryKey: ["/api/staff"],
@@ -63,6 +61,15 @@ export default function WorkSchedule() {
   const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
+
+  console.log('Current schedules state:', schedules, 'Loading:', isLoadingSchedules);
+  console.log('Week range:', weekStart.toISOString(), 'to', weekEnd.toISOString());
+  console.log('Board department:', boardDept);
+  console.log('Board staff:', boardStaff);
+  
+  // Check if we have the schedule for PGĐ Lê Văn Đức specifically
+  const ducSchedules = schedules.filter(s => s.staffId === "2e18ec7c-9735-4a76-941d-e945a3e75921");
+  console.log('PGĐ Lê Văn Đức schedules:', ducSchedules);
 
   // Delete schedule mutation
   const deleteScheduleMutation = useMutation({
