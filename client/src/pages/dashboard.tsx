@@ -12,7 +12,6 @@ import WorkSchedule from "@/components/schedule/work-schedule";
 import MeetingSchedule from "@/components/meetings/meeting-schedule";
 import UserManagement from "@/components/users/user-management";
 import PermissionManagement from "@/components/permissions/permission-management";
-import GroupPermissionsManagement from "@/components/permissions/group-permissions-management";
 import HolidayManagement from "@/components/holidays/holiday-management";
 import SystemConfig from "@/pages/system-config";
 import { apiRequest } from "@/lib/queryClient";
@@ -29,7 +28,6 @@ type Section =
   | "other-events"
   | "user-management"
   | "permissions"
-  | "group-permissions"
   | "holiday-management"
   | "system-config";
 
@@ -49,7 +47,7 @@ export default function Dashboard() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("/api/auth/logout", "POST");
+      await apiRequest("POST", "/api/auth/logout");
     },
     onSuccess: () => {
       toast({
@@ -93,8 +91,6 @@ export default function Dashboard() {
         return <UserManagement />;
       case "permissions":
         return <PermissionManagement />;
-      case "group-permissions":
-        return <GroupPermissionsManagement />;
       case "holiday-management":
         return <HolidayManagement />;
       case "system-config":

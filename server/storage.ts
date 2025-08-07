@@ -12,7 +12,6 @@ import {
   schedulePermissions,
   systemConfig,
   holidays,
-  menuPermissions,
   type User,
   type UpsertUser,
   type Department,
@@ -39,8 +38,6 @@ import {
   type InsertSystemConfig,
   type Holiday,
   type InsertHoliday,
-  type MenuPermission,
-  type InsertMenuPermission,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, count, like } from "drizzle-orm";
@@ -139,14 +136,6 @@ export interface IStorage {
   createHoliday(holiday: InsertHoliday): Promise<Holiday>;
   updateHoliday(id: string, holiday: Partial<InsertHoliday>): Promise<Holiday>;
   deleteHoliday(id: string): Promise<void>;
-
-  // Menu permissions operations
-  getMenuPermissions(userGroupId?: string): Promise<MenuPermission[]>;
-  getMenuPermission(id: string): Promise<MenuPermission | undefined>;
-  createMenuPermission(permission: InsertMenuPermission): Promise<MenuPermission>;
-  updateMenuPermission(id: string, permission: Partial<InsertMenuPermission>): Promise<MenuPermission>;
-  deleteMenuPermission(id: string): Promise<void>;
-  deleteMenuPermissionsByGroup(userGroupId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -209,8 +198,8 @@ export class DatabaseStorage implements IStorage {
         position: staff.position,
         positionShort: staff.positionShort,
         departmentId: staff.departmentId,
-        systemUserId: staff.systemUserId,
         displayOrder: staff.displayOrder,
+        password: staff.password,
         createdAt: staff.createdAt,
         updatedAt: staff.updatedAt,
         birthDate: staff.birthDate,
@@ -218,16 +207,10 @@ export class DatabaseStorage implements IStorage {
         department: {
           id: departments.id,
           name: departments.name,
-        },
-        systemUser: {
-          id: systemUsers.id,
-          username: systemUsers.username,
-          userGroupId: systemUsers.userGroupId,
         }
       })
       .from(staff)
       .leftJoin(departments, eq(staff.departmentId, departments.id))
-      .leftJoin(systemUsers, eq(staff.systemUserId, systemUsers.id))
       .orderBy(asc(staff.displayOrder), asc(staff.fullName));
     
     return result as Staff[];
@@ -251,72 +234,23 @@ export class DatabaseStorage implements IStorage {
     return staffMember;
   }
 
-  async createStaff(staffData: InsertStaff & { username?: string; password?: string; userGroupId?: string }): Promise<Staff> {
-    // First create the system user if credentials provided
-    let systemUserId = null;
-    if (staffData.username && staffData.password && staffData.userGroupId) {
-      const hashedPassword = await bcrypt.hash(staffData.password, 10);
-      const [newSystemUser] = await db
-        .insert(systemUsers)
-        .values({
-          username: staffData.username,
-          password: hashedPassword,
-          userGroupId: staffData.userGroupId,
-        })
-        .returning();
-      systemUserId = newSystemUser.id;
-    }
-
-    // Create staff record
-    const { username, password, userGroupId, ...staffOnlyData } = staffData;
+  async createStaff(staffData: InsertStaff): Promise<Staff> {
+    const hashedPassword = await bcrypt.hash(staffData.password, 10);
     const [newStaff] = await db
       .insert(staff)
-      .values({ ...staffOnlyData, systemUserId })
+      .values({ ...staffData, password: hashedPassword })
       .returning();
     return newStaff;
   }
 
-  async updateStaff(id: string, staffData: Partial<InsertStaff> & { username?: string; password?: string; userGroupId?: string }): Promise<Staff> {
-    // Get current staff to check if they have a system user
-    const [currentStaff] = await db.select().from(staff).where(eq(staff.id, id));
-    if (!currentStaff) {
-      throw new Error("Staff not found");
+  async updateStaff(id: string, staffData: Partial<InsertStaff>): Promise<Staff> {
+    const updateData = { ...staffData };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
     }
-
-    // Handle system user update/creation
-    if (staffData.username || staffData.password || staffData.userGroupId) {
-      if (currentStaff.systemUserId) {
-        // Update existing system user
-        const updateUserData: any = {};
-        if (staffData.username) updateUserData.username = staffData.username;
-        if (staffData.password) updateUserData.password = await bcrypt.hash(staffData.password, 10);
-        if (staffData.userGroupId) updateUserData.userGroupId = staffData.userGroupId;
-        
-        await db
-          .update(systemUsers)
-          .set({ ...updateUserData, updatedAt: new Date() })
-          .where(eq(systemUsers.id, currentStaff.systemUserId));
-      } else if (staffData.username && staffData.password && staffData.userGroupId) {
-        // Create new system user
-        const hashedPassword = await bcrypt.hash(staffData.password, 10);
-        const [newSystemUser] = await db
-          .insert(systemUsers)
-          .values({
-            username: staffData.username,
-            password: hashedPassword,
-            userGroupId: staffData.userGroupId,
-          })
-          .returning();
-        
-        staffData.systemUserId = newSystemUser.id;
-      }
-    }
-
-    // Update staff record
-    const { username, password, userGroupId, ...staffOnlyData } = staffData;
     const [updatedStaff] = await db
       .update(staff)
-      .set({ ...staffOnlyData, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(staff.id, id))
       .returning();
     return updatedStaff;
@@ -719,41 +653,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHoliday(id: string): Promise<void> {
     await db.delete(holidays).where(eq(holidays.id, id));
-  }
-
-  // Menu permissions operations
-  async getMenuPermissions(userGroupId?: string): Promise<MenuPermission[]> {
-    if (userGroupId) {
-      return await db.select().from(menuPermissions).where(eq(menuPermissions.userGroupId, userGroupId));
-    }
-    return await db.select().from(menuPermissions);
-  }
-
-  async getMenuPermission(id: string): Promise<MenuPermission | undefined> {
-    const [permission] = await db.select().from(menuPermissions).where(eq(menuPermissions.id, id));
-    return permission;
-  }
-
-  async createMenuPermission(permission: InsertMenuPermission): Promise<MenuPermission> {
-    const [newPermission] = await db.insert(menuPermissions).values(permission).returning();
-    return newPermission;
-  }
-
-  async updateMenuPermission(id: string, permission: Partial<InsertMenuPermission>): Promise<MenuPermission> {
-    const [updatedPermission] = await db
-      .update(menuPermissions)
-      .set({ ...permission, updatedAt: new Date() })
-      .where(eq(menuPermissions.id, id))
-      .returning();
-    return updatedPermission;
-  }
-
-  async deleteMenuPermission(id: string): Promise<void> {
-    await db.delete(menuPermissions).where(eq(menuPermissions.id, id));
-  }
-
-  async deleteMenuPermissionsByGroup(userGroupId: string): Promise<void> {
-    await db.delete(menuPermissions).where(eq(menuPermissions.userGroupId, userGroupId));
   }
 }
 
