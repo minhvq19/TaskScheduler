@@ -12,6 +12,7 @@ import {
   schedulePermissions,
   systemConfig,
   holidays,
+  menuPermissions,
   type User,
   type UpsertUser,
   type Department,
@@ -38,6 +39,8 @@ import {
   type InsertSystemConfig,
   type Holiday,
   type InsertHoliday,
+  type MenuPermission,
+  type InsertMenuPermission,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, count, like } from "drizzle-orm";
@@ -136,6 +139,14 @@ export interface IStorage {
   createHoliday(holiday: InsertHoliday): Promise<Holiday>;
   updateHoliday(id: string, holiday: Partial<InsertHoliday>): Promise<Holiday>;
   deleteHoliday(id: string): Promise<void>;
+
+  // Menu permissions operations
+  getMenuPermissions(userGroupId?: string): Promise<MenuPermission[]>;
+  getMenuPermission(id: string): Promise<MenuPermission | undefined>;
+  createMenuPermission(permission: InsertMenuPermission): Promise<MenuPermission>;
+  updateMenuPermission(id: string, permission: Partial<InsertMenuPermission>): Promise<MenuPermission>;
+  deleteMenuPermission(id: string): Promise<void>;
+  deleteMenuPermissionsByGroup(userGroupId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -653,6 +664,41 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHoliday(id: string): Promise<void> {
     await db.delete(holidays).where(eq(holidays.id, id));
+  }
+
+  // Menu permissions operations
+  async getMenuPermissions(userGroupId?: string): Promise<MenuPermission[]> {
+    if (userGroupId) {
+      return await db.select().from(menuPermissions).where(eq(menuPermissions.userGroupId, userGroupId));
+    }
+    return await db.select().from(menuPermissions);
+  }
+
+  async getMenuPermission(id: string): Promise<MenuPermission | undefined> {
+    const [permission] = await db.select().from(menuPermissions).where(eq(menuPermissions.id, id));
+    return permission;
+  }
+
+  async createMenuPermission(permission: InsertMenuPermission): Promise<MenuPermission> {
+    const [newPermission] = await db.insert(menuPermissions).values(permission).returning();
+    return newPermission;
+  }
+
+  async updateMenuPermission(id: string, permission: Partial<InsertMenuPermission>): Promise<MenuPermission> {
+    const [updatedPermission] = await db
+      .update(menuPermissions)
+      .set({ ...permission, updatedAt: new Date() })
+      .where(eq(menuPermissions.id, id))
+      .returning();
+    return updatedPermission;
+  }
+
+  async deleteMenuPermission(id: string): Promise<void> {
+    await db.delete(menuPermissions).where(eq(menuPermissions.id, id));
+  }
+
+  async deleteMenuPermissionsByGroup(userGroupId: string): Promise<void> {
+    await db.delete(menuPermissions).where(eq(menuPermissions.userGroupId, userGroupId));
   }
 }
 

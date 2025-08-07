@@ -15,6 +15,7 @@ import {
   insertSchedulePermissionSchema,
   insertSystemConfigSchema,
   insertHolidaySchema,
+  insertMenuPermissionSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -709,6 +710,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting holiday:", error);
       res.status(500).json({ message: "Failed to delete holiday" });
+    }
+  });
+
+  // Menu permissions routes
+  app.get('/api/menu-permissions', async (req, res) => {
+    try {
+      const { groupId } = req.query;
+      const permissions = await storage.getMenuPermissions(groupId as string);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching menu permissions:", error);
+      res.status(500).json({ message: "Failed to fetch menu permissions" });
+    }
+  });
+
+  app.get('/api/menu-permissions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const permission = await storage.getMenuPermission(id);
+      if (!permission) {
+        return res.status(404).json({ message: "Menu permission not found" });
+      }
+      res.json(permission);
+    } catch (error) {
+      console.error("Error fetching menu permission:", error);
+      res.status(500).json({ message: "Failed to fetch menu permission" });
+    }
+  });
+
+  app.post('/api/menu-permissions', async (req, res) => {
+    try {
+      const permissionData = insertMenuPermissionSchema.parse(req.body);
+      const permission = await storage.createMenuPermission(permissionData);
+      res.status(201).json(permission);
+    } catch (error) {
+      console.error("Error creating menu permission:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create menu permission" });
+    }
+  });
+
+  app.put('/api/menu-permissions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const permissionData = insertMenuPermissionSchema.partial().parse(req.body);
+      const permission = await storage.updateMenuPermission(id, permissionData);
+      res.json(permission);
+    } catch (error) {
+      console.error("Error updating menu permission:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update menu permission" });
+    }
+  });
+
+  app.delete('/api/menu-permissions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteMenuPermission(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting menu permission:", error);
+      res.status(500).json({ message: "Failed to delete menu permission" });
+    }
+  });
+
+  app.delete('/api/menu-permissions/group/:groupId', async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      await storage.deleteMenuPermissionsByGroup(groupId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting menu permissions by group:", error);
+      res.status(500).json({ message: "Failed to delete menu permissions" });
     }
   });
 

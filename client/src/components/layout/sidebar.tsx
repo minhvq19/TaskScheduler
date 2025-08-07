@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Settings,
   CalendarDays,
+  Shield,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -51,6 +52,7 @@ const menuItems = [
     items: [
       { id: "user-management", label: "Quản lý người dùng", icon: UserCog },
       { id: "permissions", label: "Phân quyền", icon: Key },
+      { id: "group-permissions", label: "Quản lý nhóm quyền", icon: Shield },
       { id: "system-config", label: "Tham số hệ thống", icon: Settings },
     ],
   },

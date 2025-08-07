@@ -126,10 +126,26 @@ export const otherEvents = pgTable("other_events", {
 export const userGroups = pgTable("user_groups", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
+  description: varchar("description"),
   permissions: jsonb("permissions").notNull(), // { functionName: "EDIT" | "VIEW" }
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Menu permissions table - định nghĩa các quyền chi tiết cho từng menu
+export const menuPermissions = pgTable("menu_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userGroupId: varchar("user_group_id").notNull().references(() => userGroups.id, { onDelete: "cascade" }),
+  menuId: varchar("menu_id").notNull(), // dashboard, staff-management, etc.
+  canView: boolean("can_view").default(false),
+  canCreate: boolean("can_create").default(false),
+  canEdit: boolean("can_edit").default(false),
+  canDelete: boolean("can_delete").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_menu_permissions_group_menu").on(table.userGroupId, table.menuId),
+]);
 
 // System users table (for login)
 export const systemUsers = pgTable("system_users", {
@@ -203,6 +219,14 @@ export const meetingScheduleRelations = relations(meetingSchedules, ({ one }) =>
 
 export const userGroupRelations = relations(userGroups, ({ many }) => ({
   systemUsers: many(systemUsers),
+  menuPermissions: many(menuPermissions),
+}));
+
+export const menuPermissionRelations = relations(menuPermissions, ({ one }) => ({
+  userGroup: one(userGroups, {
+    fields: [menuPermissions.userGroupId],
+    references: [userGroups.id],
+  }),
 }));
 
 export const systemUserRelations = relations(systemUsers, ({ one, many }) => ({
@@ -293,10 +317,20 @@ export const insertSchedulePermissionSchema = createInsertSchema(schedulePermiss
   createdAt: true,
 });
 
+export const insertMenuPermissionSchema = createInsertSchema(menuPermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const upsertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// Type exports
+export type MenuPermission = typeof menuPermissions.$inferSelect;
+export type InsertMenuPermission = typeof menuPermissions.$inferInsert;
 
 // Types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
