@@ -20,6 +20,7 @@ import { z } from "zod";
 
 const formSchema = insertStaffSchema.extend({
   birthDate: z.string().optional(),
+  password: z.string().optional(), // Override to make password optional for editing
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -137,6 +138,22 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
   }, [staff, form]);
 
   const onSubmit = (data: FormData) => {
+    // For new staff, password is required
+    if (!staff && (!data.password || data.password.length < 11)) {
+      form.setError("password", {
+        message: "Mật khẩu phải có ít nhất 11 ký tự cho cán bộ mới"
+      });
+      return;
+    }
+
+    // For editing, if password is provided, validate it
+    if (staff && data.password && data.password.length > 0 && data.password.length < 11) {
+      form.setError("password", {
+        message: "Mật khẩu phải có ít nhất 11 ký tự nếu muốn thay đổi"
+      });
+      return;
+    }
+
     if (staff) {
       updateStaffMutation.mutate(data);
     } else {
@@ -332,6 +349,31 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
                 {form.formState.errors.notes.message}
               </p>
             )}
+          </div>
+
+          {/* User permissions section for staff */}
+          <div className="border-t pt-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Quyền truy cập hệ thống
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="userAccess" className="block text-sm font-medium text-gray-700 mb-2">
+                  Tạo tài khoản đăng nhập
+                </Label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="userAccess"
+                    className="rounded border-gray-300 focus:ring-bidv-teal"
+                    data-testid="checkbox-user-access"
+                  />
+                  <span className="text-sm text-gray-600">
+                    Tạo tài khoản đăng nhập cho cán bộ này (sử dụng mã cán bộ làm username)
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
