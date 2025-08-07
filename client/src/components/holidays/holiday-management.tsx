@@ -57,11 +57,7 @@ export default function HolidayManagement() {
   // Create holiday mutation
   const createHolidayMutation = useMutation({
     mutationFn: async (data: HolidayFormData) => {
-      const payload = {
-        ...data,
-        date: new Date(data.date).toISOString(),
-      };
-      await apiRequest("POST", "/api/holidays", payload);
+      await apiRequest("POST", "/api/holidays", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/holidays"] });
@@ -83,11 +79,7 @@ export default function HolidayManagement() {
   // Update holiday mutation
   const updateHolidayMutation = useMutation({
     mutationFn: async (data: HolidayFormData) => {
-      const payload = {
-        ...data,
-        date: new Date(data.date).toISOString(),
-      };
-      await apiRequest("PUT", `/api/holidays/${editingHoliday?.id}`, payload);
+      await apiRequest("PUT", `/api/holidays/${editingHoliday?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/holidays"] });

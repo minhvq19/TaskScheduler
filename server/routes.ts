@@ -649,7 +649,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/holidays', async (req, res) => {
     try {
-      const holidayData = insertHolidaySchema.parse(req.body);
+      // Convert date string to Date object before validation
+      const requestData = {
+        ...req.body,
+        date: new Date(req.body.date)
+      };
+      const holidayData = insertHolidaySchema.parse(requestData);
       const holiday = await storage.createHoliday(holidayData);
       res.status(201).json(holiday);
     } catch (error) {
@@ -664,7 +669,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/holidays/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const holidayData = insertHolidaySchema.partial().parse(req.body);
+      // Convert date string to Date object if present
+      const requestData = {
+        ...req.body,
+        ...(req.body.date && { date: new Date(req.body.date) })
+      };
+      const holidayData = insertHolidaySchema.partial().parse(requestData);
       const holiday = await storage.updateHoliday(id, holidayData);
       res.json(holiday);
     } catch (error) {
