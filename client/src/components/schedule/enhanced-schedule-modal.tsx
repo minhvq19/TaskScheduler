@@ -82,24 +82,40 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   // Handle date input change to prevent weekend and holiday selection
   const handleDateChange = (field: "startDate" | "endDate", value: string) => {
+    console.log(`handleDateChange called for ${field} with value:`, value);
+    
     if (value) {
       const selectedDate = new Date(value);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
       
+      console.log(`Selected date: ${value}, day of week: ${dayOfWeek}`);
+      
       if (dayOfWeek === 0 || dayOfWeek === 6) {
+        console.log("Weekend detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
           message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
         });
+        toast({
+          title: "Lỗi",
+          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+          variant: "destructive",
+        });
         return;
       }
       
       if (isHoliday(value)) {
+        console.log("Holiday detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
           message: "Không thể chọn ngày lễ"
+        });
+        toast({
+          title: "Lỗi",
+          description: "Không thể chọn ngày lễ",
+          variant: "destructive",
         });
         return;
       }
@@ -195,6 +211,36 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       form.setValue("endTime", workEndTime);
     }
   }, [watchedIsFullDay, workStartTime, workEndTime, form]);
+
+  // Monitor form values and prevent weekends
+  useEffect(() => {
+    const checkAndPreventWeekends = (field: "startDate" | "endDate", value: string) => {
+      if (value) {
+        const selectedDate = new Date(value);
+        const dayOfWeek = selectedDate.getDay();
+        
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          console.log(`Weekend detected in useEffect for ${field}, clearing value`);
+          form.setValue(field, "");
+          form.setError(field, {
+            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+          });
+          toast({
+            title: "Lỗi",
+            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    if (watchedStartDate) {
+      checkAndPreventWeekends("startDate", watchedStartDate);
+    }
+    if (watchedEndDate) {
+      checkAndPreventWeekends("endDate", watchedEndDate);
+    }
+  }, [watchedStartDate, watchedEndDate, form, toast]);
 
 
   // Create schedule mutation
@@ -406,7 +452,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 type="date"
                 min={format(new Date(), "yyyy-MM-dd")}
                 value={watchedStartDate || ""}
-                onChange={(e) => handleDateChange("startDate", e.target.value)}
+                onChange={(e) => {
+                  console.log("Start date onChange triggered:", e.target.value);
+                  handleDateChange("startDate", e.target.value);
+                }}
+                onBlur={(e) => {
+                  console.log("Start date onBlur triggered:", e.target.value);
+                  handleDateChange("startDate", e.target.value);
+                }}
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
@@ -421,7 +474,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 type="date"
                 min={format(new Date(), "yyyy-MM-dd")}
                 value={watchedEndDate || ""}
-                onChange={(e) => handleDateChange("endDate", e.target.value)}
+                onChange={(e) => {
+                  console.log("End date onChange triggered:", e.target.value);
+                  handleDateChange("endDate", e.target.value);
+                }}
+                onBlur={(e) => {
+                  console.log("End date onBlur triggered:", e.target.value);
+                  handleDateChange("endDate", e.target.value);
+                }}
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (

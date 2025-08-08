@@ -101,24 +101,40 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   // Handle datetime input change to prevent weekend and holiday selection
   const handleDateTimeChange = (field: "startDateTime" | "endDateTime", value: string) => {
+    console.log(`handleDateTimeChange called for ${field} with value:`, value);
+    
     if (value) {
       const selectedDate = new Date(value);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
       
+      console.log(`Selected datetime: ${value}, day of week: ${dayOfWeek}`);
+      
       if (dayOfWeek === 0 || dayOfWeek === 6) {
+        console.log("Weekend detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
           message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
         });
+        toast({
+          title: "Lỗi",
+          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+          variant: "destructive",
+        });
         return;
       }
       
       if (isHoliday(value)) {
+        console.log("Holiday detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
           message: "Không thể chọn ngày lễ"
+        });
+        toast({
+          title: "Lỗi",
+          description: "Không thể chọn ngày lễ",
+          variant: "destructive",
         });
         return;
       }
@@ -218,6 +234,36 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     }
   }, [schedule, form]);
 
+  // Monitor form values and prevent weekends
+  useEffect(() => {
+    const checkAndPreventWeekends = (field: "startDateTime" | "endDateTime", value: string) => {
+      if (value) {
+        const selectedDate = new Date(value);
+        const dayOfWeek = selectedDate.getDay();
+        
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          console.log(`Weekend detected in useEffect for ${field}, clearing value`);
+          form.setValue(field, "");
+          form.setError(field, {
+            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+          });
+          toast({
+            title: "Lỗi",
+            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    if (watchedStartDateTime) {
+      checkAndPreventWeekends("startDateTime", watchedStartDateTime);
+    }
+    if (watchedEndDateTime) {
+      checkAndPreventWeekends("endDateTime", watchedEndDateTime);
+    }
+  }, [watchedStartDateTime, watchedEndDateTime, form, toast]);
+
   const onSubmit = (data: FormData) => {
     const startDateTime = new Date(data.startDateTime);
     const endDateTime = new Date(data.endDateTime);
@@ -309,7 +355,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   type="datetime-local"
                   min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   value={watchedStartDateTime || ""}
-                  onChange={(e) => handleDateTimeChange("startDateTime", e.target.value)}
+                  onChange={(e) => {
+                    console.log("Start datetime onChange triggered:", e.target.value);
+                    handleDateTimeChange("startDateTime", e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    console.log("Start datetime onBlur triggered:", e.target.value);
+                    handleDateTimeChange("startDateTime", e.target.value);
+                  }}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-start-time"
                 />
@@ -329,7 +382,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   type="datetime-local"
                   min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   value={watchedEndDateTime || ""}
-                  onChange={(e) => handleDateTimeChange("endDateTime", e.target.value)}
+                  onChange={(e) => {
+                    console.log("End datetime onChange triggered:", e.target.value);
+                    handleDateTimeChange("endDateTime", e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    console.log("End datetime onBlur triggered:", e.target.value);
+                    handleDateTimeChange("endDateTime", e.target.value);
+                  }}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-end-time"
                 />
