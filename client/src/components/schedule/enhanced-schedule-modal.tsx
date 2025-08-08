@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { type WorkSchedule, type Staff, type Department, type Holiday, type SystemConfig } from "@shared/schema";
+import { type WorkSchedule, type Staff, type Department, type Holiday, type SystemConfigs } from "@shared/schema";
 import { z } from "zod";
-import { format, startOfDay, endOfDay, isWeekend, isSameDay } from "date-fns";
+import { format, startOfDay, endOfDay, isWeekend, isSameDay, isBefore } from "date-fns";
 
 const formSchema = z.object({
   staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
@@ -96,7 +96,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   });
 
   // Fetch system config for work hours
-  const { data: systemConfigs = [] } = useQuery<SystemConfig[]>({
+  const { data: systemConfigs = [] } = useQuery<SystemConfigs[]>({
     queryKey: ["/api/system-config"],
   });
 
@@ -133,12 +133,30 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const isValidWorkDay = (dateString: string) => {
     const date = new Date(dateString);
-    return !isWeekend(date) && !isHoliday(dateString);
+    const today = startOfDay(new Date());
+    return !isWeekend(date) && !isHoliday(dateString) && !isBefore(date, today);
   };
 
-  const isValidWorkTime = (timeString: string) => {
+  const isValidWorkTime = (timeString: string, dateString?: string) => {
     if (!timeString) return true;
-    return timeString >= workStartTime && timeString <= workEndTime;
+    
+    // Check if time is within work hours
+    if (timeString < workStartTime || timeString > workEndTime) {
+      return false;
+    }
+    
+    // If date is today, check if time is not in the past
+    if (dateString) {
+      const selectedDate = new Date(dateString);
+      const today = new Date();
+      
+      if (isSameDay(selectedDate, today)) {
+        const currentTime = format(new Date(), "HH:mm");
+        return timeString >= currentTime;
+      }
+    }
+    
+    return true;
   };
 
   // Set default times when full day is checked
@@ -151,20 +169,38 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   // Validate dates when they change
   useEffect(() => {
-    if (watchedStartDate && !isValidWorkDay(watchedStartDate)) {
-      form.setError("startDate", {
-        message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
-      });
-    } else {
-      form.clearErrors("startDate");
+    if (watchedStartDate) {
+      const date = new Date(watchedStartDate);
+      const today = startOfDay(new Date());
+      
+      if (isBefore(date, today)) {
+        form.setError("startDate", {
+          message: "Không thể chọn ngày quá khứ"
+        });
+      } else if (!isValidWorkDay(watchedStartDate)) {
+        form.setError("startDate", {
+          message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
+        });
+      } else {
+        form.clearErrors("startDate");
+      }
     }
 
-    if (watchedEndDate && !isValidWorkDay(watchedEndDate)) {
-      form.setError("endDate", {
-        message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
-      });
-    } else {
-      form.clearErrors("endDate");
+    if (watchedEndDate) {
+      const date = new Date(watchedEndDate);
+      const today = startOfDay(new Date());
+      
+      if (isBefore(date, today)) {
+        form.setError("endDate", {
+          message: "Không thể chọn ngày quá khứ"
+        });
+      } else if (!isValidWorkDay(watchedEndDate)) {
+        form.setError("endDate", {
+          message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
+        });
+      } else {
+        form.clearErrors("endDate");
+      }
     }
   }, [watchedStartDate, watchedEndDate, form, holidays]);
 
@@ -261,13 +297,27 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const handleSubmit = (data: FormData) => {
     // Additional validations
-    if (!isValidWorkTime(data.startTime!)) {
-      form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
+    if (!isValidWorkTime(data.startTime!, data.startDate)) {
+      const selectedDate = new Date(data.startDate);
+      const today = new Date();
+      
+      if (isSameDay(selectedDate, today)) {
+        form.setError("startTime", { message: "Không thể chọn giờ quá khứ" });
+      } else {
+        form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
+      }
       return;
     }
 
-    if (!isValidWorkTime(data.endTime!)) {
-      form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
+    if (!isValidWorkTime(data.endTime!, data.endDate)) {
+      const selectedDate = new Date(data.endDate);
+      const today = new Date();
+      
+      if (isSameDay(selectedDate, today)) {
+        form.setError("endTime", { message: "Không thể chọn giờ quá khứ" });
+      } else {
+        form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
+      }
       return;
     }
 
@@ -434,7 +484,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           {/* Work Hours Info */}
           <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
             <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-            <p><strong>Lưu ý:</strong> Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ</p>
+            <p><strong>Lưu ý:</strong> Không thể chọn ngày/giờ quá khứ, ngày cuối tuần (T7, CN) hoặc ngày lễ</p>
           </div>
 
           {/* Form Actions */}

@@ -17,12 +17,20 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Department } from "@shared/schema";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, isBefore, startOfDay, isSameDay } from "date-fns";
 
 const formSchema = z.object({
   staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
-  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu"),
-  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc"),
+  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu").refine((value) => {
+    const dateTime = new Date(value);
+    const now = new Date();
+    return dateTime >= now;
+  }, "Không thể chọn ngày giờ quá khứ"),
+  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc").refine((value) => {
+    const dateTime = new Date(value);
+    const now = new Date();
+    return dateTime >= now;
+  }, "Không thể chọn ngày giờ quá khứ"),
   workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
   customContent: z.string().max(200).optional(),
 });
@@ -152,8 +160,32 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   }, [schedule, form]);
 
   const onSubmit = (data: FormData) => {
+    const startDateTime = new Date(data.startDateTime);
+    const endDateTime = new Date(data.endDateTime);
+    const now = new Date();
+    
+    // Validate start time is not in the past
+    if (startDateTime < now) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể chọn ngày giờ bắt đầu trong quá khứ.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate end time is not in the past
+    if (endDateTime < now) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể chọn ngày giờ kết thúc trong quá khứ.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate end time is after start time
-    if (new Date(data.endDateTime) <= new Date(data.startDateTime)) {
+    if (endDateTime <= startDateTime) {
       toast({
         title: "Lỗi",
         description: "Thời gian kết thúc phải sau thời gian bắt đầu.",
@@ -216,6 +248,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 <Input
                   id="startDateTime"
                   type="datetime-local"
+                  min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   {...form.register("startDateTime")}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-start-time"
@@ -234,6 +267,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 <Input
                   id="endDateTime"
                   type="datetime-local"
+                  min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   {...form.register("endDateTime")}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-end-time"
@@ -308,8 +342,9 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               <div className="ml-3">
                 <h4 className="text-sm font-medium text-yellow-800">Lưu ý quan trọng</h4>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày. 
-                  Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn này.
+                  • Không thể chọn ngày giờ quá khứ<br/>
+                  • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
+                  • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
                 </p>
               </div>
             </div>
