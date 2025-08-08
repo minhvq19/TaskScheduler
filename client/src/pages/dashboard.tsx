@@ -90,6 +90,8 @@ export default function Dashboard() {
       case "meeting-schedule":
         return <MeetingSchedule />;
 
+      case "user-management":
+        return <UserManagement />;
       case "permissions":
         return <PermissionManagement />;
       case "user-groups":

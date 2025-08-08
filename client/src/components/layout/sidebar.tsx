@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   Users,
   Building,
@@ -49,6 +50,7 @@ const menuItems = [
   {
     category: "Hệ thống",
     items: [
+      { id: "user-management", label: "Quản lý người dùng", icon: Users },
       { id: "permissions", label: "Phân quyền", icon: Key },
       { id: "user-groups", label: "Nhóm quyền", icon: UserCog },
       { id: "system-config", label: "Tham số hệ thống", icon: Settings },
@@ -57,8 +59,21 @@ const menuItems = [
 ];
 
 export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+  const { getMenuPermissions } = usePermissions();
+  const menuPermissions = getMenuPermissions();
+  
   const openPublicDisplay = () => {
     window.open("/display", "_blank");
+  };
+  
+  // Filter menu items based on permissions
+  const filterMenuItems = (items: any[]) => {
+    return items.filter(item => menuPermissions[item.id as keyof typeof menuPermissions]);
+  };
+  
+  const hasAccessToCategory = (section: any) => {
+    if (!section.items) return true; // Dashboard
+    return filterMenuItems(section.items).length > 0;
   };
 
   return (
@@ -81,32 +96,36 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </Button>
 
         {/* Menu sections */}
-        {menuItems.slice(1).map((section, sectionIndex) => (
-          <div key={sectionIndex} className="pt-6">
-            <div className="bg-gradient-to-r from-[#006b68] to-[#008a85] text-white px-4 py-2.5 rounded-xl mb-4 shadow-lg border border-[#005a57]">
-              <p className="text-xs font-bold uppercase tracking-wider">
-                {section.category}
-              </p>
+        {menuItems.slice(1).filter(hasAccessToCategory).map((section, sectionIndex) => {
+          const accessibleItems = filterMenuItems(section.items || []);
+          
+          return (
+            <div key={sectionIndex} className="pt-6">
+              <div className="bg-gradient-to-r from-[#006b68] to-[#008a85] text-white px-4 py-2.5 rounded-xl mb-4 shadow-lg border border-[#005a57]">
+                <p className="text-xs font-bold uppercase tracking-wider">
+                  {section.category}
+                </p>
+              </div>
+              {accessibleItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant={activeSection === item.id ? "default" : "ghost"}
+                  className={cn(
+                    "w-full justify-start space-x-3 mb-2 rounded-xl transition-all duration-300 transform hover:scale-105",
+                    activeSection === item.id 
+                      ? "bg-gradient-to-r from-[#006b68] to-[#008a85] text-white hover:from-[#005a57] hover:to-[#007974] shadow-lg border border-[#005a57]" 
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-[#006b68] hover:to-[#008a85] hover:text-white hover:shadow-md hover:border hover:border-[#005a57]"
+                  )}
+                  onClick={() => onSectionChange(item.id)}
+                  data-testid={`nav-${item.id}`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Button>
+              ))}
             </div>
-            {section.items?.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeSection === item.id ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start space-x-3 mb-2 rounded-xl transition-all duration-300 transform hover:scale-105",
-                  activeSection === item.id 
-                    ? "bg-gradient-to-r from-[#006b68] to-[#008a85] text-white hover:from-[#005a57] hover:to-[#007974] shadow-lg border border-[#005a57]" 
-                    : "text-gray-700 hover:bg-gradient-to-r hover:from-[#006b68] hover:to-[#008a85] hover:text-white hover:shadow-md hover:border hover:border-[#005a57]"
-                )}
-                onClick={() => onSectionChange(item.id)}
-                data-testid={`nav-${item.id}`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Button>
-            ))}
-          </div>
-        ))}
+          );
+        })}
 
         {/* Public Display Button */}
         <div className="pt-6">
