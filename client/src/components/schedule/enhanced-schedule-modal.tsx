@@ -80,6 +80,36 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const watchedStartDate = form.watch("startDate");
   const watchedEndDate = form.watch("endDate");
 
+  // Handle date input change to prevent weekend and holiday selection
+  const handleDateChange = (field: "startDate" | "endDate", value: string) => {
+    if (value) {
+      const selectedDate = new Date(value);
+      const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
+      
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Reset the field and show error
+        form.setValue(field, "");
+        form.setError(field, {
+          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+        });
+        return;
+      }
+      
+      if (isHoliday(value)) {
+        // Reset the field and show error
+        form.setValue(field, "");
+        form.setError(field, {
+          message: "Không thể chọn ngày lễ"
+        });
+        return;
+      }
+      
+      // If valid weekday and not holiday, clear any previous errors and set value
+      form.clearErrors(field);
+      form.setValue(field, value);
+    }
+  };
+
   // Fetch staff (filter for Ban Giám đốc)
   const { data: allStaff = [] } = useQuery<Staff[]>({
     queryKey: ["/api/staff"],
@@ -166,28 +196,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     }
   }, [watchedIsFullDay, workStartTime, workEndTime, form]);
 
-  // Validate dates when they change (only check weekends and holidays now)
-  useEffect(() => {
-    if (watchedStartDate) {      
-      if (!isValidWorkDay(watchedStartDate)) {
-        form.setError("startDate", {
-          message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
-        });
-      } else {
-        form.clearErrors("startDate");
-      }
-    }
-
-    if (watchedEndDate) {
-      if (!isValidWorkDay(watchedEndDate)) {
-        form.setError("endDate", {
-          message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
-        });
-      } else {
-        form.clearErrors("endDate");
-      }
-    }
-  }, [watchedStartDate, watchedEndDate, form, holidays]);
 
   // Create schedule mutation
   const createScheduleMutation = useMutation({
@@ -397,7 +405,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 id="startDate"
                 type="date"
                 min={format(new Date(), "yyyy-MM-dd")}
-                {...form.register("startDate")}
+                value={watchedStartDate || ""}
+                onChange={(e) => handleDateChange("startDate", e.target.value)}
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
@@ -411,7 +420,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 id="endDate"
                 type="date"
                 min={format(new Date(), "yyyy-MM-dd")}
-                {...form.register("endDate")}
+                value={watchedEndDate || ""}
+                onChange={(e) => handleDateChange("endDate", e.target.value)}
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (

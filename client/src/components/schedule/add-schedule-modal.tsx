@@ -69,6 +69,65 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   });
 
   const watchedWorkType = form.watch("workType");
+  const watchedStartDateTime = form.watch("startDateTime");
+  const watchedEndDateTime = form.watch("endDateTime");
+
+  // Fetch holidays
+  const { data: holidays = [] } = useQuery<any[]>({
+    queryKey: ["/api/holidays"],
+  });
+
+  // Check if a date is a holiday
+  const isHoliday = (dateString: string) => {
+    const date = new Date(dateString);
+    return holidays.some(holiday => {
+      const holidayDate = new Date(holiday.date);
+      
+      // Check exact date match
+      if (isSameDay(holidayDate, date)) {
+        return true;
+      }
+      
+      // Check recurring holiday (same month-day but different year)
+      if (holiday.isRecurring) {
+        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, '0')}-${String(holidayDate.getDate()).padStart(2, '0')}`;
+        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        return holidayMonthDay === checkMonthDay;
+      }
+      
+      return false;
+    });
+  };
+
+  // Handle datetime input change to prevent weekend and holiday selection
+  const handleDateTimeChange = (field: "startDateTime" | "endDateTime", value: string) => {
+    if (value) {
+      const selectedDate = new Date(value);
+      const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
+      
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Reset the field and show error
+        form.setValue(field, "");
+        form.setError(field, {
+          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+        });
+        return;
+      }
+      
+      if (isHoliday(value)) {
+        // Reset the field and show error
+        form.setValue(field, "");
+        form.setError(field, {
+          message: "Không thể chọn ngày lễ"
+        });
+        return;
+      }
+      
+      // If valid weekday and not holiday, clear any previous errors and set value
+      form.clearErrors(field);
+      form.setValue(field, value);
+    }
+  };
 
   // Fetch staff (filter for Ban Giám đốc)
   const { data: allStaff = [] } = useQuery<Staff[]>({
@@ -249,7 +308,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   id="startDateTime"
                   type="datetime-local"
                   min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                  {...form.register("startDateTime")}
+                  value={watchedStartDateTime || ""}
+                  onChange={(e) => handleDateTimeChange("startDateTime", e.target.value)}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-start-time"
                 />
@@ -268,7 +328,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   id="endDateTime"
                   type="datetime-local"
                   min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                  {...form.register("endDateTime")}
+                  value={watchedEndDateTime || ""}
+                  onChange={(e) => handleDateTimeChange("endDateTime", e.target.value)}
                   className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-end-time"
                 />
