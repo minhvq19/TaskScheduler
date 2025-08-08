@@ -361,7 +361,7 @@ export default function PublicDisplay() {
                 
                 if (now >= meetingStart && now <= meetingEnd) {
                   status = "Đang sử dụng";
-                  statusColor = "#dc2626"; // red
+                  statusColor = "#32a852"; // green
                 }
 
                 return (
