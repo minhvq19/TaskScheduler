@@ -293,19 +293,22 @@ export default function PublicDisplay() {
   );
 
   const renderMeetingScheduleTable = () => {
-    // Get meeting schedules and sort by start time, limit to 20
+    // Get meeting schedules, filter out completed ones, sort by start time, limit to 20
+    const now = new Date();
     const sortedMeetings = (displayData?.meetingSchedules || [])
+      .filter((meeting: any) => new Date(meeting.endDateTime) > now) // Only show future and ongoing meetings
       .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
       .slice(0, 20);
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
         {/* Table Header */}
-        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 250px 180px 1fr 300px', fontFamily: 'Roboto, sans-serif' }}>
+        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 250px 180px 1fr 200px 300px', fontFamily: 'Roboto, sans-serif' }}>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thứ tự</div>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thời gian</div>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Địa điểm</div>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Nội dung cuộc họp</div>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Trạng thái</div>
           <div className="p-3 text-white font-bold text-center" style={{ fontSize: '16px', fontWeight: '700' }}>Đầu mối</div>
         </div>
 
@@ -334,6 +337,19 @@ export default function PublicDisplay() {
                 // Get room name from rooms data
                 const room = rooms?.find((r: any) => r.id === meeting.roomId);
                 const roomName = room?.name || 'Phòng không xác định';
+                
+                // Determine meeting status
+                const now = new Date();
+                const meetingStart = new Date(meeting.startDateTime);
+                const meetingEnd = new Date(meeting.endDateTime);
+                
+                let status = "Sắp diễn ra";
+                let statusColor = "#f59e0b"; // yellow
+                
+                if (now >= meetingStart && now <= meetingEnd) {
+                  status = "Đang sử dụng";
+                  statusColor = "#dc2626"; // red
+                }
 
                 return (
                   <div 
@@ -341,7 +357,7 @@ export default function PublicDisplay() {
                     className="border-b border-orange-400" 
                     style={{ 
                       display: 'grid', 
-                      gridTemplateColumns: '80px 250px 180px 1fr 300px',
+                      gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
                       backgroundColor: '#006b68',
                       fontFamily: 'Roboto, sans-serif'
                     }}
@@ -358,6 +374,14 @@ export default function PublicDisplay() {
                     <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
                       {meeting.meetingContent || 'Không có thông tin'}
                     </div>
+                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                      <div 
+                        className="px-2 py-1 rounded text-white font-medium text-xs"
+                        style={{ backgroundColor: statusColor, fontFamily: 'Roboto, sans-serif' }}
+                      >
+                        {status}
+                      </div>
+                    </div>
                     <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
                       {meeting.contactPerson || 'Chưa có thông tin'}
                     </div>
@@ -372,7 +396,7 @@ export default function PublicDisplay() {
                   className="border-b border-orange-400" 
                   style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: '80px 250px 180px 1fr 300px',
+                    gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
                     backgroundColor: '#006b68',
                     fontFamily: 'Roboto, sans-serif',
                     minHeight: '48px'
@@ -390,6 +414,9 @@ export default function PublicDisplay() {
                   <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
                     
                   </div>
+                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                    
+                  </div>
                   <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
                     
                   </div>
@@ -404,7 +431,7 @@ export default function PublicDisplay() {
                 className="border-b border-orange-400" 
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: '80px 250px 180px 1fr 300px',
+                  gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
                   backgroundColor: '#006b68',
                   fontFamily: 'Roboto, sans-serif',
                   minHeight: '48px'
@@ -420,6 +447,9 @@ export default function PublicDisplay() {
                   
                 </div>
                 <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
+                  
+                </div>
+                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
                   
                 </div>
                 <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>

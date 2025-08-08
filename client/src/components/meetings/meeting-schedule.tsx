@@ -72,6 +72,7 @@ export default function MeetingSchedule() {
   const [editingSchedule, setEditingSchedule] = useState<MeetingSchedule | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoom, setSelectedRoom] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("createdAt-desc");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -237,14 +238,34 @@ export default function MeetingSchedule() {
     }
   };
 
-  // Filter schedules based on search and room
-  const filteredSchedules = schedules.filter((schedule) => {
-    const room = rooms.find(r => r.id === schedule.roomId);
-    const matchesSearch = schedule.meetingContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (schedule.contactPerson && schedule.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                         (room?.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesSearch;
-  });
+  // Filter and sort schedules based on search, room, and sort criteria
+  const filteredAndSortedSchedules = schedules
+    .filter((schedule) => {
+      const room = rooms.find(r => r.id === schedule.roomId);
+      const matchesSearch = schedule.meetingContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (schedule.contactPerson && schedule.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (room?.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      const now = new Date();
+      
+      switch (sortBy) {
+        case "startTime-asc":
+          return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
+        case "startTime-desc":
+          return new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime();
+        case "endTime-asc":
+          return new Date(a.endDateTime).getTime() - new Date(b.endDateTime).getTime();
+        case "endTime-desc":
+          return new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime();
+        case "createdAt-asc":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "createdAt-desc":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
 
   const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
@@ -267,7 +288,7 @@ export default function MeetingSchedule() {
       {/* Search and Filter */}
       <Card>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tìm kiếm
@@ -304,6 +325,25 @@ export default function MeetingSchedule() {
               </Select>
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sắp xếp theo
+              </label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger data-testid="select-sort">
+                  <SelectValue placeholder="Chọn cách sắp xếp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="startTime-asc">Thời gian bắt đầu mới nhất</SelectItem>
+                  <SelectItem value="startTime-desc">Thời gian bắt đầu muộn nhất</SelectItem>
+                  <SelectItem value="endTime-asc">Thời gian kết thúc mới nhất</SelectItem>
+                  <SelectItem value="endTime-desc">Thời gian kết thúc muộn nhất</SelectItem>
+                  <SelectItem value="createdAt-desc">Thời gian nhập lịch muộn nhất (mặc định)</SelectItem>
+                  <SelectItem value="createdAt-asc">Thời gian nhập lịch mới nhất</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div className="flex items-end">
               <Button 
                 className="bg-bidv-light hover:bg-bidv-light/90 text-white"
@@ -320,14 +360,14 @@ export default function MeetingSchedule() {
       {/* Meeting Schedules Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Lịch phòng họp ({filteredSchedules.length})</CardTitle>
+          <CardTitle>Lịch phòng họp ({filteredAndSortedSchedules.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoadingSchedules ? (
             <div className="text-center py-8" data-testid="loading-schedules">
               Đang tải dữ liệu...
             </div>
-          ) : filteredSchedules.length === 0 ? (
+          ) : filteredAndSortedSchedules.length === 0 ? (
             <div className="text-center py-8 text-gray-500" data-testid="no-schedules">
               Không tìm thấy lịch phòng họp nào
             </div>
@@ -345,7 +385,7 @@ export default function MeetingSchedule() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSchedules.map((schedule) => {
+                  {filteredAndSortedSchedules.map((schedule) => {
                     const room = rooms.find(r => r.id === schedule.roomId);
                     const status = getScheduleStatus(schedule.startDateTime, schedule.endDateTime);
                     
