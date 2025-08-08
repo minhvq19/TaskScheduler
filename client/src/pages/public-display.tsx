@@ -479,10 +479,13 @@ export default function PublicDisplay() {
   const renderOtherEventsTable = () => {
     // Filter to show only ongoing events
     const now = new Date();
+    
     const ongoingEvents = (displayData?.otherEvents || [])
       .filter((event: any) => {
-        const start = parseLocalDateTime(event.startDateTime);
-        const end = parseLocalDateTime(event.endDateTime);
+        // Use simple Date constructor for ISO format strings
+        const start = new Date(event.startDateTime);
+        const end = new Date(event.endDateTime);
+        
         return now >= start && now <= end; // Only show events that are currently ongoing
       });
 
