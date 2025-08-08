@@ -238,4 +238,18 @@
   justify-content: flex-start;
   min-height: 0;
   overflow: hidden;
+  padding: 2px;
+}
+
+.public-display-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.public-display-schedule-item {
+  flex-shrink: 0;
+  margin-bottom: 1px;
 }
