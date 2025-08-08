@@ -532,11 +532,12 @@ export class DatabaseStorage implements IStorage {
   // Other events operations
   async getOtherEvents(startDate?: Date, endDate?: Date): Promise<OtherEvent[]> {
     const conditions = [];
+    // For overlapping events: search start <= event end AND search end >= event start
     if (startDate) {
-      conditions.push(gte(otherEvents.startDateTime, startDate));
+      conditions.push(gte(otherEvents.endDateTime, startDate)); // Event ends >= search start
     }
     if (endDate) {
-      conditions.push(lte(otherEvents.endDateTime, endDate));
+      conditions.push(lte(otherEvents.startDateTime, endDate)); // Event starts <= search end  
     }
 
     if (conditions.length > 0) {

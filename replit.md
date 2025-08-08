@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 8, 2025**: Khắc phục hoàn toàn lỗi sự kiện không hiển thị trên màn hình công cộng. Sửa logic filtering trong storage.getOtherEvents() để tìm sự kiện chồng lấp thời gian thay vì sự kiện hoàn toàn nằm trong khoảng tìm kiếm. Triển khai đầy đủ search, sorting và status column cho quản trị sự kiện khác. Màn hình công cộng bây giờ hiển thị chính xác sự kiện đang diễn ra với layout ảnh lớn.
 - **August 8, 2025**: Xây dựng lại hoàn toàn chức năng "Quản trị sự kiện khác" theo đúng yêu cầu URD FR-QL-004. Triển khai tên sự kiện ngắn gọn, thời gian bắt đầu/kết thúc, nội dung chi tiết, và chức năng upload hình ảnh với validation (JPG, PNG, GIF, tối đa 10MB). Thêm các API routes thiếu (PUT, DELETE) và validation thời gian kết thúc phải sau thời gian bắt đầu.
 - **August 8, 2025**: Loại bỏ menu "Quản lý sự kiện" khỏi category "Quản lý danh mục" trong sidebar để tránh trùng lặp với chức năng "Sự kiện khác" ở menu "Quản trị lịch". Giữ lại chỉ một menu "Sự kiện khác" để quản lý tất cả các sự kiện.
 - **August 8, 2025**: Khắc phục lỗi định tuyến menu "Sự kiện khác". Thêm case thiếu trong switch statement của Dashboard component để xử lý section "other-events", đảm bảo click vào menu "Sự kiện khác" sẽ hiển thị EventManagement component thay vì quay về Dashboard.
