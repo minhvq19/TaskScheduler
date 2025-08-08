@@ -29,18 +29,33 @@ import { Plus, Edit, Trash2, CalendarPlus, Search } from "lucide-react";
 import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 
-// Helper function to parse datetime as local time (not UTC)
-const parseLocalDateTime = (dateTimeString: string): Date => {
-  // If the string doesn't have timezone info, treat as local time
-  if (dateTimeString && !dateTimeString.includes('Z') && !dateTimeString.includes('+') && !dateTimeString.includes('-', 10)) {
-    // Parse as local time by adding 'T' if missing and appending timezone info
-    const normalizedString = dateTimeString.replace(' ', 'T');
-    const localDate = new Date(normalizedString);
-    // Adjust for timezone offset to get the original local time
-    const timezoneOffset = localDate.getTimezoneOffset() * 60000;
-    return new Date(localDate.getTime() + timezoneOffset);
+// Helper function to format datetime string directly without timezone conversion
+const formatLocalDateTime = (dateTimeString: string, formatStr: string = "dd/MM/yyyy HH:mm"): string => {
+  // Extract date and time parts directly from the string
+  const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+  const [datePart, timePart] = dateTime.split(' ');
+  const [year, month, day] = datePart.split('-');
+  const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
+  
+  if (formatStr === "dd/MM/yyyy HH:mm") {
+    return `${day}/${month}/${year} ${hour}:${minute}`;
+  } else if (formatStr === "yyyy-MM-dd'T'HH:mm") {
+    return `${year}-${month}-${day}T${hour}:${minute}`;
   }
-  return parseISO(dateTimeString);
+  return dateTime;
+};
+
+// Helper function to parse datetime for status checking
+const parseLocalDateTime = (dateTime: string | Date): Date => {
+  if (dateTime instanceof Date) {
+    return dateTime;
+  }
+  
+  // For status checking, we need actual Date objects
+  const dateTimeString = dateTime.toString();
+  const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+  const localDate = new Date(cleanString);
+  return localDate;
 };
 import { insertMeetingScheduleSchema, type MeetingSchedule, type MeetingRoom } from "@shared/schema";
 import { z } from "zod";
@@ -171,8 +186,8 @@ export default function MeetingSchedule() {
     form.reset({
       roomId: schedule.roomId,
       contactPerson: schedule.contactPerson || "",
-      startDateTime: format(parseLocalDateTime(schedule.startDateTime), "yyyy-MM-dd'T'HH:mm"),
-      endDateTime: format(parseLocalDateTime(schedule.endDateTime), "yyyy-MM-dd'T'HH:mm"),
+      startDateTime: formatLocalDateTime(schedule.startDateTime, "yyyy-MM-dd'T'HH:mm"),
+      endDateTime: formatLocalDateTime(schedule.endDateTime, "yyyy-MM-dd'T'HH:mm"),
       meetingContent: schedule.meetingContent,
     });
     setShowModal(true);
@@ -210,8 +225,8 @@ export default function MeetingSchedule() {
 
   const getScheduleStatus = (startTime: string | Date, endTime: string | Date) => {
     const now = new Date();
-    const start = typeof startTime === 'string' ? parseLocalDateTime(startTime) : startTime;
-    const end = typeof endTime === 'string' ? parseLocalDateTime(endTime) : endTime;
+    const start = parseLocalDateTime(startTime);
+    const end = parseLocalDateTime(endTime);
 
     if (isAfter(now, start) && isBefore(now, end)) {
       return { label: "Đang sử dụng", className: "bg-red-100 text-red-800" };
@@ -354,10 +369,10 @@ export default function MeetingSchedule() {
                         <TableCell>
                           <div className="text-sm">
                             <div data-testid={`text-meeting-start-${schedule.id}`}>
-                              {format(parseLocalDateTime(schedule.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
+                              {formatLocalDateTime(schedule.startDateTime)}
                             </div>
                             <div data-testid={`text-meeting-end-${schedule.id}`}>
-                              {format(parseLocalDateTime(schedule.endDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
+                              {formatLocalDateTime(schedule.endDateTime)}
                             </div>
                           </div>
                         </TableCell>
