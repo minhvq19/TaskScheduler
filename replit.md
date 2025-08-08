@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 8, 2025**: Khắc phục lỗi định tuyến menu "Sự kiện khác". Thêm case thiếu trong switch statement của Dashboard component để xử lý section "other-events", đảm bảo click vào menu "Sự kiện khác" sẽ hiển thị EventManagement component thay vì quay về Dashboard.
 - **August 8, 2025**: Khắc phục lỗi xác định trạng thái cuộc họp trong màn hình công cộng. Sửa logic phân tích datetime để xử lý đúng múi giờ địa phương, đảm bảo trạng thái "Đang sử dụng" hiển thị chính xác cho các cuộc họp đang diễn ra. Triển khai hàm parseLocalDateTime để đồng nhất xử lý datetime giữa các component.
 - **August 8, 2025**: Thiết kế lại màn hình công cộng phần lịch phòng họp theo mẫu bảng chuyên nghiệp. Bảng hiển thị 6 cột: Thứ tự, Thời gian, Địa điểm, Nội dung cuộc họp, Trạng thái, Đầu mối. Sắp xếp theo thời gian bắt đầu gần nhất, hiển thị tối đa 20 lịch với font Roboto dễ đọc. Header màu cam, hàng dữ liệu màu teal theo thiết kế BIDV.
 - **August 8, 2025**: Khắc phục hoàn toàn các lỗi lịch phòng họp. Sửa lỗi validation schema để chấp nhận cả string và Date object cho startDateTime/endDateTime với xử lý múi giờ đúng. Thêm các API routes thiếu: DELETE và PUT cho meeting-schedules. Khắc phục lỗi "Expected date, received string" khi thêm lịch và lỗi không thể xóa lịch phòng họp.
