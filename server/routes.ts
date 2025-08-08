@@ -420,6 +420,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertMeetingScheduleSchema.parse(req.body);
+      const schedule = await storage.updateMeetingSchedule(req.params.id, validatedData);
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error updating meeting schedule:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update meeting schedule" });
+    }
+  });
+
+  app.delete('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
+    try {
+      await storage.deleteMeetingSchedule(req.params.id);
+      res.status(200).json({ message: "Meeting schedule deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting meeting schedule:", error);
+      res.status(500).json({ message: "Failed to delete meeting schedule" });
+    }
+  });
+
   // Other events routes with file upload
   app.get('/api/other-events', async (req, res) => {
     try {
