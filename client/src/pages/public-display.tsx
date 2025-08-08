@@ -498,11 +498,11 @@ export default function PublicDisplay() {
               {ongoingEvents.map((event: any, index: number) => (
                 <div key={index} className="text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   {/* Event name on top */}
-                  <div className="mb-4">
-                    <h3 className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                  <div className="mb-3">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                       {event.shortName}
                     </h3>
-                    <div className="text-xl text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    <div className="text-base text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
                       {format(new Date(event.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
                       {format(new Date(event.endDateTime), "HH:mm", { locale: vi })}
                     </div>
@@ -510,19 +510,19 @@ export default function PublicDisplay() {
                   
                   {/* Large image below */}
                   {event.imageUrl && (
-                    <div className="flex justify-center">
+                    <div className="w-full">
                       <img 
                         src={event.imageUrl} 
                         alt={event.shortName}
-                        className="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
-                        style={{ maxHeight: '400px', width: 'auto' }}
+                        className="w-full object-cover rounded-lg shadow-lg"
+                        style={{ height: '60vh', maxHeight: '600px' }}
                       />
                     </div>
                   )}
                   
                   {/* Event content */}
                   {event.content && (
-                    <div className="mt-4 text-lg text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    <div className="mt-3 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
                       {event.content}
                     </div>
                   )}
