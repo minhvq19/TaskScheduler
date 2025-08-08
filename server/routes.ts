@@ -55,6 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({
           id: localUser.id,
           username: localUser.username,
+          firstName: userWithGroup?.user.firstName,
+          lastName: userWithGroup?.user.lastName,
           userGroupId: localUser.userGroupId,
           userGroup: userWithGroup?.userGroup
         });

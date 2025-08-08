@@ -136,6 +136,8 @@ export const userGroups = pgTable("user_groups", {
 export const systemUsers = pgTable("system_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").notNull().unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
   password: varchar("password").notNull(),
   userGroupId: varchar("user_group_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),

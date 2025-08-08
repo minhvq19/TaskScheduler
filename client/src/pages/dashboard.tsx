@@ -230,9 +230,9 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900" data-testid="text-user-name">
-                {(user as any)?.username || (user as any)?.firstName && (user as any)?.lastName 
-                  ? (user as any)?.username || `${(user as any).firstName} ${(user as any).lastName}`
-                  : (user as any)?.email || "Người dùng"}
+                {(user as any)?.firstName && (user as any)?.lastName 
+                  ? `${(user as any).firstName} ${(user as any).lastName} (${(user as any)?.username})`
+                  : (user as any)?.username || (user as any)?.email || "Người dùng"}
               </p>
               <p className="text-xs text-bidv-gray" data-testid="text-user-role">
                 {(user as any)?.userGroup?.name || "Người dùng"}
