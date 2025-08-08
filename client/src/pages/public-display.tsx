@@ -530,23 +530,16 @@ export default function PublicDisplay() {
         <div className="p-6 h-full">
           {currentEvent ? (
             <div className="h-full flex flex-col justify-center">
-              <div className="text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                {/* Large image */}
+              <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                {/* Large image - full display */}
                 {currentEvent.imageUrl && (
-                  <div className="w-full mb-4">
+                  <div className="w-full h-full flex items-center justify-center">
                     <img 
                       src={currentEvent.imageUrl} 
                       alt={currentEvent.shortName}
-                      className="w-full object-cover rounded-lg shadow-lg"
-                      style={{ height: '60vh', maxHeight: '600px' }}
+                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
-                  </div>
-                )}
-                
-                {/* Event content */}
-                {currentEvent.content && (
-                  <div className="text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    {currentEvent.content}
                   </div>
                 )}
               </div>
