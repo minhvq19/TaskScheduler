@@ -292,12 +292,25 @@ export default function PublicDisplay() {
     </div>
   );
 
+  // Helper function to parse datetime for status checking (same as in meeting-schedule.tsx)
+  const parseLocalDateTime = (dateTime: string | Date): Date => {
+    if (dateTime instanceof Date) {
+      return dateTime;
+    }
+    
+    // For status checking, we need actual Date objects
+    const dateTimeString = dateTime.toString();
+    const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+    const localDate = new Date(cleanString);
+    return localDate;
+  };
+
   const renderMeetingScheduleTable = () => {
     // Get meeting schedules, filter out completed ones, sort by start time, limit to 20
     const now = new Date();
     const sortedMeetings = (displayData?.meetingSchedules || [])
-      .filter((meeting: any) => new Date(meeting.endDateTime) > now) // Only show future and ongoing meetings
-      .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
+      .filter((meeting: any) => parseLocalDateTime(meeting.endDateTime) > now) // Only show future and ongoing meetings
+      .sort((a: any, b: any) => parseLocalDateTime(a.startDateTime).getTime() - parseLocalDateTime(b.startDateTime).getTime())
       .slice(0, 20);
 
     return (
@@ -340,8 +353,8 @@ export default function PublicDisplay() {
                 
                 // Determine meeting status
                 const now = new Date();
-                const meetingStart = new Date(meeting.startDateTime);
-                const meetingEnd = new Date(meeting.endDateTime);
+                const meetingStart = parseLocalDateTime(meeting.startDateTime);
+                const meetingEnd = parseLocalDateTime(meeting.endDateTime);
                 
                 let status = "Sắp diễn ra";
                 let statusColor = "#f59e0b"; // yellow
