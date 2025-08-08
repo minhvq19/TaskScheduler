@@ -421,14 +421,16 @@ export class DatabaseStorage implements IStorage {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
+    // Find all schedules that overlap with this day (not just those that start on this day)
     return await db
       .select()
       .from(workSchedules)
       .where(
         and(
           eq(workSchedules.staffId, staffId),
-          gte(workSchedules.startDateTime, startOfDay),
-          lte(workSchedules.startDateTime, endOfDay)
+          // Schedule starts before or on the day AND ends on or after the day
+          lte(workSchedules.startDateTime, endOfDay),
+          gte(workSchedules.endDateTime, startOfDay)
         )
       );
   }
@@ -448,29 +450,13 @@ export class DatabaseStorage implements IStorage {
           ? existingSchedules.filter(s => s.id !== excludeScheduleId)
           : existingSchedules;
         
-        // Count schedules that overlap with this day
-        let overlappingCount = 0;
-        const dayStart = new Date(currentDate);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(currentDate);
-        dayEnd.setHours(23, 59, 59, 999);
-        
-        for (const schedule of relevantSchedules) {
-          const scheduleStart = new Date(schedule.startDateTime);
-          const scheduleEnd = new Date(schedule.endDateTime);
-          
-          // Check if schedule overlaps with this day
-          if (scheduleStart <= dayEnd && scheduleEnd >= dayStart) {
-            overlappingCount++;
-          }
-        }
-        
+        // The getWorkSchedulesByStaffAndDate method now returns all overlapping schedules
         // Adding the new schedule would exceed the limit
-        if (overlappingCount >= 5) {
+        if (relevantSchedules.length >= 5) {
           return {
             isValid: false,
             violatingDate: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
-            currentCount: overlappingCount
+            currentCount: relevantSchedules.length
           };
         }
       }
