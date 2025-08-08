@@ -490,13 +490,15 @@ export default function PublicDisplay() {
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
         
-        console.log('Event:', event.shortName);
-        console.log('Start:', event.startDateTime, '-> Parsed:', start.toISOString());
-        console.log('End:', event.endDateTime, '-> Parsed:', end.toISOString());
-        console.log('Current time:', now.toISOString());
-        console.log('Is ongoing?', now >= start && now <= end);
+        const isOngoing = now >= start && now <= end;
+        console.log(`Event: ${event.shortName}`);
+        console.log(`Start: ${event.startDateTime} -> ${start.toISOString()}`);
+        console.log(`End: ${event.endDateTime} -> ${end.toISOString()}`);
+        console.log(`Current: ${now.toISOString()}`);
+        console.log(`Is ongoing: ${isOngoing}`);
+        console.log('---');
         
-        return now >= start && now <= end; // Only show events that are currently ongoing
+        return true; // Temporarily show all events for testing
       });
     
     console.log('Ongoing events:', ongoingEvents);
