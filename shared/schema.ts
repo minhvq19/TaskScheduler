@@ -126,6 +126,7 @@ export const otherEvents = pgTable("other_events", {
 export const userGroups = pgTable("user_groups", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
+  description: varchar("description"),
   permissions: jsonb("permissions").notNull(), // { functionName: "EDIT" | "VIEW" }
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
