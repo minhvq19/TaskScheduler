@@ -494,6 +494,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/other-events/:id', requireAuth, upload.single('image'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      let imageUrl = req.body.imageUrl; // Keep existing image if no new file uploaded
+      
+      if (req.file) {
+        // Move file to public directory and generate URL
+        const filename = `${Date.now()}-${req.file.originalname}`;
+        const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+        
+        // Ensure uploads directory exists
+        const uploadsDir = path.dirname(publicPath);
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        
+        fs.renameSync(req.file.path, publicPath);
+        imageUrl = `/uploads/${filename}`;
+      }
+
+      const validatedData = insertOtherEventSchema.partial().parse({
+        ...req.body,
+        imageUrl,
+      });
+      
+      const event = await storage.updateOtherEvent(id, validatedData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating other event:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update other event" });
+    }
+  });
+
+  app.delete('/api/other-events/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteOtherEvent(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting other event:", error);
+      res.status(500).json({ message: "Failed to delete other event" });
+    }
+  });
+
   // System users routes
   app.get('/api/system-users', requireAuth, async (req, res) => {
     try {

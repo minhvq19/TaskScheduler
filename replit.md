@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 8, 2025**: Xây dựng lại hoàn toàn chức năng "Quản trị sự kiện khác" theo đúng yêu cầu URD FR-QL-004. Triển khai tên sự kiện ngắn gọn, thời gian bắt đầu/kết thúc, nội dung chi tiết, và chức năng upload hình ảnh với validation (JPG, PNG, GIF, tối đa 10MB). Thêm các API routes thiếu (PUT, DELETE) và validation thời gian kết thúc phải sau thời gian bắt đầu.
 - **August 8, 2025**: Loại bỏ menu "Quản lý sự kiện" khỏi category "Quản lý danh mục" trong sidebar để tránh trùng lặp với chức năng "Sự kiện khác" ở menu "Quản trị lịch". Giữ lại chỉ một menu "Sự kiện khác" để quản lý tất cả các sự kiện.
 - **August 8, 2025**: Khắc phục lỗi định tuyến menu "Sự kiện khác". Thêm case thiếu trong switch statement của Dashboard component để xử lý section "other-events", đảm bảo click vào menu "Sự kiện khác" sẽ hiển thị EventManagement component thay vì quay về Dashboard.
 - **August 8, 2025**: Khắc phục lỗi xác định trạng thái cuộc họp trong màn hình công cộng. Sửa logic phân tích datetime để xử lý đúng múi giờ địa phương, đảm bảo trạng thái "Đang sử dụng" hiển thị chính xác cho các cuộc họp đang diễn ra. Triển khai hàm parseLocalDateTime để đồng nhất xử lý datetime giữa các component.
