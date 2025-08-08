@@ -82,8 +82,8 @@ export default function MeetingSchedule() {
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        startDateTime: new Date(data.startDateTime),
-        endDateTime: new Date(data.endDateTime),
+        startDateTime: data.startDateTime,
+        endDateTime: data.endDateTime,
       };
       await apiRequest("POST", "/api/meeting-schedules", payload);
     },
@@ -109,8 +109,8 @@ export default function MeetingSchedule() {
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        startDateTime: new Date(data.startDateTime),
-        endDateTime: new Date(data.endDateTime),
+        startDateTime: data.startDateTime,
+        endDateTime: data.endDateTime,
       };
       await apiRequest("PUT", `/api/meeting-schedules/${editingSchedule?.id}`, payload);
     },
