@@ -180,7 +180,7 @@ export default function PermissionManagement() {
     // Find permissions to add (new staff)
     const toAdd = selectedStaff.filter(staffId => !currentStaffIds.includes(staffId));
 
-    const promises = [];
+    const promises: Promise<any>[] = [];
     
     // Delete removed permissions
     toDelete.forEach(permission => {
@@ -299,7 +299,7 @@ export default function PermissionManagement() {
                         </TableCell>
 
                         <TableCell className="text-sm text-gray-900">
-                          {new Date(firstPermission.createdAt).toLocaleDateString('vi-VN')}
+                          {firstPermission.createdAt ? new Date(firstPermission.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
                         </TableCell>
                         <TableCell>
                           <Badge className="bg-green-100 text-green-800">Hoạt động</Badge>
@@ -307,23 +307,23 @@ export default function PermissionManagement() {
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => handleEdit(userId)}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                               data-testid={`button-edit-${userId}`}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-4 h-4 mr-1" />
                               Sửa
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDelete(userId)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                               data-testid={`button-delete-${userId}`}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 mr-1" />
                               Xóa
                             </Button>
                           </div>
