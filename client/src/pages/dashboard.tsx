@@ -36,9 +36,6 @@ type Section =
 export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
-  
-  // Debug user info
-  console.log('Dashboard user info:', user);
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -237,10 +234,6 @@ export default function Dashboard() {
                   ? `${(user as any).firstName} ${(user as any).lastName} (${(user as any)?.username})`
                   : (user as any)?.username || (user as any)?.email || "Người dùng"}
               </p>
-              {/* Debug info */}
-              <div style={{fontSize: '10px', color: 'red'}}>
-                Debug: firstName={JSON.stringify((user as any)?.firstName)}, lastName={JSON.stringify((user as any)?.lastName)}, username={JSON.stringify((user as any)?.username)}
-              </div>
               <p className="text-xs text-bidv-gray" data-testid="text-user-role">
                 {(user as any)?.userGroup?.name || "Người dùng"}
               </p>
