@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, Building } from "lucide-react";
 import { insertDepartmentSchema, type Department } from "@shared/schema";
@@ -35,6 +36,10 @@ export default function DepartmentManagement() {
   const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canEdit } = usePermissions();
+  
+  // Check if user can edit departments
+  const canEditDepartments = canEdit("departments");
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -157,14 +162,16 @@ export default function DepartmentManagement() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản lý phòng ban
         </h2>
-        <Button
-          onClick={() => setShowModal(true)}
-          className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-department"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm phòng ban
-        </Button>
+        {canEditDepartments && (
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-department"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm phòng ban
+          </Button>
+        )}
       </div>
 
       {/* Departments Table */}
@@ -224,24 +231,31 @@ export default function DepartmentManagement() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(department)}
-                            className="text-bidv-teal hover:text-bidv-teal/80"
-                            data-testid={`button-edit-${department.id}`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(department.id)}
-                            className="text-red-600 hover:text-red-700"
-                            data-testid={`button-delete-${department.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {canEditDepartments && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(department)}
+                                className="text-bidv-teal hover:text-bidv-teal/80"
+                                data-testid={`button-edit-${department.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(department.id)}
+                                className="text-red-600 hover:text-red-700"
+                                data-testid={`button-delete-${department.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                          {!canEditDepartments && (
+                            <span className="text-sm text-gray-500">Chỉ xem</span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
