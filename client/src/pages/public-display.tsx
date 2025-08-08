@@ -476,31 +476,67 @@ export default function PublicDisplay() {
     );
   };
 
-  const renderOtherEventsTable = () => (
-    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
-      <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Sự kiện khác</h2>
-        {displayData?.otherEvents && displayData.otherEvents.length > 0 ? (
-          <div className="space-y-2">
-            {displayData.otherEvents.map((event: any, index: number) => (
-              <div key={index} className="bg-green-100 p-4 rounded-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                <div className="font-bold text-lg" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>{event.title}</div>
-                <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  {format(new Date(event.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
-                  {format(new Date(event.endDateTime), "HH:mm", { locale: vi })}
+  const renderOtherEventsTable = () => {
+    // Filter to show only ongoing events
+    const now = new Date();
+    const ongoingEvents = (displayData?.otherEvents || [])
+      .filter((event: any) => {
+        const start = parseLocalDateTime(event.startDateTime);
+        const end = parseLocalDateTime(event.endDateTime);
+        return now >= start && now <= end; // Only show events that are currently ongoing
+      });
+
+    return (
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="p-6 h-full">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Sự kiện khác đang diễn ra</h2>
+          {ongoingEvents.length > 0 ? (
+            <div className="h-full flex flex-col justify-center">
+              {ongoingEvents.map((event: any, index: number) => (
+                <div key={index} className="text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                  {/* Event name on top */}
+                  <div className="mb-4">
+                    <h3 className="text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                      {event.shortName}
+                    </h3>
+                    <div className="text-xl text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {format(new Date(event.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
+                      {format(new Date(event.endDateTime), "HH:mm", { locale: vi })}
+                    </div>
+                  </div>
+                  
+                  {/* Large image below */}
+                  {event.imageUrl && (
+                    <div className="flex justify-center">
+                      <img 
+                        src={event.imageUrl} 
+                        alt={event.shortName}
+                        className="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
+                        style={{ maxHeight: '400px', width: 'auto' }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Event content */}
+                  {event.content && (
+                    <div className="mt-4 text-lg text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {event.content}
+                    </div>
+                  )}
                 </div>
-                {event.description && (
-                  <div className="text-sm mt-2" style={{ fontFamily: 'Roboto, sans-serif' }}>{event.description}</div>
-                )}
+              ))}
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-gray-500 text-2xl text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                Hiện tại không có sự kiện nào đang diễn ra
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-gray-500 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Không có sự kiện nào khác</div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (isLoading) {
     return (

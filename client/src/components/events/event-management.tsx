@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
@@ -21,9 +22,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Calendar, Upload, X } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Edit, Trash2, Calendar, Upload, X, Search } from "lucide-react";
+import { format, isAfter, isBefore } from "date-fns";
 import { vi } from "date-fns/locale";
 import { insertOtherEventSchema, type OtherEvent } from "@shared/schema";
 import { z } from "zod";
@@ -39,11 +41,26 @@ const formSchema = insertOtherEventSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
+// Helper function to parse datetime for status checking
+const parseLocalDateTime = (dateTime: string | Date): Date => {
+  if (dateTime instanceof Date) {
+    return dateTime;
+  }
+  
+  // For status checking, we need actual Date objects
+  const dateTimeString = dateTime.toString();
+  const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+  const localDate = new Date(cleanString);
+  return localDate;
+};
+
 export default function EventManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<OtherEvent | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<string>("createdAt-desc");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -263,6 +280,45 @@ export default function EventManagement() {
     }
   };
 
+  const getEventStatus = (startTime: string | Date, endTime: string | Date) => {
+    const now = new Date();
+    const start = parseLocalDateTime(startTime);
+    const end = parseLocalDateTime(endTime);
+
+    if (isAfter(now, start) && isBefore(now, end)) {
+      return { label: "Đang diễn ra", className: "bg-green-100 text-green-800" };
+    } else if (isBefore(now, start)) {
+      return { label: "Sắp diễn ra", className: "bg-yellow-100 text-yellow-800" };
+    } else {
+      return { label: "Đã kết thúc", className: "bg-gray-100 text-gray-800" };
+    }
+  };
+
+  // Filter and sort events based on search and sort criteria
+  const filteredAndSortedEvents = events
+    .filter((event) => {
+      const matchesSearch = event.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           event.content.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "startTime-asc":
+          return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
+        case "startTime-desc":
+          return new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime();
+        case "endTime-asc":
+          return new Date(a.endDateTime).getTime() - new Date(b.endDateTime).getTime();
+        case "endTime-desc":
+          return new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime();
+        case "createdAt-asc":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "createdAt-desc":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
   const isMutating = createEventMutation.isPending || updateEventMutation.isPending;
 
   return (
@@ -281,19 +337,72 @@ export default function EventManagement() {
         </Button>
       </div>
 
+      {/* Search and Filter */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tìm kiếm
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Tìm theo tên sự kiện, nội dung..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sắp xếp theo
+              </label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger data-testid="select-sort">
+                  <SelectValue placeholder="Chọn cách sắp xếp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="startTime-asc">Thời gian bắt đầu mới nhất</SelectItem>
+                  <SelectItem value="startTime-desc">Thời gian bắt đầu muộn nhất</SelectItem>
+                  <SelectItem value="endTime-asc">Thời gian kết thúc mới nhất</SelectItem>
+                  <SelectItem value="endTime-desc">Thời gian kết thúc muộn nhất</SelectItem>
+                  <SelectItem value="createdAt-desc">Thời gian nhập sự kiện muộn nhất (mặc định)</SelectItem>
+                  <SelectItem value="createdAt-asc">Thời gian nhập sự kiện mới nhất</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-end">
+              <Button 
+                className="bg-bidv-light hover:bg-bidv-light/90 text-white"
+                data-testid="button-search"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Tìm kiếm
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Events Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách sự kiện khác ({events.length})</CardTitle>
+          <CardTitle>Danh sách sự kiện khác ({filteredAndSortedEvents.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8" data-testid="loading-events">
               Đang tải dữ liệu...
             </div>
-          ) : events.length === 0 ? (
+          ) : filteredAndSortedEvents.length === 0 ? (
             <div className="text-center py-8 text-gray-500" data-testid="no-events">
-              Chưa có sự kiện nào
+              Không tìm thấy sự kiện nào
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -304,11 +413,15 @@ export default function EventManagement() {
                     <TableHead>Thời gian</TableHead>
                     <TableHead>Nội dung chi tiết</TableHead>
                     <TableHead>Hình ảnh</TableHead>
+                    <TableHead>Trạng thái</TableHead>
                     <TableHead className="text-right">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.map((event) => (
+                  {filteredAndSortedEvents.map((event) => {
+                    const status = getEventStatus(event.startDateTime, event.endDateTime);
+                    
+                    return (
                     <TableRow key={event.id} data-testid={`event-row-${event.id}`}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -351,6 +464,9 @@ export default function EventManagement() {
                           <span className="text-gray-400 text-sm">Không có hình</span>
                         )}
                       </TableCell>
+                      <TableCell data-testid={`status-event-${event.id}`}>
+                        <Badge className={status.className}>{status.label}</Badge>
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
                           <Button
@@ -374,7 +490,8 @@ export default function EventManagement() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
