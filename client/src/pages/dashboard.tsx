@@ -10,7 +10,6 @@ import EventManagement from "@/components/events/event-management";
 import RoomManagement from "@/components/rooms/room-management";
 import WorkSchedule from "@/components/schedule/work-schedule";
 import MeetingSchedule from "@/components/meetings/meeting-schedule";
-import UserManagement from "@/components/users/user-management";
 import PermissionManagement from "@/components/permissions/permission-management";
 import UserGroupManagement from "@/components/permissions/user-group-management";
 import HolidayManagement from "@/components/holidays/holiday-management";
@@ -27,7 +26,6 @@ type Section =
   | "work-schedule"
   | "meeting-schedule"
   | "other-events"
-  | "user-management"
   | "permissions"
   | "user-groups"
   | "holiday-management"
@@ -90,8 +88,6 @@ export default function Dashboard() {
       case "meeting-schedule":
         return <MeetingSchedule />;
 
-      case "user-management":
-        return <UserManagement />;
       case "permissions":
         return <PermissionManagement />;
       case "user-groups":

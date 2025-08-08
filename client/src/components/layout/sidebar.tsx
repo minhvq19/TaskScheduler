@@ -50,7 +50,6 @@ const menuItems = [
   {
     category: "Hệ thống",
     items: [
-      { id: "user-management", label: "Quản lý người dùng", icon: Users },
       { id: "permissions", label: "Phân quyền", icon: Key },
       { id: "user-groups", label: "Nhóm quyền", icon: UserCog },
       { id: "system-config", label: "Tham số hệ thống", icon: Settings },

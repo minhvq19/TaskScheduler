@@ -73,7 +73,6 @@ export function usePermissions() {
       "holiday-management": canView("holidays"),
       
       // System sections
-      "user-management": canView("users"),
       "permissions": canView("permissions"),
       "user-groups": canView("permissions"), // Same as permissions
       "system-config": canView("systemConfig"),
