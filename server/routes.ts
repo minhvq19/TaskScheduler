@@ -14,7 +14,7 @@ import {
   insertUserGroupSchema,
   insertSystemUserSchema,
   insertSchedulePermissionSchema,
-  insertSystemConfigSchema,
+  insertSystemConfigsSchema,
   insertHolidaySchema,
 } from "@shared/schema";
 import { z } from "zod";

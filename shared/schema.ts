@@ -313,7 +313,6 @@ export const insertSystemUserSchema = createInsertSchema(systemUsers).omit({
 export const insertSchedulePermissionSchema = createInsertSchema(schedulePermissions).omit({
   id: true,
   createdAt: true,
-  updatedAt: true,
 });
 
 export const insertHolidaySchema = createInsertSchema(holidays).omit({
