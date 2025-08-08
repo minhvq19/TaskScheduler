@@ -26,8 +26,22 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, CalendarPlus, Search } from "lucide-react";
-import { format, isAfter, isBefore } from "date-fns";
+import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
+
+// Helper function to parse datetime as local time (not UTC)
+const parseLocalDateTime = (dateTimeString: string): Date => {
+  // If the string doesn't have timezone info, treat as local time
+  if (dateTimeString && !dateTimeString.includes('Z') && !dateTimeString.includes('+') && !dateTimeString.includes('-', 10)) {
+    // Parse as local time by adding 'T' if missing and appending timezone info
+    const normalizedString = dateTimeString.replace(' ', 'T');
+    const localDate = new Date(normalizedString);
+    // Adjust for timezone offset to get the original local time
+    const timezoneOffset = localDate.getTimezoneOffset() * 60000;
+    return new Date(localDate.getTime() + timezoneOffset);
+  }
+  return parseISO(dateTimeString);
+};
 import { insertMeetingScheduleSchema, type MeetingSchedule, type MeetingRoom } from "@shared/schema";
 import { z } from "zod";
 
@@ -157,8 +171,8 @@ export default function MeetingSchedule() {
     form.reset({
       roomId: schedule.roomId,
       contactPerson: schedule.contactPerson || "",
-      startDateTime: format(new Date(schedule.startDateTime), "yyyy-MM-dd'T'HH:mm"),
-      endDateTime: format(new Date(schedule.endDateTime), "yyyy-MM-dd'T'HH:mm"),
+      startDateTime: format(parseLocalDateTime(schedule.startDateTime), "yyyy-MM-dd'T'HH:mm"),
+      endDateTime: format(parseLocalDateTime(schedule.endDateTime), "yyyy-MM-dd'T'HH:mm"),
       meetingContent: schedule.meetingContent,
     });
     setShowModal(true);
@@ -196,8 +210,8 @@ export default function MeetingSchedule() {
 
   const getScheduleStatus = (startTime: string | Date, endTime: string | Date) => {
     const now = new Date();
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    const start = typeof startTime === 'string' ? parseLocalDateTime(startTime) : startTime;
+    const end = typeof endTime === 'string' ? parseLocalDateTime(endTime) : endTime;
 
     if (isAfter(now, start) && isBefore(now, end)) {
       return { label: "Đang sử dụng", className: "bg-red-100 text-red-800" };
@@ -340,10 +354,10 @@ export default function MeetingSchedule() {
                         <TableCell>
                           <div className="text-sm">
                             <div data-testid={`text-meeting-start-${schedule.id}`}>
-                              {format(new Date(schedule.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
+                              {format(parseLocalDateTime(schedule.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
                             </div>
                             <div data-testid={`text-meeting-end-${schedule.id}`}>
-                              {format(new Date(schedule.endDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
+                              {format(parseLocalDateTime(schedule.endDateTime), "dd/MM/yyyy HH:mm", { locale: vi })}
                             </div>
                           </div>
                         </TableCell>
