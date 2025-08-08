@@ -301,7 +301,7 @@ export default function PublicDisplay() {
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
         {/* Table Header */}
-        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 200px 180px 1fr 200px', fontFamily: 'Roboto, sans-serif' }}>
+        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 250px 180px 1fr 300px', fontFamily: 'Roboto, sans-serif' }}>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thứ tự</div>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thời gian</div>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Địa điểm</div>
@@ -315,13 +315,20 @@ export default function PublicDisplay() {
             <>              
               {/* Render meeting rows */}
               {sortedMeetings.map((meeting: any, index: number) => {
-                // Format datetime string directly without timezone conversion
-                const formatDateTime = (dateTimeString: string): string => {
-                  const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
-                  const [datePart, timePart] = dateTime.split(' ');
-                  const [year, month, day] = datePart.split('-');
-                  const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
-                  return `${hour}:${minute} - ${day}/${month}/${year}`;
+                // Format datetime string to show both start and end times
+                const formatDateTime = (startDateTime: string, endDateTime: string): string => {
+                  const formatSingleDateTime = (dateTimeString: string) => {
+                    const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+                    const [datePart, timePart] = dateTime.split(' ');
+                    const [year, month, day] = datePart.split('-');
+                    const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
+                    return { time: `${hour}:${minute}`, date: `${day}/${month}/${year}` };
+                  };
+                  
+                  const start = formatSingleDateTime(startDateTime);
+                  const end = formatSingleDateTime(endDateTime);
+                  
+                  return `${start.time} - ${start.date} (dự kiến kết thúc lúc ${end.time} - ${end.date})`;
                 };
 
                 // Get room name from rooms data
@@ -334,7 +341,7 @@ export default function PublicDisplay() {
                     className="border-b border-orange-400" 
                     style={{ 
                       display: 'grid', 
-                      gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                      gridTemplateColumns: '80px 250px 180px 1fr 300px',
                       backgroundColor: '#006b68',
                       fontFamily: 'Roboto, sans-serif'
                     }}
@@ -343,7 +350,7 @@ export default function PublicDisplay() {
                       {index + 1}
                     </div>
                     <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                      {formatDateTime(meeting.startDateTime)}
+                      {formatDateTime(meeting.startDateTime, meeting.endDateTime)}
                     </div>
                     <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
                       {roomName}
@@ -365,7 +372,7 @@ export default function PublicDisplay() {
                   className="border-b border-orange-400" 
                   style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                    gridTemplateColumns: '80px 250px 180px 1fr 300px',
                     backgroundColor: '#006b68',
                     fontFamily: 'Roboto, sans-serif',
                     minHeight: '48px'
@@ -397,7 +404,7 @@ export default function PublicDisplay() {
                 className="border-b border-orange-400" 
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                  gridTemplateColumns: '80px 250px 180px 1fr 300px',
                   backgroundColor: '#006b68',
                   fontFamily: 'Roboto, sans-serif',
                   minHeight: '48px'
