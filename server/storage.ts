@@ -82,6 +82,7 @@ export interface IStorage {
   getWorkSchedules(startDate?: Date, endDate?: Date, staffId?: string): Promise<WorkSchedule[]>;
   getWorkSchedule(id: string): Promise<WorkSchedule | undefined>;
   getWorkSchedulesByStaffAndDate(staffId: string, date: Date): Promise<WorkSchedule[]>;
+  validateWorkScheduleLimit(staffId: string, startDate: Date, endDate: Date, excludeScheduleId?: string): Promise<{ isValid: boolean; violatingDate?: string; currentCount?: number }>;
   createWorkSchedule(schedule: InsertWorkSchedule): Promise<WorkSchedule>;
   updateWorkSchedule(id: string, schedule: Partial<InsertWorkSchedule>): Promise<WorkSchedule>;
   deleteWorkSchedule(id: string): Promise<void>;
@@ -430,6 +431,55 @@ export class DatabaseStorage implements IStorage {
           lte(workSchedules.startDateTime, endOfDay)
         )
       );
+  }
+
+  async validateWorkScheduleLimit(staffId: string, startDate: Date, endDate: Date, excludeScheduleId?: string): Promise<{ isValid: boolean; violatingDate?: string; currentCount?: number }> {
+    // Check each day in the date range
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      // Skip weekends
+      const dayOfWeek = currentDate.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not Sunday or Saturday
+        const existingSchedules = await this.getWorkSchedulesByStaffAndDate(staffId, currentDate);
+        
+        // Filter out the schedule being updated if provided
+        const relevantSchedules = excludeScheduleId 
+          ? existingSchedules.filter(s => s.id !== excludeScheduleId)
+          : existingSchedules;
+        
+        // Count schedules that overlap with this day
+        let overlappingCount = 0;
+        const dayStart = new Date(currentDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(currentDate);
+        dayEnd.setHours(23, 59, 59, 999);
+        
+        for (const schedule of relevantSchedules) {
+          const scheduleStart = new Date(schedule.startDateTime);
+          const scheduleEnd = new Date(schedule.endDateTime);
+          
+          // Check if schedule overlaps with this day
+          if (scheduleStart <= dayEnd && scheduleEnd >= dayStart) {
+            overlappingCount++;
+          }
+        }
+        
+        // Adding the new schedule would exceed the limit
+        if (overlappingCount >= 5) {
+          return {
+            isValid: false,
+            violatingDate: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
+            currentCount: overlappingCount
+          };
+        }
+      }
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return { isValid: true };
   }
 
   async createWorkSchedule(schedule: InsertWorkSchedule): Promise<WorkSchedule> {

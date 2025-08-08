@@ -12,6 +12,7 @@ Preferred communication style: Simple, everyday language.
 
 - **August 8, 2025**: Enhanced work schedule validation to prevent past date/time selection at browser level using HTML input constraints (min attributes). Users can no longer select past dates or times in schedule forms.
 - **August 8, 2025**: Added real-time weekend and holiday prevention. Users can no longer select Saturdays, Sundays, or holidays when entering work schedules. Invalid selections are immediately reset with error messages.
+- **August 8, 2025**: Implemented comprehensive daily schedule limit validation for date ranges. System now enforces maximum 5 work schedules per day per board member across entire date ranges, providing specific error messages indicating which date would exceed the limit.
 
 # System Architecture
 

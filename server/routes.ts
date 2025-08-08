@@ -306,17 +306,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: (req.user as any)?.id || 'admin-user',
       });
 
-      // Check daily limit (max 5 schedules per staff per day)
-      const startOfDay = new Date(validatedData.startDateTime);
-      startOfDay.setHours(0, 0, 0, 0);
-      const existingSchedules = await storage.getWorkSchedulesByStaffAndDate(
+      // Check daily limit (max 5 schedules per staff per day) for the entire date range
+      const startDate = new Date(validatedData.startDateTime);
+      const endDate = new Date(validatedData.endDateTime);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+      
+      const validation = await storage.validateWorkScheduleLimit(
         validatedData.staffId,
-        startOfDay
+        startDate,
+        endDate
       );
 
-      if (existingSchedules.length >= 5) {
+      if (!validation.isValid) {
+        const violatingDateFormatted = new Date(validation.violatingDate!).toLocaleDateString('vi-VN');
         return res.status(400).json({ 
-          message: "Không thể thêm quá 5 lịch công tác cho một cá nhân trong cùng một ngày" 
+          message: `Không thể thêm lịch công tác. Ngày ${violatingDateFormatted} đã có ${validation.currentCount} lịch công tác, vượt quá giới hạn 5 lịch cho mỗi ngày.`
         });
       }
 
@@ -340,6 +345,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : undefined,
         updatedBy: (req.user as any)?.id || 'admin-user',
       });
+
+      // Check daily limit if dates are being updated
+      if (validatedData.startDateTime && validatedData.endDateTime && validatedData.staffId) {
+        const startDate = new Date(validatedData.startDateTime);
+        const endDate = new Date(validatedData.endDateTime);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+        
+        const validation = await storage.validateWorkScheduleLimit(
+          validatedData.staffId,
+          startDate,
+          endDate,
+          id // Exclude current schedule from count
+        );
+
+        if (!validation.isValid) {
+          const violatingDateFormatted = new Date(validation.violatingDate!).toLocaleDateString('vi-VN');
+          return res.status(400).json({ 
+            message: `Không thể cập nhật lịch công tác. Ngày ${violatingDateFormatted} đã có ${validation.currentCount} lịch công tác, vượt quá giới hạn 5 lịch cho mỗi ngày.`
+          });
+        }
+      }
+
       const schedule = await storage.updateWorkSchedule(id, validatedData);
       res.json(schedule);
     } catch (error) {
