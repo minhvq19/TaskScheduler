@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, LogOut, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { startOfDay, endOfDay } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import StaffManagement from "@/components/staff/staff-management";
 import DepartmentManagement from "@/components/departments/department-management";
@@ -36,6 +38,46 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Fetch dashboard statistics
+  const today = new Date();
+  const startOfToday = startOfDay(today);
+  const endOfToday = endOfDay(today);
+
+  // Fetch today's schedules count
+  const { data: todaySchedules = [] } = useQuery({
+    queryKey: ["/api/work-schedules", "today"],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('startDate', startOfToday.toISOString());
+      params.append('endDate', endOfToday.toISOString());
+      const response = await fetch(`/api/work-schedules?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch schedules');
+      return response.json();
+    },
+  });
+
+  // Fetch meeting rooms count
+  const { data: meetingRooms = [] } = useQuery({
+    queryKey: ["/api/meeting-rooms"],
+  });
+
+  // Fetch ongoing other events count
+  const { data: otherEvents = [] } = useQuery({
+    queryKey: ["/api/other-events", "ongoing"],
+    queryFn: async () => {
+      const response = await fetch('/api/other-events');
+      if (!response.ok) throw new Error('Failed to fetch other events');
+      const events = await response.json();
+      // Filter for ongoing events
+      const now = new Date();
+      return events.filter((event: any) => {
+        const start = new Date(event.startDateTime);
+        const end = new Date(event.endDateTime);
+        return now >= start && now <= end;
+      });
+    },
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -120,24 +162,12 @@ export default function Dashboard() {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-total-staff">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Tổng cán bộ</p>
-                    <p className="text-3xl font-bold text-gray-900" data-testid="text-staff-count">0</p>
-                  </div>
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <i className="fas fa-users text-bidv-blue text-xl"></i>
-                  </div>
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-today-schedules">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Lịch hôm nay</p>
-                    <p className="text-3xl font-bold text-gray-900" data-testid="text-schedule-count">0</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-schedule-count">{todaySchedules.length}</p>
                   </div>
                   <div className="bg-green-100 p-3 rounded-lg">
                     <i className="fas fa-calendar-check text-green-600 text-xl"></i>
@@ -149,7 +179,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Phòng họp</p>
-                    <p className="text-3xl font-bold text-gray-900" data-testid="text-room-count">0</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-room-count">{meetingRooms.length}</p>
                   </div>
                   <div className="bg-purple-100 p-3 rounded-lg">
                     <i className="fas fa-door-open text-purple-600 text-xl"></i>
@@ -157,11 +187,11 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-monthly-events">
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-other-events">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Sự kiện tháng</p>
-                    <p className="text-3xl font-bold text-gray-900" data-testid="text-event-count">0</p>
+                    <p className="text-sm font-medium text-gray-500">Sự kiện khác</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-event-count">{otherEvents.length}</p>
                   </div>
                   <div className="bg-orange-100 p-3 rounded-lg">
                     <i className="fas fa-star text-orange-600 text-xl"></i>
