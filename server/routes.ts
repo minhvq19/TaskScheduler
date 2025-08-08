@@ -674,8 +674,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/public/display-data', async (req, res) => {
     try {
+      console.log('=== PUBLIC DISPLAY DATA API CALLED ===');
       const today = new Date();
       const currentTime = new Date();
+      console.log('Current time:', currentTime.toISOString());
       
       // Get schedules for the next 7 days (today + 6 days)
       // Look for schedules that start up to 30 days ago and end up to 30 days from now
@@ -687,6 +689,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, sevenDaysFromNow);
       const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, sevenDaysFromNow);
       const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, sevenDaysFromNow);
+      console.log('Raw other events from storage:', allOtherEvents.length);
+      console.log('Date range:', thirtyDaysAgo.toISOString(), 'to', sevenDaysFromNow.toISOString());
 
       // Filter schedules that are active in the next 7 days
       const startOfToday = new Date(today);
@@ -707,18 +711,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return start <= endOfSevenDays && end >= startOfToday;
       });
 
-      const otherEvents = allOtherEvents.filter(event => {
-        const start = new Date(event.startDateTime);
-        const end = new Date(event.endDateTime);
-        return start <= endOfSevenDays && end >= startOfToday;
-      });
+      // Show all events for debugging
+      console.log('=== OTHER EVENTS DEBUG ===');
+      console.log('allOtherEvents array:', JSON.stringify(allOtherEvents, null, 2));
+      
+      const otherEvents = allOtherEvents;
+      console.log('Final otherEvents to send:', otherEvents.length);
 
-      res.json({
+      const response = {
         workSchedules,
         meetingSchedules,
         otherEvents,
         currentTime: currentTime.toISOString(),
-      });
+      };
+      console.log('=== SENDING RESPONSE ===');
+      console.log('Response otherEvents count:', response.otherEvents.length);
+      console.log('=== END DEBUG ===');
+      res.json(response);
     } catch (error) {
       console.error("Error fetching public display data:", error);
       res.status(500).json({ message: "Failed to fetch display data" });

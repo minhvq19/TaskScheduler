@@ -480,9 +480,12 @@ export default function PublicDisplay() {
     // Filter to show only ongoing events
     const now = new Date();
     
+    // DEBUG: Log what we received
+    console.log('=== CLIENT DEBUG: Other Events ===');
+    console.log('Current time:', now.toISOString());
     console.log('Display data:', displayData);
-    console.log('Other events raw:', displayData?.otherEvents);
-    console.log('Other events length:', displayData?.otherEvents?.length);
+    console.log('Other events from server:', displayData?.otherEvents);
+    console.log('Other events count:', (displayData?.otherEvents || []).length);
     
     const ongoingEvents = (displayData?.otherEvents || [])
       .filter((event: any) => {
@@ -490,18 +493,18 @@ export default function PublicDisplay() {
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
         
-        const isOngoing = now >= start && now <= end;
-        console.log(`Event: ${event.shortName}`);
-        console.log(`Start: ${event.startDateTime} -> ${start.toISOString()}`);
-        console.log(`End: ${event.endDateTime} -> ${end.toISOString()}`);
-        console.log(`Current: ${now.toISOString()}`);
-        console.log(`Is ongoing: ${isOngoing}`);
-        console.log('---');
+        console.log(`Event "${event.shortName}":`);
+        console.log('  Start:', event.startDateTime, '-> Date:', start.toISOString());
+        console.log('  End:', event.endDateTime, '-> Date:', end.toISOString());
+        console.log('  Now:', now.toISOString());
+        console.log('  Is ongoing? now >= start:', now >= start, ', now <= end:', now <= end);
+        console.log('  Overall result:', now >= start && now <= end);
         
-        return true; // Temporarily show all events for testing
+        return now >= start && now <= end; // Only show events that are currently ongoing
       });
-    
-    console.log('Ongoing events:', ongoingEvents);
+      
+    console.log('Filtered ongoing events:', ongoingEvents.length);
+    console.log('=== END CLIENT DEBUG ===');
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
