@@ -41,7 +41,6 @@ const userGroupSchema = z.object({
     otherEvents: z.enum(["VIEW", "EDIT", "NONE"]).default("NONE"),
     permissions: z.enum(["VIEW", "EDIT", "NONE"]).default("NONE"),
     systemConfig: z.enum(["VIEW", "EDIT", "NONE"]).default("NONE"),
-    users: z.enum(["VIEW", "EDIT", "NONE"]).default("NONE"),
     holidays: z.enum(["VIEW", "EDIT", "NONE"]).default("NONE"),
   }).default({}),
 });
@@ -78,7 +77,6 @@ export default function UserGroupManagement() {
         otherEvents: "NONE",
         permissions: "NONE",
         systemConfig: "NONE",
-        users: "NONE",
         holidays: "NONE",
       },
     },
@@ -151,7 +149,6 @@ export default function UserGroupManagement() {
         otherEvents: (group.permissions.otherEvents as "VIEW" | "EDIT" | "NONE") || "NONE",
         permissions: (group.permissions.permissions as "VIEW" | "EDIT" | "NONE") || "NONE",
         systemConfig: (group.permissions.systemConfig as "VIEW" | "EDIT" | "NONE") || "NONE",
-        users: (group.permissions.users as "VIEW" | "EDIT" | "NONE") || "NONE",
         holidays: (group.permissions.holidays as "VIEW" | "EDIT" | "NONE") || "NONE",
       },
     });
@@ -195,7 +192,6 @@ export default function UserGroupManagement() {
     otherEvents: "Sự kiện khác",
     permissions: "Phân quyền",
     systemConfig: "Tham số hệ thống",
-    users: "Quản lý người dùng",
     holidays: "Quản lý ngày nghỉ lễ",
   };
 
