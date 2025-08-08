@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import AddStaffModal from "./add-staff-modal";
@@ -26,6 +27,10 @@ export default function StaffManagement() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canEdit } = usePermissions();
+  
+  // Check if user can edit staff
+  const canEditStaff = canEdit("staff");
 
   // Fetch staff
   const { data: staff = [], isLoading: isLoadingStaff } = useQuery<Staff[]>({
@@ -88,14 +93,16 @@ export default function StaffManagement() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản lý cán bộ
         </h2>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-staff"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm cán bộ
-        </Button>
+        {canEditStaff && (
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-staff"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm cán bộ
+          </Button>
+        )}
       </div>
 
       {/* Search and Filter */}
@@ -219,24 +226,31 @@ export default function StaffManagement() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(member)}
-                              className="text-bidv-teal hover:text-bidv-teal/80"
-                              data-testid={`button-edit-${member.id}`}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(member.id)}
-                              className="text-red-600 hover:text-red-700"
-                              data-testid={`button-delete-${member.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {canEditStaff && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(member)}
+                                  className="text-bidv-teal hover:text-bidv-teal/80"
+                                  data-testid={`button-edit-${member.id}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(member.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                  data-testid={`button-delete-${member.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                            {!canEditStaff && (
+                              <span className="text-sm text-gray-500">Chỉ xem</span>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Settings, Plus, Edit2, Trash2, Save, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { SystemConfig, InsertSystemConfig } from "@shared/schema";
@@ -35,8 +36,12 @@ interface ConfigFormData {
 export default function SystemConfigPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canEdit } = usePermissions();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<SystemConfig | null>(null);
+  
+  // Check if user can edit system config
+  const canEditSystemConfig = canEdit("systemConfig");
   const [formData, setFormData] = useState<ConfigFormData>({
     key: "",
     value: "",
@@ -202,14 +207,16 @@ export default function SystemConfigPage() {
           <Settings className="h-6 w-6 text-bidv-teal" />
           <h1 className="text-2xl font-bold text-gray-900">Quản trị tham số hệ thống</h1>
         </div>
-        <Button
-          onClick={startAdd}
-          className="flex items-center space-x-2 bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-config"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Thêm tham số</span>
-        </Button>
+        {canEditSystemConfig && (
+          <Button
+            onClick={startAdd}
+            className="flex items-center space-x-2 bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-config"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Thêm tham số</span>
+          </Button>
+        )}
       </div>
 
       {/* Edit/Add Dialog */}
@@ -358,24 +365,31 @@ export default function SystemConfigPage() {
                         </div>
                       </div>
                       <div className="flex space-x-2 ml-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => startEdit(config)}
-                          className="hover:bg-blue-50 hover:border-blue-300"
-                          data-testid={`button-edit-${config.key}`}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(config.key)}
-                          className="hover:bg-red-50 hover:border-red-300 text-red-600"
-                          data-testid={`button-delete-${config.key}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {canEditSystemConfig && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => startEdit(config)}
+                              className="hover:bg-blue-50 hover:border-blue-300"
+                              data-testid={`button-edit-${config.key}`}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(config.key)}
+                              className="hover:bg-red-50 hover:border-red-300 text-red-600"
+                              data-testid={`button-delete-${config.key}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                        {!canEditSystemConfig && (
+                          <span className="text-sm text-gray-500">Chỉ xem</span>
+                        )}
                       </div>
                     </div>
                   ))}
