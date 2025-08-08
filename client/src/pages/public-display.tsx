@@ -57,7 +57,7 @@ export default function PublicDisplay() {
           // Switch to next screen and reset countdown
           const currentScreen = SCREENS[currentScreenIndex];
           
-          if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
+          if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
             // For other events, cycle through ongoing events
             const now = new Date();
             const ongoingEvents = displayData.otherEvents.filter((event: any) => {
@@ -95,7 +95,7 @@ export default function PublicDisplay() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentScreenIndex, currentEventIndex, displayData]);
+  }, [currentScreenIndex, currentEventIndex]);
 
   // Get 7 days starting from today
   const today = new Date();
