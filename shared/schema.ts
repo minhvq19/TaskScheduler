@@ -321,6 +321,31 @@ export const insertOtherEventSchema = createInsertSchema(otherEvents).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  startDateTime: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      // Handle datetime-local format properly by treating as local time
+      // If the string doesn't have timezone info, treat as local time
+      if (val.includes('T') && !val.includes('Z') && !val.includes('+') && !val.includes('-', 10)) {
+        // This is a datetime-local string, treat as local time
+        return new Date(val);
+      }
+      return new Date(val);
+    }
+    return val;
+  }),
+  endDateTime: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      // Handle datetime-local format properly by treating as local time
+      // If the string doesn't have timezone info, treat as local time
+      if (val.includes('T') && !val.includes('Z') && !val.includes('+') && !val.includes('-', 10)) {
+        // This is a datetime-local string, treat as local time
+        return new Date(val);
+      }
+      return new Date(val);
+    }
+    return val;
+  }),
 });
 
 export const insertUserGroupSchema = createInsertSchema(userGroups).omit({
