@@ -11,6 +11,12 @@ interface DisplayData {
   currentTime: string;
 }
 
+interface MeetingRoom {
+  id: string;
+  name: string;
+  location?: string;
+}
+
 interface Staff {
   id: string;
   employeeId: string;
@@ -80,6 +86,12 @@ export default function PublicDisplay() {
   // Fetch staff data
   const { data: staff = [] } = useQuery<Staff[]>({
     queryKey: ["/api/public/staff"],
+    refetchInterval: 60000,
+  });
+
+  // Fetch meeting rooms data
+  const { data: rooms = [] } = useQuery<MeetingRoom[]>({
+    queryKey: ["/api/meeting-rooms"],
     refetchInterval: 60000,
   });
 
@@ -280,29 +292,139 @@ export default function PublicDisplay() {
     </div>
   );
 
-  const renderMeetingScheduleTable = () => (
-    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
-      <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Lịch họp trong tuần</h2>
-        {displayData?.meetingSchedules && displayData.meetingSchedules.length > 0 ? (
-          <div className="space-y-2">
-            {displayData.meetingSchedules.map((meeting: any, index: number) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                <div className="font-bold text-lg" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>{meeting.title}</div>
-                <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  {format(new Date(meeting.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
-                  {format(new Date(meeting.endDateTime), "HH:mm", { locale: vi })}
+  const renderMeetingScheduleTable = () => {
+    // Get meeting schedules and sort by start time, limit to 20
+    const sortedMeetings = (displayData?.meetingSchedules || [])
+      .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
+      .slice(0, 20);
+
+    return (
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
+        {/* Table Header */}
+        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 200px 180px 1fr 200px', fontFamily: 'Roboto, sans-serif' }}>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thứ tự</div>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thời gian</div>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Địa điểm</div>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Nội dung cuộc họp</div>
+          <div className="p-3 text-white font-bold text-center" style={{ fontSize: '16px', fontWeight: '700' }}>Đầu mối</div>
+        </div>
+
+        {/* Table Body */}
+        <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'hidden' }}>
+          {sortedMeetings.length > 0 ? (
+            <>              
+              {/* Render meeting rows */}
+              {sortedMeetings.map((meeting: any, index: number) => {
+                // Format datetime string directly without timezone conversion
+                const formatDateTime = (dateTimeString: string): string => {
+                  const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+                  const [datePart, timePart] = dateTime.split(' ');
+                  const [year, month, day] = datePart.split('-');
+                  const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
+                  return `${hour}:${minute} - ${day}/${month}/${year}`;
+                };
+
+                // Get room name from rooms data
+                const room = rooms?.find((r: any) => r.id === meeting.roomId);
+                const roomName = room?.name || 'Phòng không xác định';
+
+                return (
+                  <div 
+                    key={index} 
+                    className="border-b border-orange-400" 
+                    style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                      backgroundColor: '#006b68',
+                      fontFamily: 'Roboto, sans-serif'
+                    }}
+                  >
+                    <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
+                      {index + 1}
+                    </div>
+                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                      {formatDateTime(meeting.startDateTime)}
+                    </div>
+                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                      {roomName}
+                    </div>
+                    <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
+                      {meeting.meetingContent || 'Không có thông tin'}
+                    </div>
+                    <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
+                      {meeting.contactPerson || 'Chưa có thông tin'}
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Fill empty rows to reach total of 20 rows */}
+              {Array.from({ length: Math.max(0, 20 - sortedMeetings.length) }, (_, index) => (
+                <div 
+                  key={`empty-${index}`}
+                  className="border-b border-orange-400" 
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                    backgroundColor: '#006b68',
+                    fontFamily: 'Roboto, sans-serif',
+                    minHeight: '48px'
+                  }}
+                >
+                  <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
+                    {sortedMeetings.length + index + 1}
+                  </div>
+                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                    ...
+                  </div>
+                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                    
+                  </div>
+                  <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
+                    
+                  </div>
+                  <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
+                    
+                  </div>
                 </div>
-                <div className="text-sm" style={{ fontFamily: 'Roboto, sans-serif' }}>{meeting.location}</div>
+              ))}
+            </>
+          ) : (
+            // Show empty table with 20 rows when no meetings
+            Array.from({ length: 20 }, (_, index) => (
+              <div 
+                key={`empty-${index}`}
+                className="border-b border-orange-400" 
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 200px 180px 1fr 200px',
+                  backgroundColor: '#006b68',
+                  fontFamily: 'Roboto, sans-serif',
+                  minHeight: '48px'
+                }}
+              >
+                <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
+                  {index + 1}
+                </div>
+                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                  {index < 3 ? '...' : ''}
+                </div>
+                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
+                  
+                </div>
+                <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
+                  
+                </div>
+                <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
+                  
+                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-gray-500 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Không có lịch họp nào trong tuần này</div>
-        )}
+            ))
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderOtherEventsTable = () => (
     <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
