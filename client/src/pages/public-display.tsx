@@ -196,24 +196,28 @@ export default function PublicDisplay() {
                       return (
                         <div
                           key={schedule.id}
-                          className="text-xs p-0.5 rounded text-white font-medium"
+                          className="text-xs p-1 rounded text-white font-medium"
                           style={{
                             backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                            fontSize: "7px",
-                            lineHeight: "1.0",
+                            fontSize: "9px",
+                            lineHeight: "1.1",
                             opacity: isWorkAtBranch ? 0 : 1
                           }}
                         >
                           {!isWorkAtBranch && (
                             <>
-                              <div className="font-bold truncate">{schedule.workType}</div>
-                              {schedule.customContent && (
-                                <div className="truncate opacity-90 text-[6px]">{schedule.customContent}</div>
-                              )}
-                              <div className="opacity-75 text-[6px]">
-                                {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
-                                {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
+                              {/* Line 1: [Main content] - Time */}
+                              <div className="font-bold truncate">
+                                {schedule.workType === "Khác" && schedule.customContent 
+                                  ? schedule.customContent 
+                                  : schedule.workType} - (
+                                {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })} – 
+                                {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })})
                               </div>
+                              {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
+                              {schedule.workType !== "Khác" && schedule.customContent && (
+                                <div className="truncate opacity-90">{schedule.customContent}</div>
+                              )}
                             </>
                           )}
                         </div>
@@ -236,33 +240,33 @@ export default function PublicDisplay() {
         </div>
       ))}
       
-      {/* Color Legend */}
-      <div className="bg-gray-50 p-3 border-t border-gray-300">
-        <div className="text-xs font-bold text-gray-700 mb-2 text-center">GHI CHÚ MÀU SẮC</div>
-        <div className="grid grid-cols-3 gap-2 text-xs">
+      {/* Compact Color Legend */}
+      <div className="bg-gray-50 p-2 border-t border-gray-300">
+        <div className="text-xs font-bold text-gray-700 mb-1 text-center">GHI CHÚ MÀU SẮC</div>
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
-            <span>Làm việc tại CN</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
+            <span className="text-[10px]">CN</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
-            <span>Nghỉ phép</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
+            <span className="text-[10px]">Nghỉ phép</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
-            <span>Trực lãnh đạo</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
+            <span className="text-[10px]">Trực LD</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
-            <span>Đi công tác trong nước</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
+            <span className="text-[10px]">CT trong nước</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
-            <span>Đi công tác nước ngoài</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
+            <span className="text-[10px]">CT nước ngoài</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded mr-2" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
-            <span>Khác</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
+            <span className="text-[10px]">Khác</span>
           </div>
         </div>
       </div>
