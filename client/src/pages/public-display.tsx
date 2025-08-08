@@ -37,6 +37,7 @@ const SCREENS = [
 export default function PublicDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(SCREEN_DURATION / 1000);
 
   // Update time every second
@@ -54,7 +55,39 @@ export default function PublicDisplay() {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           // Switch to next screen and reset countdown
-          setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+          const currentScreen = SCREENS[currentScreenIndex];
+          
+          if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
+            // For other events, cycle through ongoing events
+            const now = new Date();
+            const ongoingEvents = displayData.otherEvents.filter((event: any) => {
+              const start = new Date(event.startDateTime);
+              const end = new Date(event.endDateTime);
+              return now >= start && now <= end;
+            });
+            
+            if (ongoingEvents.length > 1) {
+              // If multiple events, cycle through them
+              const nextEventIndex = (currentEventIndex + 1) % ongoingEvents.length;
+              if (nextEventIndex === 0) {
+                // Completed all events, go to next screen
+                setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+                setCurrentEventIndex(0);
+              } else {
+                // Show next event
+                setCurrentEventIndex(nextEventIndex);
+              }
+            } else {
+              // Single or no events, go to next screen
+              setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+              setCurrentEventIndex(0);
+            }
+          } else {
+            // Regular screen rotation
+            setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+            setCurrentEventIndex(0);
+          }
+          
           return SCREEN_DURATION / 1000;
         }
         return prev - 1;
@@ -62,7 +95,7 @@ export default function PublicDisplay() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [currentScreenIndex, currentEventIndex, displayData]);
 
   // Get 7 days starting from today
   const today = new Date();
@@ -489,45 +522,34 @@ export default function PublicDisplay() {
         return now >= start && now <= end; // Only show events that are currently ongoing
       });
 
+    // Show only the current event based on currentEventIndex
+    const currentEvent = ongoingEvents[currentEventIndex];
+
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
         <div className="p-6 h-full">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Sự kiện khác đang diễn ra</h2>
-          {ongoingEvents.length > 0 ? (
+          {currentEvent ? (
             <div className="h-full flex flex-col justify-center">
-              {ongoingEvents.map((event: any, index: number) => (
-                <div key={index} className="text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                  {/* Event name on top */}
-                  <div className="mb-3">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-                      {event.shortName}
-                    </h3>
-                    <div className="text-base text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      {format(new Date(event.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
-                      {format(new Date(event.endDateTime), "HH:mm", { locale: vi })}
-                    </div>
+              <div className="text-center mb-6" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                {/* Large image */}
+                {currentEvent.imageUrl && (
+                  <div className="w-full mb-4">
+                    <img 
+                      src={currentEvent.imageUrl} 
+                      alt={currentEvent.shortName}
+                      className="w-full object-cover rounded-lg shadow-lg"
+                      style={{ height: '60vh', maxHeight: '600px' }}
+                    />
                   </div>
-                  
-                  {/* Large image below */}
-                  {event.imageUrl && (
-                    <div className="w-full">
-                      <img 
-                        src={event.imageUrl} 
-                        alt={event.shortName}
-                        className="w-full object-cover rounded-lg shadow-lg"
-                        style={{ height: '60vh', maxHeight: '600px' }}
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Event content */}
-                  {event.content && (
-                    <div className="mt-3 text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      {event.content}
-                    </div>
-                  )}
-                </div>
-              ))}
+                )}
+                
+                {/* Event content */}
+                {currentEvent.content && (
+                  <div className="text-sm text-gray-700" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {currentEvent.content}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center">
@@ -558,7 +580,22 @@ export default function PublicDisplay() {
           Chi nhánh Sở giao dịch 1
         </div>
         <div className="text-yellow-400 text-xl font-bold mt-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-          {SCREENS[currentScreenIndex].name.toUpperCase()}
+          {(() => {
+            const currentScreen = SCREENS[currentScreenIndex];
+            if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
+              const now = new Date();
+              const ongoingEvents = displayData.otherEvents.filter((event: any) => {
+                const start = new Date(event.startDateTime);
+                const end = new Date(event.endDateTime);
+                return now >= start && now <= end;
+              });
+              const currentEvent = ongoingEvents[currentEventIndex];
+              if (currentEvent) {
+                return `SỰ KIỆN KHÁC: ${currentEvent.shortName.toUpperCase()}`;
+              }
+            }
+            return currentScreen.name.toUpperCase();
+          })()} 
         </div>
         
         {/* Screen info and time display in top right corner */}
