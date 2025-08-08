@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 8, 2025**: Triển khai font Roboto và tối ưu layout màn hình công cộng. Thay đổi font chính từ Inter sang Roboto cho tất cả văn bản trong màn hình công cộng. Sửa lỗi bảng dữ liệu bị co lại khi có ít lịch công tác bằng cách thiết lập chiều cao tối thiểu 120px cho các ô và sử dụng flexbox để đảm bảo bảng luôn kéo dài xuống hết màn hình. Tăng kích thước font lên 10px và cải thiện độ đậm chữ để dễ đọc hơn.
 - **August 8, 2025**: Optimized public display screen for better readability and space efficiency. Enhanced schedule content formatting to display maximum 2 lines with structure "[Main content] - (Time)" and "Detailed content". Increased text size from 6-7px to 9px. Compacted color legend section with abbreviated labels and smaller indicators to reduce screen space usage.
 - **August 8, 2025**: Enhanced work schedule validation to prevent past date/time selection at browser level using HTML input constraints (min attributes). Users can no longer select past dates or times in schedule forms.
 - **August 8, 2025**: Added real-time weekend and holiday prevention. Users can no longer select Saturdays, Sundays, or holidays when entering work schedules. Invalid selections are immediately reset with error messages.

@@ -146,7 +146,7 @@ export default function PublicDisplay() {
   };
 
   const renderWorkScheduleTable = () => (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
       <div className="grid grid-cols-8 bg-orange-500">
         <div className="p-2 text-white font-bold text-center border-r border-orange-600">
@@ -166,16 +166,17 @@ export default function PublicDisplay() {
       </div>
 
       {/* Table Body */}
-      {staff
-        .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
-        .map((staffMember, rowIndex) => (
-        <div key={staffMember.id} className="grid grid-cols-8 border-b border-gray-200">
-          {/* Staff Name Column */}
-          <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center">
-            <div>
-              <div className="text-xs">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+      <div className="public-display-table-body">
+        {staff
+          .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
+          .map((staffMember, rowIndex) => (
+          <div key={staffMember.id} className="public-display-row grid grid-cols-8 border-b border-gray-200">
+            {/* Staff Name Column */}
+            <div className="public-display-cell p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              <div>
+                <div className="text-sm font-medium">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+              </div>
             </div>
-          </div>
           
           {/* Schedule Columns for each day */}
           {days.map((day, dayIndex) => {
@@ -185,8 +186,12 @@ export default function PublicDisplay() {
             return (
               <div 
                 key={dayIndex} 
-                className="p-0.5 border-r border-gray-300 min-h-[70px] relative"
-                style={{ backgroundColor: isWeekendDay ? '#9ca3af' : '#006b68' }}
+                className="public-display-cell p-0.5 border-r border-gray-300 relative"
+                style={{ 
+                  backgroundColor: isWeekendDay ? '#9ca3af' : '#006b68',
+                  fontFamily: 'Roboto, sans-serif',
+                  minHeight: '120px'
+                }}
               >
                 {!isWeekendDay && schedules.length > 0 ? (
                   <div className="space-y-0.5">
@@ -196,18 +201,20 @@ export default function PublicDisplay() {
                       return (
                         <div
                           key={schedule.id}
-                          className="text-xs p-1 rounded text-white font-medium"
+                          className="text-xs p-1 rounded text-white font-medium mb-1"
                           style={{
                             backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                            fontSize: "9px",
-                            lineHeight: "1.1",
-                            opacity: isWorkAtBranch ? 0 : 1
+                            fontSize: "10px",
+                            lineHeight: "1.2",
+                            opacity: isWorkAtBranch ? 0 : 1,
+                            fontFamily: 'Roboto, sans-serif',
+                            fontWeight: '500'
                           }}
                         >
                           {!isWorkAtBranch && (
                             <>
                               {/* Line 1: [Main content] - Time */}
-                              <div className="font-bold truncate">
+                              <div className="font-semibold truncate" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
                                   : schedule.workType} - (
@@ -216,7 +223,7 @@ export default function PublicDisplay() {
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
-                                <div className="truncate opacity-90">{schedule.customContent}</div>
+                                <div className="truncate opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px' }}>{schedule.customContent}</div>
                               )}
                             </>
                           )}
@@ -224,49 +231,50 @@ export default function PublicDisplay() {
                       );
                     })}
                     {schedules.filter(s => s.workType !== "Làm việc tại CN").length > 8 && (
-                      <div className="text-[6px] text-gray-500 text-center">
+                      <div className="text-[8px] text-gray-400 text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
                         +{schedules.filter(s => s.workType !== "Làm việc tại CN").length - 8} more
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-gray-400 text-xs p-0.5">
+                  <div className="text-gray-400 text-xs p-0.5" style={{ minHeight: '120px' }}>
                     {/* Empty cell - no schedule or weekend */}
                   </div>
                 )}
               </div>
             );
           })}
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
       
       {/* Compact Color Legend */}
-      <div className="bg-gray-50 p-2 border-t border-gray-300">
-        <div className="text-xs font-bold text-gray-700 mb-1 text-center">GHI CHÚ MÀU SẮC</div>
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs">
+      <div className="bg-gray-50 p-2 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="text-xs font-bold text-gray-700 mb-1 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>GHI CHÚ MÀU SẮC</div>
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
-            <span className="text-[10px]">CN</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CN</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
-            <span className="text-[10px]">Nghỉ phép</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>Nghỉ phép</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
-            <span className="text-[10px]">Trực LD</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>Trực LD</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
-            <span className="text-[10px]">CT trong nước</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CT trong nước</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
-            <span className="text-[10px]">CT nước ngoài</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CT nước ngoài</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
-            <span className="text-[10px]">Khác</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>Khác</span>
           </div>
         </div>
       </div>
@@ -274,50 +282,50 @@ export default function PublicDisplay() {
   );
 
   const renderMeetingScheduleTable = () => (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Lịch họp trong tuần</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Lịch họp trong tuần</h2>
         {displayData?.meetingSchedules && displayData.meetingSchedules.length > 0 ? (
           <div className="space-y-2">
             {displayData.meetingSchedules.map((meeting: any, index: number) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg">
-                <div className="font-bold text-lg">{meeting.title}</div>
-                <div className="text-sm text-gray-600">
+              <div key={index} className="bg-blue-100 p-4 rounded-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <div className="font-bold text-lg" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>{meeting.title}</div>
+                <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   {format(new Date(meeting.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
                   {format(new Date(meeting.endDateTime), "HH:mm", { locale: vi })}
                 </div>
-                <div className="text-sm">{meeting.location}</div>
+                <div className="text-sm" style={{ fontFamily: 'Roboto, sans-serif' }}>{meeting.location}</div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 text-xl">Không có lịch họp nào trong tuần này</div>
+          <div className="text-gray-500 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Không có lịch họp nào trong tuần này</div>
         )}
       </div>
     </div>
   );
 
   const renderOtherEventsTable = () => (
-    <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Sự kiện khác</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>Sự kiện khác</h2>
         {displayData?.otherEvents && displayData.otherEvents.length > 0 ? (
           <div className="space-y-2">
             {displayData.otherEvents.map((event: any, index: number) => (
-              <div key={index} className="bg-green-100 p-4 rounded-lg">
-                <div className="font-bold text-lg">{event.title}</div>
-                <div className="text-sm text-gray-600">
+              <div key={index} className="bg-green-100 p-4 rounded-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                <div className="font-bold text-lg" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>{event.title}</div>
+                <div className="text-sm text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
                   {format(new Date(event.startDateTime), "dd/MM/yyyy HH:mm", { locale: vi })} - 
                   {format(new Date(event.endDateTime), "HH:mm", { locale: vi })}
                 </div>
                 {event.description && (
-                  <div className="text-sm mt-2">{event.description}</div>
+                  <div className="text-sm mt-2" style={{ fontFamily: 'Roboto, sans-serif' }}>{event.description}</div>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 text-xl">Không có sự kiện nào khác</div>
+          <div className="text-gray-500 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Không có sự kiện nào khác</div>
         )}
       </div>
     </div>
@@ -326,35 +334,35 @@ export default function PublicDisplay() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-teal-900 flex items-center justify-center">
-        <div className="text-white text-2xl">Đang tải dữ liệu...</div>
+        <div className="text-white text-2xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Đang tải dữ liệu...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-teal-900" data-testid="public-display">
+    <div className="public-display-container bg-teal-900" style={{ fontFamily: 'Roboto, sans-serif' }} data-testid="public-display">
       {/* Header with time in top right */}
-      <div className="bg-teal-900 text-center py-4 relative">
-        <div className="text-yellow-400 text-lg font-bold">NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
-        <div className="text-white text-base text-center font-bold">
+      <div className="bg-teal-900 text-center py-4 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="text-yellow-400 text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
+        <div className="text-white text-base text-center font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
           Chi nhánh Sở giao dịch 1
         </div>
-        <div className="text-yellow-400 text-xl font-bold mt-2">
+        <div className="text-yellow-400 text-xl font-bold mt-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
           {SCREENS[currentScreenIndex].name.toUpperCase()}
         </div>
         
         {/* Screen info and time display in top right corner */}
-        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded">
-          <div className="text-base font-bold">
+        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <div className="text-base font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
             {format(currentTime, "HH:mm:ss", { locale: vi })}
           </div>
-          <div className="text-xs">
+          <div className="text-xs" style={{ fontFamily: 'Roboto, sans-serif' }}>
             {format(currentTime, "dd/MM/yyyy", { locale: vi })}
           </div>
-          <div className="text-xs mt-1 text-yellow-300">
+          <div className="text-xs mt-1 text-yellow-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
             Màn hình: {currentScreenIndex + 1}/{SCREENS.length}
           </div>
-          <div className="text-xs text-yellow-300">
+          <div className="text-xs text-yellow-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
             Còn lại: {timeRemaining}s
           </div>
         </div>
