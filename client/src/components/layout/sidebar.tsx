@@ -34,7 +34,6 @@ const menuItems = [
     items: [
       { id: "staff-management", label: "Quản lý cán bộ", icon: Users },
       { id: "department-management", label: "Quản lý phòng ban", icon: Building },
-      { id: "event-management", label: "Quản lý sự kiện", icon: Star },
       { id: "room-management", label: "Quản lý phòng họp", icon: DoorOpen },
     ],
   },
