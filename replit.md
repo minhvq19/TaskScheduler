@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 8, 2025**: Sửa lỗi validation schema cho lịch phòng họp. Cập nhật insertMeetingScheduleSchema để chấp nhận cả string và Date object cho startDateTime/endDateTime, và tự động chuyển đổi string thành Date. Sửa function getScheduleStatus để chấp nhận cả string và Date parameters. Khắc phục lỗi "Expected date, received string" khi thêm lịch phòng họp.
 - **August 8, 2025**: Tối ưu hoàn chỉnh màn hình công cộng không cần thanh cuộn. Triển khai font Roboto và layout responsive với height: 100vh để đảm bảo toàn bộ nội dung hiển thị vừa trong màn hình. Sử dụng flexbox để phân chia không gian đều, giảm padding/margin và điều chỉnh font size xuống 8px để tối ưu không gian. Giới hạn hiển thị tối đa 6 lịch công tác mỗi ô và loại bỏ overflow để đảm bảo không cần cuộn.
 - **August 8, 2025**: Optimized public display screen for better readability and space efficiency. Enhanced schedule content formatting to display maximum 2 lines with structure "[Main content] - (Time)" and "Detailed content". Increased text size from 6-7px to 9px. Compacted color legend section with abbreviated labels and smaller indicators to reduce screen space usage.
 - **August 8, 2025**: Enhanced work schedule validation to prevent past date/time selection at browser level using HTML input constraints (min attributes). Users can no longer select past dates or times in schedule forms.

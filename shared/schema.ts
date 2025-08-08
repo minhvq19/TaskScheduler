@@ -290,6 +290,9 @@ export const insertMeetingScheduleSchema = createInsertSchema(meetingSchedules).
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  startDateTime: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  endDateTime: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
 });
 
 export const insertOtherEventSchema = createInsertSchema(otherEvents).omit({

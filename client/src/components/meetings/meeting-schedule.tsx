@@ -194,7 +194,7 @@ export default function MeetingSchedule() {
     }
   };
 
-  const getScheduleStatus = (startTime: string, endTime: string) => {
+  const getScheduleStatus = (startTime: string | Date, endTime: string | Date) => {
     const now = new Date();
     const start = new Date(startTime);
     const end = new Date(endTime);
