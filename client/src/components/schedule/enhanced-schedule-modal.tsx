@@ -296,8 +296,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   }, [schedule, isOpen, form, workStartTime, workEndTime]);
 
   const handleSubmit = (data: FormData) => {
-    // Additional validations
-    if (!isValidWorkTime(data.startTime!, data.startDate)) {
+    // Only validate times if not full day and times are provided
+    if (!data.isFullDay && data.startTime && !isValidWorkTime(data.startTime, data.startDate)) {
       const selectedDate = new Date(data.startDate);
       const today = new Date();
       
@@ -309,7 +309,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       return;
     }
 
-    if (!isValidWorkTime(data.endTime!, data.endDate)) {
+    if (!data.isFullDay && data.endTime && !isValidWorkTime(data.endTime, data.endDate)) {
       const selectedDate = new Date(data.endDate);
       const today = new Date();
       
