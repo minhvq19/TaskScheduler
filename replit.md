@@ -8,6 +8,10 @@ The system features a React-based frontend with a modern component library (shad
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+- **August 8, 2025**: Enhanced work schedule validation to prevent past date/time selection at browser level using HTML input constraints (min attributes). Users can no longer select past dates or times in schedule forms.
+
 # System Architecture
 
 ## Frontend Architecture

@@ -133,8 +133,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const isValidWorkDay = (dateString: string) => {
     const date = new Date(dateString);
-    const today = startOfDay(new Date());
-    return !isWeekend(date) && !isHoliday(dateString) && !isBefore(date, today);
+    return !isWeekend(date) && !isHoliday(dateString);
   };
 
   const isValidWorkTime = (timeString: string, dateString?: string) => {
@@ -167,17 +166,10 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     }
   }, [watchedIsFullDay, workStartTime, workEndTime, form]);
 
-  // Validate dates when they change
+  // Validate dates when they change (only check weekends and holidays now)
   useEffect(() => {
-    if (watchedStartDate) {
-      const date = new Date(watchedStartDate);
-      const today = startOfDay(new Date());
-      
-      if (isBefore(date, today)) {
-        form.setError("startDate", {
-          message: "Không thể chọn ngày quá khứ"
-        });
-      } else if (!isValidWorkDay(watchedStartDate)) {
+    if (watchedStartDate) {      
+      if (!isValidWorkDay(watchedStartDate)) {
         form.setError("startDate", {
           message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
         });
@@ -187,14 +179,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     }
 
     if (watchedEndDate) {
-      const date = new Date(watchedEndDate);
-      const today = startOfDay(new Date());
-      
-      if (isBefore(date, today)) {
-        form.setError("endDate", {
-          message: "Không thể chọn ngày quá khứ"
-        });
-      } else if (!isValidWorkDay(watchedEndDate)) {
+      if (!isValidWorkDay(watchedEndDate)) {
         form.setError("endDate", {
           message: "Không thể chọn ngày cuối tuần hoặc ngày lễ"
         });
@@ -411,6 +396,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               <Input
                 id="startDate"
                 type="date"
+                min={format(new Date(), "yyyy-MM-dd")}
                 {...form.register("startDate")}
                 data-testid="input-start-date"
               />
@@ -424,6 +410,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               <Input
                 id="endDate"
                 type="date"
+                min={format(new Date(), "yyyy-MM-dd")}
                 {...form.register("endDate")}
                 data-testid="input-end-date"
               />
@@ -441,6 +428,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="startTime"
                   type="time"
+                  min={isSameDay(new Date(watchedStartDate || new Date()), new Date()) ? format(new Date(), "HH:mm") : workStartTime}
+                  max={workEndTime}
                   {...form.register("startTime")}
                   data-testid="input-start-time"
                 />
@@ -454,6 +443,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="endTime"
                   type="time"
+                  min={isSameDay(new Date(watchedEndDate || new Date()), new Date()) ? format(new Date(), "HH:mm") : workStartTime}
+                  max={workEndTime}
                   {...form.register("endTime")}
                   data-testid="input-end-time"
                 />
