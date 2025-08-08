@@ -480,14 +480,26 @@ export default function PublicDisplay() {
     // Filter to show only ongoing events
     const now = new Date();
     
+    console.log('Display data:', displayData);
+    console.log('Other events raw:', displayData?.otherEvents);
+    console.log('Other events length:', displayData?.otherEvents?.length);
+    
     const ongoingEvents = (displayData?.otherEvents || [])
       .filter((event: any) => {
         // Use simple Date constructor for ISO format strings
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
         
+        console.log('Event:', event.shortName);
+        console.log('Start:', event.startDateTime, '-> Parsed:', start.toISOString());
+        console.log('End:', event.endDateTime, '-> Parsed:', end.toISOString());
+        console.log('Current time:', now.toISOString());
+        console.log('Is ongoing?', now >= start && now <= end);
+        
         return now >= start && now <= end; // Only show events that are currently ongoing
       });
+    
+    console.log('Ongoing events:', ongoingEvents);
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
