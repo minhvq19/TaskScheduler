@@ -240,6 +240,8 @@ export const insertStaffSchema = createInsertSchema(staff).omit({
   updatedAt: true,
 }).extend({
   password: z.string().min(11).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),
+  createUserAccount: z.boolean().optional(),
+  userGroupId: z.string().optional(),
 });
 
 export const updateStaffSchema = createInsertSchema(staff).omit({
@@ -257,6 +259,8 @@ export const updateStaffSchema = createInsertSchema(staff).omit({
   }, {
     message: "Mật khẩu phải có ít nhất 11 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
   }),
+  createUserAccount: z.boolean().optional(),
+  userGroupId: z.string().optional(),
 }).partial();
 
 export const insertMeetingRoomSchema = createInsertSchema(meetingRooms).omit({

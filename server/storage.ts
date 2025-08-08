@@ -234,25 +234,81 @@ export class DatabaseStorage implements IStorage {
     return staffMember;
   }
 
-  async createStaff(staffData: InsertStaff): Promise<Staff> {
+  async createStaff(staffData: InsertStaff & { createUserAccount?: boolean; userGroupId?: string }): Promise<Staff> {
     const hashedPassword = await bcrypt.hash(staffData.password, 10);
     const [newStaff] = await db
       .insert(staff)
-      .values({ ...staffData, password: hashedPassword })
+      .values({ 
+        fullName: staffData.fullName,
+        employeeId: staffData.employeeId,
+        password: hashedPassword,
+        position: staffData.position,
+        positionShort: staffData.positionShort,
+        departmentId: staffData.departmentId,
+        birthDate: staffData.birthDate,
+        displayOrder: staffData.displayOrder,
+        notes: staffData.notes,
+      })
       .returning();
+
+    // Create user account if requested
+    if (staffData.createUserAccount && staffData.userGroupId) {
+      await this.createSystemUser({
+        username: staffData.employeeId,
+        password: staffData.password,
+        userGroupId: staffData.userGroupId,
+      });
+    }
+
     return newStaff;
   }
 
-  async updateStaff(id: string, staffData: Partial<InsertStaff>): Promise<Staff> {
-    const updateData = { ...staffData };
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+  async updateStaff(id: string, staffData: Partial<InsertStaff> & { createUserAccount?: boolean; userGroupId?: string }): Promise<Staff> {
+    const updateData: any = {};
+    
+    // Copy only staff table fields
+    if (staffData.fullName !== undefined) updateData.fullName = staffData.fullName;
+    if (staffData.employeeId !== undefined) updateData.employeeId = staffData.employeeId;
+    if (staffData.position !== undefined) updateData.position = staffData.position;
+    if (staffData.positionShort !== undefined) updateData.positionShort = staffData.positionShort;
+    if (staffData.departmentId !== undefined) updateData.departmentId = staffData.departmentId;
+    if (staffData.birthDate !== undefined) updateData.birthDate = staffData.birthDate;
+    if (staffData.displayOrder !== undefined) updateData.displayOrder = staffData.displayOrder;
+    if (staffData.notes !== undefined) updateData.notes = staffData.notes;
+    
+    if (staffData.password) {
+      updateData.password = await bcrypt.hash(staffData.password, 10);
     }
+
     const [updatedStaff] = await db
       .update(staff)
       .set({ ...updateData, updatedAt: new Date() })
       .where(eq(staff.id, id))
       .returning();
+
+    // Handle user account creation/update
+    if (staffData.createUserAccount !== undefined) {
+      const existingUser = await this.getSystemUserByUsername(updatedStaff.employeeId);
+      
+      if (staffData.createUserAccount && !existingUser && staffData.userGroupId) {
+        // Create new user account
+        await this.createSystemUser({
+          username: updatedStaff.employeeId,
+          password: staffData.password || 'TempPassword123!',
+          userGroupId: staffData.userGroupId,
+        });
+      } else if (staffData.createUserAccount && existingUser && staffData.userGroupId) {
+        // Update existing user account group
+        await this.updateSystemUser(existingUser.id, {
+          userGroupId: staffData.userGroupId,
+          ...(staffData.password && { password: staffData.password })
+        });
+      } else if (!staffData.createUserAccount && existingUser) {
+        // Delete user account if unchecked
+        await this.deleteSystemUser(existingUser.id);
+      }
+    }
+
     return updatedStaff;
   }
 

@@ -16,12 +16,22 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertStaffSchema, type Staff, type Department } from "@shared/schema";
+
+interface UserGroup {
+  id: string;
+  name: string;
+  description?: string;
+  permissions: Record<string, string>;
+  createdAt: string;
+  updatedAt: string;
+}
 import { z } from "zod";
 
 const formSchema = insertStaffSchema.extend({
   birthDate: z.string().optional(),
   password: z.string().optional(), // Override to make password optional for editing
   createUserAccount: z.boolean().optional(), // For creating user account
+  userGroupId: z.string().optional(), // For selecting user group when creating account
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -49,6 +59,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
       displayOrder: 0,
       notes: "",
       createUserAccount: false,
+      userGroupId: "",
     },
   });
 
@@ -60,6 +71,11 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
   // Fetch system users to check if staff has user account
   const { data: systemUsers = [] } = useQuery<any[]>({
     queryKey: ["/api/system-users"],
+  });
+
+  // Fetch user groups for dropdown
+  const { data: userGroups = [] } = useQuery<UserGroup[]>({
+    queryKey: ["/api/user-groups"],
   });
 
   // Create staff mutation
@@ -132,6 +148,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         displayOrder: staff.displayOrder || 0,
         notes: staff.notes || "",
         createUserAccount: hasUserAccount,
+        userGroupId: hasUserAccount ? systemUsers.find((u: any) => u.username === staff.employeeId)?.userGroupId || "" : "",
       });
     } else if (!staff) {
       form.reset({
@@ -145,6 +162,7 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
         displayOrder: 0,
         notes: "",
         createUserAccount: false,
+        userGroupId: "",
       });
     }
   }, [staff, systemUsers.length]);
@@ -162,6 +180,14 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
     if (staff && data.password && data.password.length > 0 && data.password.length < 11) {
       form.setError("password", {
         message: "Mật khẩu phải có ít nhất 11 ký tự nếu muốn thay đổi"
+      });
+      return;
+    }
+
+    // If creating user account, userGroupId is required
+    if (data.createUserAccount && !data.userGroupId) {
+      form.setError("userGroupId", {
+        message: "Vui lòng chọn nhóm quyền khi tạo tài khoản đăng nhập"
       });
       return;
     }
@@ -386,6 +412,38 @@ export default function AddStaffModal({ isOpen, onClose, staff }: AddStaffModalP
                   </span>
                 </div>
               </div>
+              
+              {/* User Group Selection - only show when createUserAccount is checked */}
+              {form.watch("createUserAccount") && (
+                <div>
+                  <Label htmlFor="userGroupId" className="block text-sm font-medium text-gray-700 mb-2">
+                    Nhóm quyền *
+                  </Label>
+                  <Select
+                    value={form.watch("userGroupId")}
+                    onValueChange={(value) => form.setValue("userGroupId", value)}
+                  >
+                    <SelectTrigger data-testid="select-user-group">
+                      <SelectValue placeholder="Chọn nhóm quyền cho tài khoản" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userGroups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name} {group.description && `- ${group.description}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.userGroupId && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {form.formState.errors.userGroupId.message}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Nhóm quyền sẽ quyết định các chức năng mà tài khoản này có thể truy cập
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
