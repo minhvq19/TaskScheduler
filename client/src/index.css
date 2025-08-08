@@ -179,18 +179,45 @@
   background-color: #32a852; /* Updated to match database */
 }
 
+/* Header height optimization */
+.public-display-header {
+  flex-shrink: 0;
+  height: auto;
+}
+
+/* Table header optimization */
+.public-display-table-header {
+  flex-shrink: 0;
+  height: auto;
+}
+
+/* Legend optimization */
+.public-display-legend {
+  flex-shrink: 0;
+  height: auto;
+}
+
 /* Public Display Optimizations */
 .public-display-container {
   font-family: 'Roboto', sans-serif;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.public-display-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .public-display-table {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .public-display-table-body {
@@ -201,12 +228,14 @@
 
 .public-display-row {
   flex: 1;
-  min-height: 120px;
+  display: flex;
 }
 
 .public-display-cell {
-  min-height: 120px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 0;
+  overflow: hidden;
 }

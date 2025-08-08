@@ -148,17 +148,17 @@ export default function PublicDisplay() {
   const renderWorkScheduleTable = () => (
     <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
-      <div className="grid grid-cols-8 bg-orange-500">
-        <div className="p-2 text-white font-bold text-center border-r border-orange-600">
-          <div className="text-sm">Lãnh đạo/ Ngày</div>
+      <div className="public-display-table-header grid grid-cols-8 bg-orange-500">
+        <div className="p-1 text-white font-bold text-center border-r border-orange-600">
+          <div className="text-xs">Lãnh đạo/ Ngày</div>
         </div>
         {days.map((day, index) => {
           const dayOfWeek = day.getDay();
           const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
           
           return (
-            <div key={index} className="p-2 text-white font-bold text-center border-r border-orange-600">
-              <div className="text-sm">{dayNames[dayOfWeek]}</div>
+            <div key={index} className="p-1 text-white font-bold text-center border-r border-orange-600">
+              <div className="text-xs">{dayNames[dayOfWeek]}</div>
               <div className="text-xs">{format(day, "dd/MM", { locale: vi })}</div>
             </div>
           );
@@ -172,9 +172,9 @@ export default function PublicDisplay() {
           .map((staffMember, rowIndex) => (
           <div key={staffMember.id} className="public-display-row grid grid-cols-8 border-b border-gray-200">
             {/* Staff Name Column */}
-            <div className="public-display-cell p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <div className="p-1 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               <div>
-                <div className="text-sm font-medium">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+                <div className="text-xs font-medium">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
               </div>
             </div>
           
@@ -189,8 +189,7 @@ export default function PublicDisplay() {
                 className="public-display-cell p-0.5 border-r border-gray-300 relative"
                 style={{ 
                   backgroundColor: isWeekendDay ? '#9ca3af' : '#006b68',
-                  fontFamily: 'Roboto, sans-serif',
-                  minHeight: '120px'
+                  fontFamily: 'Roboto, sans-serif'
                 }}
               >
                 {!isWeekendDay && schedules.length > 0 ? (
@@ -201,11 +200,11 @@ export default function PublicDisplay() {
                       return (
                         <div
                           key={schedule.id}
-                          className="text-xs p-1 rounded text-white font-medium mb-1"
+                          className="text-xs p-0.5 rounded text-white font-medium mb-0.5"
                           style={{
                             backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                            fontSize: "10px",
-                            lineHeight: "1.2",
+                            fontSize: "8px",
+                            lineHeight: "1.1",
                             opacity: isWorkAtBranch ? 0 : 1,
                             fontFamily: 'Roboto, sans-serif',
                             fontWeight: '500'
@@ -223,21 +222,21 @@ export default function PublicDisplay() {
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
-                                <div className="truncate opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '9px' }}>{schedule.customContent}</div>
+                                <div className="truncate opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '7px' }}>{schedule.customContent}</div>
                               )}
                             </>
                           )}
                         </div>
                       );
                     })}
-                    {schedules.filter(s => s.workType !== "Làm việc tại CN").length > 8 && (
-                      <div className="text-[8px] text-gray-400 text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                        +{schedules.filter(s => s.workType !== "Làm việc tại CN").length - 8} more
+                    {schedules.filter(s => s.workType !== "Làm việc tại CN").length > 6 && (
+                      <div className="text-[6px] text-gray-400 text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                        +{schedules.filter(s => s.workType !== "Làm việc tại CN").length - 6} more
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-gray-400 text-xs p-0.5" style={{ minHeight: '120px' }}>
+                  <div className="text-gray-400 text-xs p-0.5">
                     {/* Empty cell - no schedule or weekend */}
                   </div>
                 )}
@@ -249,7 +248,7 @@ export default function PublicDisplay() {
       </div>
       
       {/* Compact Color Legend */}
-      <div className="bg-gray-50 p-2 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="public-display-legend bg-gray-50 p-1 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
         <div className="text-xs font-bold text-gray-700 mb-1 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>GHI CHÚ MÀU SẮC</div>
         <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <div className="flex items-center">
@@ -342,7 +341,7 @@ export default function PublicDisplay() {
   return (
     <div className="public-display-container bg-teal-900" style={{ fontFamily: 'Roboto, sans-serif' }} data-testid="public-display">
       {/* Header with time in top right */}
-      <div className="bg-teal-900 text-center py-4 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="public-display-header bg-teal-900 text-center py-3 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
         <div className="text-yellow-400 text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-white text-base text-center font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
           Chi nhánh Sở giao dịch 1
@@ -368,7 +367,7 @@ export default function PublicDisplay() {
         </div>
       </div>
       {/* Dynamic Screen Content */}
-      <div className="p-2">
+      <div className="public-display-content p-2">
         {renderScheduleContent()}
       </div>
     </div>
