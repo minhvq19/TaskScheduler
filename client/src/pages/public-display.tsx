@@ -535,10 +535,14 @@ export default function PublicDisplay() {
                 {currentEvent.imageUrl && (
                   <div className="w-full h-full flex items-center justify-center">
                     <img 
-                      src={currentEvent.imageUrl} 
+                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}` : currentEvent.imageUrl} 
                       alt={currentEvent.shortName}
                       className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                       style={{ width: 'auto', height: 'auto' }}
+                      onError={(e) => {
+                        console.error('Image failed to load:', currentEvent.imageUrl);
+                        console.error('Attempted URL:', e.currentTarget.src);
+                      }}
                     />
                   </div>
                 )}

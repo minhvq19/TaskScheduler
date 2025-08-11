@@ -46,8 +46,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Static serving for uploaded images
+  // Static serving for uploaded images - try both paths for compatibility
   app.use('/uploads', express.static(path.join(process.cwd(), 'dist', 'public', 'uploads')));
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
@@ -479,6 +480,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         fs.renameSync(req.file.path, publicPath);
+        
+        // Also copy to the backup uploads directory for compatibility
+        const backupPath = path.join(process.cwd(), 'uploads', filename);
+        const backupDir = path.dirname(backupPath);
+        if (!fs.existsSync(backupDir)) {
+          fs.mkdirSync(backupDir, { recursive: true });
+        }
+        fs.copyFileSync(publicPath, backupPath);
+        
         imageUrl = `/uploads/${filename}`;
       }
 
@@ -515,6 +525,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         fs.renameSync(req.file.path, publicPath);
+        
+        // Also copy to the backup uploads directory for compatibility
+        const backupPath = path.join(process.cwd(), 'uploads', filename);
+        const backupDir = path.dirname(backupPath);
+        if (!fs.existsSync(backupDir)) {
+          fs.mkdirSync(backupDir, { recursive: true });
+        }
+        fs.copyFileSync(publicPath, backupPath);
+        
         imageUrl = `/uploads/${filename}`;
       }
 
