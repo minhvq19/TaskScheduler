@@ -122,9 +122,9 @@ export default function PublicDisplay() {
     refetchInterval: 60000,
   });
 
-  // Fetch meeting rooms data
+  // Fetch meeting rooms data - use public endpoint
   const { data: rooms = [] } = useQuery<MeetingRoom[]>({
-    queryKey: ["/api/meeting-rooms"],
+    queryKey: ["/api/public/meeting-rooms"],
     refetchInterval: 60000,
   });
 
@@ -262,8 +262,8 @@ export default function PublicDisplay() {
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
                                   : schedule.workType} - (
-                                {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })} – 
-                                {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })})
+                                {format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – 
+                                {format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
@@ -325,16 +325,25 @@ export default function PublicDisplay() {
     </div>
   );
 
-  // Helper function to parse datetime for status checking (same as in meeting-schedule.tsx)
+  // Helper function to parse datetime for status checking and display with proper timezone
   const parseLocalDateTime = (dateTime: string | Date): Date => {
     if (dateTime instanceof Date) {
       return dateTime;
     }
     
-    // For status checking, we need actual Date objects
+    // For datetime display, we need to handle timezone properly
     const dateTimeString = dateTime.toString();
+    
+    // If it's an ISO string with Z (UTC), convert to local time
+    if (dateTimeString.includes('T') && dateTimeString.includes('Z')) {
+      return new Date(dateTimeString);
+    }
+    
+    // If it's a clean datetime string, treat as local time
     const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
-    const localDate = new Date(cleanString);
+    
+    // Parse as local time by adding explicit timezone offset for Vietnam (GMT+7)
+    const localDate = new Date(cleanString + '+07:00');
     return localDate;
   };
 

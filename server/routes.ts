@@ -691,6 +691,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public meeting rooms endpoint
+  app.get('/api/public/meeting-rooms', async (req, res) => {
+    try {
+      const rooms = await storage.getMeetingRooms();
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching public meeting rooms:", error);
+      res.status(500).json({ message: "Failed to fetch meeting rooms" });
+    }
+  });
+
   app.get('/api/public/display-data', async (req, res) => {
     try {
       const today = new Date();
