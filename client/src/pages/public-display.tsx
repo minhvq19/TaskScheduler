@@ -634,13 +634,26 @@ export default function PublicDisplay() {
           {(() => {
             const currentScreen = SCREENS[currentScreenIndex];
             if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
+              // Use same filtering logic as renderOtherEventsTable
               const now = new Date();
-              const ongoingEvents = displayData.otherEvents.filter((event: any) => {
-                const start = new Date(event.startDateTime);
-                const end = new Date(event.endDateTime);
-                return now >= start && now <= end;
-              });
-              const currentEvent = ongoingEvents[currentEventIndex];
+              const thirtyDaysFromNow = new Date();
+              thirtyDaysFromNow.setDate(now.getDate() + 30);
+              
+              const relevantEvents = displayData.otherEvents
+                .filter((event: any) => {
+                  const start = new Date(event.startDateTime);
+                  const end = new Date(event.endDateTime);
+                  const isOngoing = now >= start && now <= end;
+                  const isUpcoming = start >= now && start <= thirtyDaysFromNow;
+                  return isOngoing || isUpcoming;
+                })
+                .sort((a: any, b: any) => {
+                  const startA = new Date(a.startDateTime);
+                  const startB = new Date(b.startDateTime);
+                  return startA.getTime() - startB.getTime();
+                });
+              
+              const currentEvent = relevantEvents[currentEventIndex];
               if (currentEvent) {
                 return `SỰ KIỆN KHÁC: ${currentEvent.shortName.toUpperCase()}`;
               }
