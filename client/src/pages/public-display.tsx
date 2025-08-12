@@ -542,7 +542,6 @@ export default function PublicDisplay() {
             </React.Fragment>
           ))}
         </div>
-        </div>
       </div>
     );
   };
