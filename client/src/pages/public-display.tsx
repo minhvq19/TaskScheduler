@@ -278,7 +278,7 @@ export default function PublicDisplay() {
             {/* Staff Name Column */}
             <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               <div>
-                <div className="text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px', fontWeight: '700' }}>{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+                <div className="text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '22px', fontWeight: '700' }}>{(staffMember as any).positionShort}. {staffMember.fullName}</div>
               </div>
             </div>
           
