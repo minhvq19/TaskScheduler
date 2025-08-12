@@ -644,7 +644,7 @@ export default function PublicDisplay() {
         <div className="text-yellow-400 font-bold text-[22px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-center font-bold text-[22px] text-[#facc15]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
 </div>
-        <div className="text-yellow-400 text-xl font-bold mt-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+        <div className="text-xl font-bold mt-2 text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
           {(() => {
             const currentScreen = SCREENS[currentScreenIndex];
             if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
