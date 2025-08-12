@@ -711,16 +711,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Look for schedules that start up to 30 days ago and end up to 30 days from now
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(today.getDate() - 30);
-      const sevenDaysFromNow = new Date(today);
-      sevenDaysFromNow.setDate(today.getDate() + 7);
+      const thirtyDaysFromNow = new Date(today);
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-      const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, sevenDaysFromNow);
-      const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, sevenDaysFromNow);
-      const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, sevenDaysFromNow);
+      const allWorkSchedules = await storage.getWorkSchedules(thirtyDaysAgo, thirtyDaysFromNow);
+      const allMeetingSchedules = await storage.getMeetingSchedules(thirtyDaysAgo, thirtyDaysFromNow);
+      const allOtherEvents = await storage.getOtherEvents(thirtyDaysAgo, thirtyDaysFromNow);
 
       // Filter schedules that are active in the next 7 days
       const startOfToday = new Date(today);
       startOfToday.setHours(0, 0, 0, 0);
+      const sevenDaysFromNow = new Date(today);
+      sevenDaysFromNow.setDate(today.getDate() + 7);
       const endOfSevenDays = new Date(sevenDaysFromNow);
       endOfSevenDays.setHours(23, 59, 59, 999);
 
@@ -737,7 +739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return start <= endOfSevenDays && end >= startOfToday;
       });
 
-      // Send all events that overlap with the date range
+      // Send all events (no filtering by 7-day range for other events as they might be long-running)
       const otherEvents = allOtherEvents;
 
       res.json({

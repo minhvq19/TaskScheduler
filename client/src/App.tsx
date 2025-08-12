@@ -18,6 +18,7 @@ function Router() {
       {/* Public display route - always accessible */}
       <Route path="/display" component={PublicDisplay} />
       <Route path="/public-display" component={PublicDisplay} />
+      <Route path="/public" component={PublicDisplay} />
       
       {/* Protected routes */}
       {isLoading ? (

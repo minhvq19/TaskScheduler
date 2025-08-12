@@ -82,17 +82,28 @@ export default function PublicDisplay() {
           const currentScreen = SCREENS[currentScreenIndex];
           
           if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
-            // For other events, cycle through ongoing events
+            // For other events, cycle through relevant events (ongoing + upcoming within 30 days)
             const now = new Date();
-            const ongoingEvents = displayData.otherEvents.filter((event: any) => {
-              const start = new Date(event.startDateTime);
-              const end = new Date(event.endDateTime);
-              return now >= start && now <= end;
-            });
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(now.getDate() + 30);
             
-            if (ongoingEvents.length > 1) {
+            const relevantEvents = displayData.otherEvents
+              .filter((event: any) => {
+                const start = new Date(event.startDateTime);
+                const end = new Date(event.endDateTime);
+                const isOngoing = now >= start && now <= end;
+                const isUpcoming = start >= now && start <= thirtyDaysFromNow;
+                return isOngoing || isUpcoming;
+              })
+              .sort((a: any, b: any) => {
+                const startA = new Date(a.startDateTime);
+                const startB = new Date(b.startDateTime);
+                return startA.getTime() - startB.getTime();
+              });
+            
+            if (relevantEvents.length > 1) {
               // If multiple events, cycle through them
-              const nextEventIndex = (currentEventIndex + 1) % ongoingEvents.length;
+              const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
               if (nextEventIndex === 0) {
                 // Completed all events, go to next screen
                 setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
@@ -543,20 +554,32 @@ export default function PublicDisplay() {
   };
 
   const renderOtherEventsTable = () => {
-    // Filter to show only ongoing events
+    // Filter to show ongoing events OR events starting within the next 30 days
     const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
     
-    const ongoingEvents = (displayData?.otherEvents || [])
+    const relevantEvents = (displayData?.otherEvents || [])
       .filter((event: any) => {
         // Use simple Date constructor for ISO format strings
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
         
-        return now >= start && now <= end; // Only show events that are currently ongoing
+        // Show events that are ongoing OR will start within the next 30 days
+        const isOngoing = now >= start && now <= end;
+        const isUpcoming = start >= now && start <= thirtyDaysFromNow;
+        
+        return isOngoing || isUpcoming;
+      })
+      .sort((a: any, b: any) => {
+        // Sort by start time - ongoing events first, then upcoming
+        const startA = new Date(a.startDateTime);
+        const startB = new Date(b.startDateTime);
+        return startA.getTime() - startB.getTime();
       });
 
     // Show only the current event based on currentEventIndex
-    const currentEvent = ongoingEvents[currentEventIndex];
+    const currentEvent = relevantEvents[currentEventIndex];
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
