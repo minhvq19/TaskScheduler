@@ -64,10 +64,10 @@ const defaultConfigs = [
     category: 'colors'
   },
   {
-    key: 'colors.domestic_business_trip',
-    value: '#10b981',
+    key: 'colors.customer_visit',
+    value: '#0071a6',
     type: 'color',
-    description: 'Màu cho loại "Đi công tác trong nước"',
+    description: 'Màu cho loại "Đi khách hàng"',
     category: 'colors'
   },
   {

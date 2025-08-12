@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 12, 2025**: Cập nhật cấu hình nội dung công tác: bỏ "Đi công tác trong nước", giữ "Đi khách hàng" với màu #0071a6. Cập nhật form và màn hình công cộng để thống nhất. Dynamic layout cột tuần: tự động điều chỉnh độ rộng cuối tuần (0.5fr) và trong tuần (1fr) dựa trên ngày thực.
 - **August 12, 2025**: Hoàn thành tái cấu trúc form lịch công tác: giảm giới hạn từ 5 xuống 4 lịch mỗi người mỗi ngày, form mặc định ngày hiện tại, bỏ option "Làm việc tại Chi nhánh" (mặc định), khắc phục lỗi lịch cuối tuần không hiển thị ở cả admin và public. Tối ưu màn hình công cộng: giảm độ rộng cột cuối tuần, tăng font size tên/chức danh (16px), cho phép text wrap. Thêm tham số cấu hình meeting_max_rows (mặc định 10).
 - **August 12, 2025**: Khắc phục hoàn toàn lỗi sự kiện khác không hiển thị trên màn hình công cộng. Mở rộng API data range từ 7 ngày thành 30 ngày tương lai. Cập nhật logic filtering để hiển thị sự kiện đang diễn ra HOẶC sự kiện sắp tới trong 30 ngày. Sửa logic auto-cycling để chu kỳ hiển thị đúng nhiều sự kiện.
 - **August 12, 2025**: Triển khai tham số cấu hình cho phép/không cho phép nhập lịch công tác vào cuối tuần (mặc định: cho phép). Thêm loại hình "Đi khách hàng" trong nội dung công tác "Khác" với đặc điểm không tô màu nền trên lịch. Cập nhật form validation và hiển thị ghi chú cho user về chính sách cuối tuần và màu sắc. Thêm entry vào color legend cho "Đi khách hàng".

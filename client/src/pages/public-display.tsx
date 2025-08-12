@@ -368,8 +368,8 @@ export default function PublicDisplay() {
             <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>Trực LD</span>
           </div>
           <div className="flex items-center">
-            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác trong nước") }}></div>
-            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CT trong nước</span>
+            <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi khách hàng") }}></div>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>Đi khách hàng</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>

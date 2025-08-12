@@ -20,8 +20,8 @@ export const useSystemColors = () => {
       "Làm việc tại CN": colorConfigs.find(c => c.key === "colors.work_at_branch")?.value || "#4a90a4",
       "Nghỉ phép": colorConfigs.find(c => c.key === "colors.leave")?.value || "#f59e0b",
       "Trực lãnh đạo": colorConfigs.find(c => c.key === "colors.leadership_duty")?.value || "#ef4444",
-      "Đi công tác trong nước": colorConfigs.find(c => c.key === "colors.domestic_business_trip")?.value || "#10b981",
       "Đi công tác nước ngoài": colorConfigs.find(c => c.key === "colors.international_business_trip")?.value || "#8b5cf6",
+      "Đi khách hàng": colorConfigs.find(c => c.key === "colors.customer_visit")?.value || "#0071a6",
       "Khác": colorConfigs.find(c => c.key === "colors.other")?.value || "#6b7280"
     };
     
