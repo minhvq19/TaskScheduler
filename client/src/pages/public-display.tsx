@@ -240,7 +240,7 @@ export default function PublicDisplay() {
   const renderWorkScheduleTable = () => (
     <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
-      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.6fr)' }}>
+      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.5fr)' }}>
         <div className="p-2 text-white font-bold text-center border-r border-orange-600">
           <div className="text-sm">Lãnh đạo/ Ngày</div>
         </div>
@@ -262,7 +262,7 @@ export default function PublicDisplay() {
         {staff
           .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
           .map((staffMember, rowIndex) => (
-          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.6fr)' }}>
+          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.5fr)' }}>
             {/* Staff Name Column */}
             <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               <div>
