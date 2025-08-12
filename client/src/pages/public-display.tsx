@@ -424,7 +424,7 @@ export default function PublicDisplay() {
       .slice(0, meetingMaxRows);
 
     return (
-      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg flex flex-col" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
         {/* Table Header */}
         <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 250px 180px 1fr 200px 300px', fontFamily: 'Roboto, sans-serif' }}>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thứ tự</div>
@@ -434,8 +434,8 @@ export default function PublicDisplay() {
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Trạng thái</div>
           <div className="p-3 text-white font-bold text-center" style={{ fontSize: '16px', fontWeight: '700' }}>Đầu mối</div>
         </div>
-        {/* Table Body */}
-        <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'hidden' }}>
+        {/* Table Body - Data Rows */}
+        <div className="flex-1" style={{ overflowY: 'hidden' }}>
           {sortedMeetings.length > 0 ? (
             <>              
               {/* Render meeting rows */}
@@ -511,75 +511,37 @@ export default function PublicDisplay() {
                 );
               })}
               
-              {/* Fill empty rows to reach total of meetingMaxRows */}
-              {Array.from({ length: Math.max(0, meetingMaxRows - sortedMeetings.length) }, (_, index) => (
-                <div 
-                  key={`empty-${index}`}
-                  className="border-b border-orange-400" 
-                  style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
-                    backgroundColor: '#006b68',
-                    fontFamily: 'Roboto, sans-serif',
-                    minHeight: '8px'
-                  }}
-                >
-                  <div className="px-1 py-0 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '8px', fontWeight: '600' }}>
-                    {sortedMeetings.length + index + 1}
-                  </div>
-                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                    
-                  </div>
-                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                    
-                  </div>
-                  <div className="px-1 py-0 text-white border-r border-orange-400" style={{ fontSize: '8px' }}>
-                    
-                  </div>
-                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                    
-                  </div>
-                  <div className="px-1 py-0 text-white text-center" style={{ fontSize: '8px' }}>
-                    
-                  </div>
-                </div>
-              ))}
+
             </>
-          ) : (
-            // Show empty table with meetingMaxRows when no meetings
-            (Array.from({ length: meetingMaxRows }, (_, index) => (
-              <div 
-                key={`empty-${index}`}
-                className="border-b border-orange-400" 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
-                  backgroundColor: '#006b68',
-                  fontFamily: 'Roboto, sans-serif',
-                  minHeight: '8px'
-                }}
-              >
-                <div className="px-1 py-0 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '8px', fontWeight: '600' }}>
-                  {index + 1}
-                </div>
-                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                  
-                </div>
-                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                  
-                </div>
-                <div className="px-1 py-0 text-white border-r border-orange-400" style={{ fontSize: '8px' }}>
-                  
-                </div>
-                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
-                  
-                </div>
-                <div className="px-1 py-0 text-white text-center" style={{ fontSize: '8px' }}>
-                  
-                </div>
+          ) : null}
+        </div>
+        
+        {/* Footer - Empty rows at bottom (minimal height) */}
+        <div style={{ 
+          background: '#006b68',
+          borderTop: '1px solid #fb7185',
+          minHeight: sortedMeetings.length > 0 ? `${(meetingMaxRows - sortedMeetings.length) * 8}px` : `${meetingMaxRows * 8}px`,
+          maxHeight: sortedMeetings.length > 0 ? `${(meetingMaxRows - sortedMeetings.length) * 8}px` : `${meetingMaxRows * 8}px`,
+          display: 'grid',
+          gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
+          alignContent: 'start'
+        }}>
+          {/* Generate small empty rows for remaining slots */}
+          {Array.from({ 
+            length: sortedMeetings.length > 0 ? Math.max(0, meetingMaxRows - sortedMeetings.length) : meetingMaxRows 
+          }, (_, index) => (
+            <React.Fragment key={`empty-${index}`}>
+              <div className="border-r border-orange-400 text-center text-white" style={{ fontSize: '6px', padding: '1px', height: '8px', lineHeight: '6px' }}>
+                {sortedMeetings.length > 0 ? sortedMeetings.length + index + 1 : index + 1}
               </div>
-            )))
-          )}
+              <div className="border-r border-orange-400" style={{ height: '8px' }}></div>
+              <div className="border-r border-orange-400" style={{ height: '8px' }}></div>
+              <div className="border-r border-orange-400" style={{ height: '8px' }}></div>
+              <div className="border-r border-orange-400" style={{ height: '8px' }}></div>
+              <div style={{ height: '8px' }}></div>
+            </React.Fragment>
+          ))}
+        </div>
         </div>
       </div>
     );
