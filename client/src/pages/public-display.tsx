@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, addDays, startOfDay, eachDayOfInterval, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSystemColors } from "@/hooks/useSystemColors";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 interface DisplayData {
   workSchedules: any[];
@@ -39,6 +40,7 @@ export default function PublicDisplay() {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(SCREEN_DURATION / 1000);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Update time every second
   useEffect(() => {
@@ -49,8 +51,30 @@ export default function PublicDisplay() {
     return () => clearInterval(interval);
   }, []);
 
+  // Manual navigation functions
+  const goToPreviousScreen = () => {
+    setCurrentScreenIndex(prev => (prev - 1 + SCREENS.length) % SCREENS.length);
+    setCurrentEventIndex(0);
+    setTimeRemaining(SCREEN_DURATION / 1000);
+  };
+
+  const goToNextScreen = () => {
+    setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+    setCurrentEventIndex(0);
+    setTimeRemaining(SCREEN_DURATION / 1000);
+  };
+
+  const toggleAutoRotation = () => {
+    setIsPaused(prev => !prev);
+    if (!isPaused) {
+      setTimeRemaining(SCREEN_DURATION / 1000); // Reset timer when pausing
+    }
+  };
+
   // Screen rotation and countdown
   useEffect(() => {
+    if (isPaused) return; // Don't rotate when paused
+    
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
@@ -95,7 +119,7 @@ export default function PublicDisplay() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentScreenIndex, currentEventIndex]);
+  }, [currentScreenIndex, currentEventIndex, isPaused]);
 
   // Get 7 days starting from today
   const today = new Date();
@@ -604,19 +628,58 @@ export default function PublicDisplay() {
           })()} 
         </div>
         
-        {/* Screen info and time display in top right corner */}
-        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded" style={{ fontFamily: 'Roboto, sans-serif' }}>
-          <div className="text-base font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-            {format(currentTime, "HH:mm:ss", { locale: vi })}
+        {/* Navigation controls and time display in top right corner */}
+        <div className="absolute top-4 right-4 flex items-start gap-3">
+          {/* Navigation buttons */}
+          <div className="flex flex-col gap-2">
+            {/* Navigation controls row */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPreviousScreen}
+                className="bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-full transition-colors duration-200 shadow-lg"
+                style={{ fontSize: '16px' }}
+                data-testid="button-prev-screen"
+                title="Màn hình trước"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              
+              <button
+                onClick={toggleAutoRotation}
+                className={`${isPaused ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white p-2 rounded-full transition-colors duration-200 shadow-lg`}
+                style={{ fontSize: '16px' }}
+                data-testid="button-toggle-auto"
+                title={isPaused ? "Tiếp tục tự động" : "Tạm dừng tự động"}
+              >
+                {isPaused ? <Play size={20} /> : <Pause size={20} />}
+              </button>
+              
+              <button
+                onClick={goToNextScreen}
+                className="bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-full transition-colors duration-200 shadow-lg"
+                style={{ fontSize: '16px' }}
+                data-testid="button-next-screen"
+                title="Màn hình tiếp theo"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
-          <div className="text-xs" style={{ fontFamily: 'Roboto, sans-serif' }}>
-            {format(currentTime, "dd/MM/yyyy", { locale: vi })}
-          </div>
-          <div className="text-xs mt-1 text-yellow-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
-            Màn hình: {currentScreenIndex + 1}/{SCREENS.length}
-          </div>
-          <div className="text-xs text-yellow-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
-            Còn lại: {timeRemaining}s
+
+          {/* Screen info and time display */}
+          <div className="bg-black bg-opacity-50 text-white px-3 py-2 rounded" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <div className="text-base font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
+              {format(currentTime, "HH:mm:ss", { locale: vi })}
+            </div>
+            <div className="text-xs" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              {format(currentTime, "dd/MM/yyyy", { locale: vi })}
+            </div>
+            <div className="text-xs mt-1 text-yellow-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Màn hình: {currentScreenIndex + 1}/{SCREENS.length}
+            </div>
+            <div className={`text-xs ${isPaused ? 'text-red-300' : 'text-yellow-300'}`} style={{ fontFamily: 'Roboto, sans-serif' }}>
+              {isPaused ? 'Đã tạm dừng' : `Còn lại: ${timeRemaining}s`}
+            </div>
           </div>
         </div>
       </div>
