@@ -302,14 +302,14 @@ export default function PublicDisplay() {
                       return (
                         <div
                           key={schedule.id}
-                          className="public-display-schedule-item text-xs p-1 rounded text-white font-medium"
+                          className="public-display-schedule-item text-sm p-1 rounded text-white font-medium"
                           style={{
                             backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                            fontSize: "12px",
-                            lineHeight: "1.3",
+                            fontSize: "15px",
+                            lineHeight: "1.4",
                             opacity: isWorkAtBranch ? 0 : 1,
                             fontFamily: 'Roboto, sans-serif',
-                            fontWeight: '500',
+                            fontWeight: '600',
                             whiteSpace: 'normal',
                             wordWrap: 'break-word'
                           }}
@@ -317,7 +317,7 @@ export default function PublicDisplay() {
                           {!isWorkAtBranch && (
                             <>
                               {/* Line 1: [Main content] - Time */}
-                              <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600', fontSize: '12px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
+                              <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '15px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
                                   : schedule.workType} - (
@@ -326,7 +326,7 @@ export default function PublicDisplay() {
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
-                                <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', whiteSpace: 'normal', wordWrap: 'break-word' }}>{schedule.customContent}</div>
+                                <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '13px', whiteSpace: 'normal', wordWrap: 'break-word' }}>{schedule.customContent}</div>
                               )}
                             </>
                           )}
