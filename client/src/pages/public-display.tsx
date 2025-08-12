@@ -250,7 +250,7 @@ export default function PublicDisplay() {
     const gridTemplate = `minmax(160px, 1fr) ${days.map((_, index) => getColumnWidth(index)).join(' ')}`;
     
     return (
-    <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
       <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: gridTemplate }}>
         <div className="p-2 text-white font-bold text-center border-r border-orange-600">
@@ -386,7 +386,6 @@ export default function PublicDisplay() {
           </div>
         </div>
       </div>
-    </div>
     );
   };
 
