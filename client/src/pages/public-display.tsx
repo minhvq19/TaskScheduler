@@ -240,7 +240,7 @@ export default function PublicDisplay() {
   const renderWorkScheduleTable = () => (
     <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
-      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) repeat(7, 1fr)' }}>
+      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.6fr)' }}>
         <div className="p-2 text-white font-bold text-center border-r border-orange-600">
           <div className="text-sm">Lãnh đạo/ Ngày</div>
         </div>
@@ -262,11 +262,11 @@ export default function PublicDisplay() {
         {staff
           .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
           .map((staffMember, rowIndex) => (
-          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) repeat(7, 1fr)' }}>
+          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.6fr)' }}>
             {/* Staff Name Column */}
             <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               <div>
-                <div className="text-sm font-medium">{(staffMember as any).positionShort}. {staffMember.fullName}</div>
+                <div className="text-base font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px', fontWeight: '700' }}>{(staffMember as any).positionShort}. {staffMember.fullName}</div>
               </div>
             </div>
           
@@ -284,7 +284,7 @@ export default function PublicDisplay() {
                   fontFamily: 'Roboto, sans-serif'
                 }}
               >
-                {!isWeekendDay && schedules.length > 0 ? (
+                {schedules.length > 0 ? (
                   <div className="public-display-schedule-container">
                     {schedules.slice(0, 8).map((schedule, idx) => {
                       const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
@@ -295,17 +295,19 @@ export default function PublicDisplay() {
                           className="public-display-schedule-item text-xs p-1 rounded text-white font-medium"
                           style={{
                             backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                            fontSize: "11px",
-                            lineHeight: "1.2",
+                            fontSize: "12px",
+                            lineHeight: "1.3",
                             opacity: isWorkAtBranch ? 0 : 1,
                             fontFamily: 'Roboto, sans-serif',
-                            fontWeight: '500'
+                            fontWeight: '500',
+                            whiteSpace: 'normal',
+                            wordWrap: 'break-word'
                           }}
                         >
                           {!isWorkAtBranch && (
                             <>
                               {/* Line 1: [Main content] - Time */}
-                              <div className="font-semibold truncate" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600', fontSize: '11px' }}>
+                              <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600', fontSize: '12px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
                                   : schedule.workType} - (
@@ -314,7 +316,7 @@ export default function PublicDisplay() {
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
-                                <div className="truncate opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '10px' }}>{schedule.customContent}</div>
+                                <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '11px', whiteSpace: 'normal', wordWrap: 'break-word' }}>{schedule.customContent}</div>
                               )}
                             </>
                           )}

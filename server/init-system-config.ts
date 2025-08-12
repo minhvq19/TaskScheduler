@@ -124,6 +124,15 @@ const defaultConfigs = [
     type: 'boolean',
     description: 'Cho phép nhập lịch công tác vào Thứ 7, Chủ nhật',
     category: 'policies'
+  },
+
+  // Meeting display configuration
+  {
+    key: 'display.meeting_max_rows',
+    value: '10',
+    type: 'number',
+    description: 'Số dòng tối đa hiển thị lịch họp tại màn hình công cộng',
+    category: 'display'
   }
 ];
 

@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 12, 2025**: Hoàn thành tái cấu trúc form lịch công tác: giảm giới hạn từ 5 xuống 4 lịch mỗi người mỗi ngày, form mặc định ngày hiện tại, bỏ option "Làm việc tại Chi nhánh" (mặc định), khắc phục lỗi lịch cuối tuần không hiển thị ở cả admin và public. Tối ưu màn hình công cộng: giảm độ rộng cột cuối tuần, tăng font size tên/chức danh (16px), cho phép text wrap. Thêm tham số cấu hình meeting_max_rows (mặc định 10).
 - **August 12, 2025**: Khắc phục hoàn toàn lỗi sự kiện khác không hiển thị trên màn hình công cộng. Mở rộng API data range từ 7 ngày thành 30 ngày tương lai. Cập nhật logic filtering để hiển thị sự kiện đang diễn ra HOẶC sự kiện sắp tới trong 30 ngày. Sửa logic auto-cycling để chu kỳ hiển thị đúng nhiều sự kiện.
 - **August 12, 2025**: Triển khai tham số cấu hình cho phép/không cho phép nhập lịch công tác vào cuối tuần (mặc định: cho phép). Thêm loại hình "Đi khách hàng" trong nội dung công tác "Khác" với đặc điểm không tô màu nền trên lịch. Cập nhật form validation và hiển thị ghi chú cho user về chính sách cuối tuần và màu sắc. Thêm entry vào color legend cho "Đi khách hàng".
 - **August 12, 2025**: Thêm tính năng navigation manual cho màn hình công cộng. Triển khai nút Previous/Next và nút Play/Pause ở góc trên bên phải với thiết kế đẹp, sử dụng icons từ Lucide React. Người dùng có thể chủ động chuyển màn hình hoặc tạm dừng/tiếp tục chế độ tự động chuyển màn hình. Các nút có màu cam (navigation) và đỏ/xanh (pause/play) với hover effects và tooltips.

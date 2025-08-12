@@ -152,7 +152,7 @@ export default function WorkSchedule() {
     const staff = boardStaff.find(s => s.id === staffId);
     const isBoardMember = staff && (staff as any).department?.name.toLowerCase().includes("giám đốc");
     
-    if (!isWeekend && isBoardMember && daySchedules.length === 0) {
+    if (isBoardMember && daySchedules.length === 0) {
       // Add default work schedule
       daySchedules.push({
         id: `default-${staffId}-${day.toISOString()}`,
@@ -271,7 +271,7 @@ export default function WorkSchedule() {
                           className={`p-2 border border-gray-200 min-h-20 ${isWeekendDay ? 'bg-gray-200' : ''}`}
                           style={{ backgroundColor: isWeekendDay ? '#d1d5db' : '#006b68' }}
                         >
-                          {!isWeekendDay && daySchedules.map((schedule) => {
+                          {daySchedules.map((schedule) => {
                             const isDefaultSchedule = schedule.id.startsWith('default-');
                             const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
                             

@@ -43,7 +43,6 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const workTypes = [
-  { value: "Làm việc tại CN", label: "Làm việc tại CN" },
   { value: "Nghỉ phép", label: "Nghỉ phép" },
   { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
   { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
@@ -64,18 +63,23 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get current date in yyyy-MM-dd format for form inputs
+  const getCurrentDate = () => {
+    const today = new Date();
+    return format(today, "yyyy-MM-dd");
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
       staffId: "",
-      startDate: "",
-      endDate: "",
+      startDate: getCurrentDate(),
+      endDate: getCurrentDate(),
       startTime: "",
       endTime: "",
       workType: "",
       customContent: "",
-// Removed customWorkType from defaultValues
       isFullDay: false,
     },
   });

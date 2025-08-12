@@ -452,7 +452,7 @@ export class DatabaseStorage implements IStorage {
         
         // The getWorkSchedulesByStaffAndDate method now returns all overlapping schedules
         // Adding the new schedule would exceed the limit
-        if (relevantSchedules.length >= 5) {
+        if (relevantSchedules.length >= 4) {
           return {
             isValid: false,
             violatingDate: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format

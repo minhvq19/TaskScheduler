@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: (req.user as any)?.id || 'admin-user',
       });
 
-      // Check daily limit (max 5 schedules per staff per day) for the entire date range
+      // Check daily limit (max 4 schedules per staff per day) for the entire date range
       const startDate = new Date(validatedData.startDateTime);
       const endDate = new Date(validatedData.endDateTime);
       startDate.setHours(0, 0, 0, 0);
@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!validation.isValid) {
         const violatingDateFormatted = new Date(validation.violatingDate!).toLocaleDateString('vi-VN');
         return res.status(400).json({ 
-          message: `Không thể thêm lịch công tác. Ngày ${violatingDateFormatted} đã có ${validation.currentCount} lịch công tác, vượt quá giới hạn 5 lịch cho mỗi ngày.`
+          message: `Không thể thêm lịch công tác. Ngày ${violatingDateFormatted} đã có ${validation.currentCount} lịch công tác, vượt quá giới hạn 4 lịch cho mỗi ngày.`
         });
       }
 
