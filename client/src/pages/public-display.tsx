@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, addDays, startOfDay, eachDayOfInterval, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -28,7 +28,7 @@ interface Staff {
   };
 }
 
-const SCREEN_DURATION = 15000; // 15 seconds
+// SCREEN_DURATION will be loaded from system config
 const SCREENS = [
   { id: 'work-schedule', name: 'Kế hoạch công tác' },
   { id: 'meeting-schedule', name: 'Lịch họp' },
@@ -39,7 +39,7 @@ export default function PublicDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(SCREEN_DURATION / 1000);
+  const [timeRemaining, setTimeRemaining] = useState(15); // Will be updated from config
   const [isPaused, setIsPaused] = useState(false);
 
   // Update time every second
@@ -51,23 +51,35 @@ export default function PublicDisplay() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch system config to get refresh interval
+  const { data: systemConfig = [] } = useQuery<any[]>({
+    queryKey: ["/api/system-config"],
+    refetchInterval: 60000,
+  });
+
+  // Get screen duration from config, default to 15 seconds
+  const screenDurationMs = React.useMemo(() => {
+    const refreshConfig = systemConfig.find(config => config.key === 'display.refresh_interval');
+    return refreshConfig ? parseInt(refreshConfig.value) * 1000 : 15000;
+  }, [systemConfig]);
+
   // Manual navigation functions
   const goToPreviousScreen = () => {
     setCurrentScreenIndex(prev => (prev - 1 + SCREENS.length) % SCREENS.length);
     setCurrentEventIndex(0);
-    setTimeRemaining(SCREEN_DURATION / 1000);
+    setTimeRemaining(screenDurationMs / 1000);
   };
 
   const goToNextScreen = () => {
     setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
     setCurrentEventIndex(0);
-    setTimeRemaining(SCREEN_DURATION / 1000);
+    setTimeRemaining(screenDurationMs / 1000);
   };
 
   const toggleAutoRotation = () => {
     setIsPaused(prev => !prev);
     if (!isPaused) {
-      setTimeRemaining(SCREEN_DURATION / 1000); // Reset timer when pausing
+      setTimeRemaining(screenDurationMs / 1000); // Reset timer when pausing
     }
   };
 
@@ -123,14 +135,14 @@ export default function PublicDisplay() {
             setCurrentEventIndex(0);
           }
           
-          return SCREEN_DURATION / 1000;
+          return screenDurationMs / 1000;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentScreenIndex, currentEventIndex, isPaused]);
+  }, [currentScreenIndex, currentEventIndex, isPaused, screenDurationMs]);
 
   // Get 7 days starting from today
   const today = new Date();
@@ -142,7 +154,7 @@ export default function PublicDisplay() {
   // Fetch display data when screen changes (every 15 seconds)
   const { data: displayData, isLoading, refetch: refetchDisplayData } = useQuery<DisplayData>({
     queryKey: ["/api/public/display-data"],
-    refetchInterval: SCREEN_DURATION,
+    refetchInterval: screenDurationMs,
     refetchIntervalInBackground: true,
   });
 
