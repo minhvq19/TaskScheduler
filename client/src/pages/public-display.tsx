@@ -521,25 +521,25 @@ export default function PublicDisplay() {
                     gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
                     backgroundColor: '#006b68',
                     fontFamily: 'Roboto, sans-serif',
-                    minHeight: '10px'
+                    minHeight: '8px'
                   }}
                 >
-                  <div className="p-1 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '12px', fontWeight: '600' }}>
+                  <div className="px-1 py-0 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '8px', fontWeight: '600' }}>
                     {sortedMeetings.length + index + 1}
                   </div>
-                  <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                     
                   </div>
-                  <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                     
                   </div>
-                  <div className="p-1 text-white border-r border-orange-400" style={{ fontSize: '12px' }}>
+                  <div className="px-1 py-0 text-white border-r border-orange-400" style={{ fontSize: '8px' }}>
                     
                   </div>
-                  <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                  <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                     
                   </div>
-                  <div className="p-1 text-white text-center" style={{ fontSize: '12px' }}>
+                  <div className="px-1 py-0 text-white text-center" style={{ fontSize: '8px' }}>
                     
                   </div>
                 </div>
@@ -556,25 +556,25 @@ export default function PublicDisplay() {
                   gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
                   backgroundColor: '#006b68',
                   fontFamily: 'Roboto, sans-serif',
-                  minHeight: '10px'
+                  minHeight: '8px'
                 }}
               >
-                <div className="p-1 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '12px', fontWeight: '600' }}>
+                <div className="px-1 py-0 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '8px', fontWeight: '600' }}>
                   {index + 1}
                 </div>
-                <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                   
                 </div>
-                <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                   
                 </div>
-                <div className="p-1 text-white border-r border-orange-400" style={{ fontSize: '12px' }}>
+                <div className="px-1 py-0 text-white border-r border-orange-400" style={{ fontSize: '8px' }}>
                   
                 </div>
-                <div className="p-1 text-white text-center border-r border-orange-400" style={{ fontSize: '12px' }}>
+                <div className="px-1 py-0 text-white text-center border-r border-orange-400" style={{ fontSize: '8px' }}>
                   
                 </div>
-                <div className="p-1 text-white text-center" style={{ fontSize: '12px' }}>
+                <div className="px-1 py-0 text-white text-center" style={{ fontSize: '8px' }}>
                   
                 </div>
               </div>
