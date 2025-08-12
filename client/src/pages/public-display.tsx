@@ -30,7 +30,7 @@ interface Staff {
 
 // SCREEN_DURATION will be loaded from system config
 const SCREENS = [
-  { id: 'work-schedule', name: 'Kế hoạch công tác' },
+  { id: 'work-schedule', name: 'LỊCH HỌP' },
   { id: 'meeting-schedule', name: 'Lịch họp' },
   { id: 'other-events', name: 'Sự kiện khác' }
 ];
@@ -637,7 +637,7 @@ export default function PublicDisplay() {
                   </div>
                 ) : (
                   /* Show event details when no image */
-                  <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                  (<div className="w-full h-full flex flex-col items-center justify-center p-8">
                     <div className="text-center text-teal-800">
                       <h2 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                         {currentEvent.shortName}
@@ -648,7 +648,7 @@ export default function PublicDisplay() {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </div>)
                 )}
               </div>
             </div>
@@ -679,7 +679,7 @@ export default function PublicDisplay() {
         <div className="text-yellow-400 font-bold text-[22px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-center font-bold text-[22px] text-[#facc15]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
 </div>
-        <div className="text-xl font-bold mt-2 text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+        <div className="font-bold mt-2 text-[#ffffff] text-[44px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
           {(() => {
             const currentScreen = SCREENS[currentScreenIndex];
             if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
