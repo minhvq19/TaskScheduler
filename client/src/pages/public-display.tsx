@@ -401,7 +401,6 @@ export default function PublicDisplay() {
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Trạng thái</div>
           <div className="p-3 text-white font-bold text-center" style={{ fontSize: '16px', fontWeight: '700' }}>Đầu mối</div>
         </div>
-
         {/* Table Body */}
         <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'hidden' }}>
           {sortedMeetings.length > 0 ? (
@@ -515,7 +514,7 @@ export default function PublicDisplay() {
             </>
           ) : (
             // Show empty table with 20 rows when no meetings
-            Array.from({ length: 20 }, (_, index) => (
+            (Array.from({ length: 20 }, (_, index) => (
               <div 
                 key={`empty-${index}`}
                 className="border-b border-orange-400" 
@@ -546,7 +545,7 @@ export default function PublicDisplay() {
                   
                 </div>
               </div>
-            ))
+            )))
           )}
         </div>
       </div>
@@ -629,9 +628,8 @@ export default function PublicDisplay() {
       {/* Header with time in top right */}
       <div className="public-display-header bg-teal-900 text-center py-3 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
         <div className="text-yellow-400 text-lg font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
-        <div className="text-white text-base text-center font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-          Chi nhánh Sở giao dịch 1
-        </div>
+        <div className="text-white text-base text-center font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
+</div>
         <div className="text-yellow-400 text-xl font-bold mt-2" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
           {(() => {
             const currentScreen = SCREENS[currentScreenIndex];
