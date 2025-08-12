@@ -153,8 +153,8 @@ export default function PublicDisplay() {
 
   // Fetch display data when screen changes (every 15 seconds)
   const { data: displayData, isLoading, refetch: refetchDisplayData } = useQuery<DisplayData>({
-    queryKey: ["/api/public/display-data"],
-    refetchInterval: screenDurationMs,
+    queryKey: ["/api/public/display-data"], // Use stable key but force refresh
+    refetchInterval: 3000, // Refresh every 3 seconds for immediate updates
     refetchIntervalInBackground: true,
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Don't cache data to ensure fresh image URLs
