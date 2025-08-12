@@ -615,7 +615,7 @@ export default function PublicDisplay() {
             <div className="h-full flex flex-col justify-center">
               <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
                 {/* Large image - full display */}
-                {currentEvent.imageUrl && (
+                {currentEvent.imageUrl ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <img 
                       src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}` : currentEvent.imageUrl} 
@@ -625,8 +625,24 @@ export default function PublicDisplay() {
                       onError={(e) => {
                         console.error('Image failed to load:', currentEvent.imageUrl);
                         console.error('Attempted URL:', e.currentTarget.src);
+                        // Hide the image element when it fails to load
+                        e.currentTarget.style.display = 'none';
                       }}
                     />
+                  </div>
+                ) : (
+                  /* Show event details when no image */
+                  <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                    <div className="text-center text-teal-800">
+                      <h2 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                        {currentEvent.shortName}
+                      </h2>
+                      {currentEvent.detailedContent && (
+                        <p className="text-2xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                          {currentEvent.detailedContent}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
