@@ -123,6 +123,12 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       // If valid weekday and not holiday, clear any previous errors and set value
       form.clearErrors(field);
       form.setValue(field, value);
+      
+      // Auto-fill endDate when startDate is set and isFullDay is checked
+      if (field === "startDate" && watchedIsFullDay) {
+        form.setValue("endDate", value);
+        form.clearErrors("endDate");
+      }
     }
   };
 
@@ -209,8 +215,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     if (watchedIsFullDay) {
       form.setValue("startTime", workStartTime);
       form.setValue("endTime", workEndTime);
+      
+      // Auto-fill endDate with startDate when full day is checked
+      if (watchedStartDate) {
+        form.setValue("endDate", watchedStartDate);
+        form.clearErrors("endDate");
+      }
     }
-  }, [watchedIsFullDay, workStartTime, workEndTime, form]);
+  }, [watchedIsFullDay, workStartTime, workEndTime, form, watchedStartDate]);
 
   // Monitor form values and prevent weekends
   useEffect(() => {
