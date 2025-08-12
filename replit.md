@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+- **August 12, 2025**: Triển khai tham số cấu hình display.meeting_max_rows để kiểm soát số dòng tối đa hiển thị lịch họp trên màn hình công cộng (mặc định: 10 dòng). Thay thế hardcode số 20 bằng giá trị động từ system config. Khắc phục lỗi hiển thị ảnh sự kiện khác: xóa tham chiếu file không tồn tại, thêm fallback hiển thị text khi không có ảnh.
 - **August 12, 2025**: Cập nhật cấu hình nội dung công tác: bỏ "Đi công tác trong nước", giữ "Đi khách hàng" với màu #0071a6. Cập nhật form và màn hình công cộng để thống nhất. Dynamic layout cột tuần: tự động điều chỉnh độ rộng cuối tuần (0.5fr) và trong tuần (1fr) dựa trên ngày thực.
 - **August 12, 2025**: Hoàn thành tái cấu trúc form lịch công tác: giảm giới hạn từ 5 xuống 4 lịch mỗi người mỗi ngày, form mặc định ngày hiện tại, bỏ option "Làm việc tại Chi nhánh" (mặc định), khắc phục lỗi lịch cuối tuần không hiển thị ở cả admin và public. Tối ưu màn hình công cộng: giảm độ rộng cột cuối tuần, tăng font size tên/chức danh (16px), cho phép text wrap. Thêm tham số cấu hình meeting_max_rows (mặc định 10).
 - **August 12, 2025**: Khắc phục hoàn toàn lỗi sự kiện khác không hiển thị trên màn hình công cộng. Mở rộng API data range từ 7 ngày thành 30 ngày tương lai. Cập nhật logic filtering để hiển thị sự kiện đang diễn ra HOẶC sự kiện sắp tới trong 30 ngày. Sửa logic auto-cycling để chu kỳ hiển thị đúng nhiều sự kiện.

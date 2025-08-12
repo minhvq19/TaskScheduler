@@ -175,6 +175,8 @@ export default function PublicDisplay() {
     refetchInterval: 60000,
   });
 
+
+
   const { getWorkScheduleColor } = useSystemColors();
 
   // Function to check if date is weekend
@@ -411,12 +413,15 @@ export default function PublicDisplay() {
   };
 
   const renderMeetingScheduleTable = () => {
-    // Get meeting schedules, filter out completed ones, sort by start time, limit to 20
+    // Get meeting max rows from system config
+    const meetingMaxRows = parseInt(systemConfig?.find((c: any) => c.key === 'display.meeting_max_rows')?.value || '10');
+    
+    // Get meeting schedules, filter out completed ones, sort by start time, limit by config
     const now = new Date();
     const sortedMeetings = (displayData?.meetingSchedules || [])
       .filter((meeting: any) => parseLocalDateTime(meeting.endDateTime) > now) // Only show future and ongoing meetings
       .sort((a: any, b: any) => parseLocalDateTime(a.startDateTime).getTime() - parseLocalDateTime(b.startDateTime).getTime())
-      .slice(0, 20);
+      .slice(0, meetingMaxRows);
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
@@ -506,8 +511,8 @@ export default function PublicDisplay() {
                 );
               })}
               
-              {/* Fill empty rows to reach total of 20 rows */}
-              {Array.from({ length: Math.max(0, 20 - sortedMeetings.length) }, (_, index) => (
+              {/* Fill empty rows to reach total of meetingMaxRows */}
+              {Array.from({ length: Math.max(0, meetingMaxRows - sortedMeetings.length) }, (_, index) => (
                 <div 
                   key={`empty-${index}`}
                   className="border-b border-orange-400" 
@@ -541,8 +546,8 @@ export default function PublicDisplay() {
               ))}
             </>
           ) : (
-            // Show empty table with 20 rows when no meetings
-            (Array.from({ length: 20 }, (_, index) => (
+            // Show empty table with meetingMaxRows when no meetings
+            (Array.from({ length: meetingMaxRows }, (_, index) => (
               <div 
                 key={`empty-${index}`}
                 className="border-b border-orange-400" 
