@@ -115,6 +115,15 @@ const defaultConfigs = [
     type: 'string',
     description: 'Giờ kết thúc làm việc hàng ngày',
     category: 'timing'
+  },
+
+  // Work schedule policies
+  {
+    key: 'policies.allow_weekend_schedule',
+    value: 'true',
+    type: 'boolean',
+    description: 'Cho phép nhập lịch công tác vào Thứ 7, Chủ nhật',
+    category: 'policies'
   }
 ];
 

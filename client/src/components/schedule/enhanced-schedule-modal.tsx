@@ -28,6 +28,7 @@ const formSchema = z.object({
   endTime: z.string().optional(),
   workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
   customContent: z.string().max(200).optional(),
+  customWorkType: z.string().optional(), // For sub-categories of "Khác"
   isFullDay: z.boolean().default(false),
 }).refine((data) => {
   if (!data.isFullDay) {
@@ -48,6 +49,11 @@ const workTypes = [
   { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
   { value: "Đi công tác nước ngoài", label: "Đi công tác nước ngoài" },
   { value: "Khác", label: "Khác" },
+];
+
+const customWorkTypes = [
+  { value: "general", label: "Khác" },
+  { value: "customer_visit", label: "Đi khách hàng" },
 ];
 
 interface EnhancedScheduleModalProps {
@@ -71,14 +77,24 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       endTime: "",
       workType: "",
       customContent: "",
+      customWorkType: "",
       isFullDay: false,
     },
   });
 
   const watchedWorkType = form.watch("workType");
+  const watchedCustomWorkType = form.watch("customWorkType");
   const watchedIsFullDay = form.watch("isFullDay");
   const watchedStartDate = form.watch("startDate");
   const watchedEndDate = form.watch("endDate");
+
+  // Fetch system configuration for weekend policy
+  const { data: systemConfigs = [] } = useQuery<SystemConfigs[]>({
+    queryKey: ["/api/system-config"],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const allowWeekendSchedule = systemConfigs.find(c => c.key === 'policies.allow_weekend_schedule')?.value === 'true';
 
   // Handle date input change to prevent weekend and holiday selection
   const handleDateChange = (field: "startDate" | "endDate", value: string) => {
@@ -90,16 +106,17 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       
       console.log(`Selected date: ${value}, day of week: ${dayOfWeek}`);
       
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        console.log("Weekend detected, preventing selection");
+      // Check weekend restriction based on system config
+      if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        console.log("Weekend detected, preventing selection due to policy");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
         });
         toast({
           title: "Lỗi",
-          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
           variant: "destructive",
         });
         return;
@@ -147,10 +164,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     queryKey: ["/api/holidays"],
   });
 
-  // Fetch system config for work hours
-  const { data: systemConfigs = [] } = useQuery<SystemConfigs[]>({
-    queryKey: ["/api/system-config"],
-  });
+
 
   const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
   const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
@@ -231,15 +245,16 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
         const selectedDate = new Date(value);
         const dayOfWeek = selectedDate.getDay();
         
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          console.log(`Weekend detected in useEffect for ${field}, clearing value`);
+        // Check weekend restriction based on system config
+        if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
+          console.log(`Weekend detected in useEffect for ${field}, clearing value due to policy`);
           form.setValue(field, "");
           form.setError(field, {
-            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
           });
           toast({
             title: "Lỗi",
-            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
             variant: "destructive",
           });
         }
@@ -252,7 +267,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     if (watchedEndDate) {
       checkAndPreventWeekends("endDate", watchedEndDate);
     }
-  }, [watchedStartDate, watchedEndDate, form, toast]);
+  }, [watchedStartDate, watchedEndDate, form, toast, allowWeekendSchedule]);
 
 
   // Create schedule mutation
@@ -261,11 +276,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
       const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
 
+      // For "Khác" work type, determine if it's customer visit
+      const isCustomerVisit = data.workType === "Khác" && data.customWorkType === "customer_visit";
+      const finalWorkType = isCustomerVisit ? "Đi khách hàng" : data.workType;
+
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        workType: data.workType,
+        workType: finalWorkType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
@@ -294,11 +313,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
       const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
 
+      // For "Khác" work type, determine if it's customer visit
+      const isCustomerVisit = data.workType === "Khác" && data.customWorkType === "customer_visit";
+      const finalWorkType = isCustomerVisit ? "Đi khách hàng" : data.workType;
+
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        workType: data.workType,
+        workType: finalWorkType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);
@@ -333,14 +356,20 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       // Check if it's a full day (matches work hours)
       const isFullDay = startTimeStr === workStartTime && endTimeStr === workEndTime;
 
+      // Determine if it's customer visit type
+      const isCustomerVisit = schedule.workType === "Đi khách hàng";
+      const displayWorkType = isCustomerVisit ? "Khác" : schedule.workType;
+      const customWorkType = isCustomerVisit ? "customer_visit" : "general";
+
       form.reset({
         staffId: schedule.staffId,
         startDate: format(startDate, "yyyy-MM-dd"),
         endDate: format(endDate, "yyyy-MM-dd"),
         startTime: startTimeStr,
         endTime: endTimeStr,
-        workType: schedule.workType,
+        workType: displayWorkType,
         customContent: schedule.customContent || "",
+        customWorkType: isCustomerVisit ? customWorkType : "",
         isFullDay: isFullDay,
       });
     }
@@ -537,27 +566,51 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             </div>
           )}
 
-          {/* Custom Content (only for "Khác") */}
+          {/* Custom Work Type (only for "Khác") */}
           {watchedWorkType === "Khác" && (
-            <div className="space-y-2">
-              <Label htmlFor="customContent">Nội dung cụ thể</Label>
-              <Textarea
-                id="customContent"
-                placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
-                maxLength={200}
-                {...form.register("customContent")}
-                data-testid="textarea-custom-content"
-              />
-              {form.formState.errors.customContent && (
-                <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
-              )}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="customWorkType">Loại hình</Label>
+                <Select 
+                  value={watchedCustomWorkType} 
+                  onValueChange={(value) => form.setValue("customWorkType", value)}
+                >
+                  <SelectTrigger data-testid="select-custom-work-type">
+                    <SelectValue placeholder="Chọn loại hình" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customWorkTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customContent">Nội dung cụ thể</Label>
+                <Textarea
+                  id="customContent"
+                  placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
+                  maxLength={200}
+                  {...form.register("customContent")}
+                  data-testid="textarea-custom-content"
+                />
+                {form.formState.errors.customContent && (
+                  <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
+                )}
+              </div>
             </div>
           )}
 
           {/* Work Hours Info */}
           <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
             <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-            <p><strong>Lưu ý:</strong> Không thể chọn ngày/giờ quá khứ, ngày cuối tuần (T7, CN) hoặc ngày lễ</p>
+            <p><strong>Lưu ý:</strong> Không thể chọn ngày/giờ quá khứ{allowWeekendSchedule ? "" : ", ngày cuối tuần (T7, CN)"} hoặc ngày lễ</p>
+            {watchedWorkType === "Khác" && watchedCustomWorkType === "customer_visit" && (
+              <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ không được tô màu nền trên lịch</p>
+            )}
           </div>
 
           {/* Form Actions */}

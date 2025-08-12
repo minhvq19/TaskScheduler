@@ -121,10 +121,11 @@ export default function WorkSchedule() {
   const getScheduleStyle = (workType: string) => {
     const bgColor = getWorkScheduleColor(workType);
     const isWorkAtBranch = workType === "Làm việc tại CN";
+    const isCustomerVisit = workType === "Đi khách hàng";
     
     return {
-      backgroundColor: isWorkAtBranch ? "transparent" : bgColor,
-      color: isWorkAtBranch ? "transparent" : "white", // Hide text for work at branch
+      backgroundColor: isWorkAtBranch || isCustomerVisit ? "transparent" : bgColor,
+      color: isWorkAtBranch ? "transparent" : (isCustomerVisit ? "#374151" : "white"), // Show text for customer visit but with dark color
       border: isWorkAtBranch ? "none" : "none"
     };
   };
@@ -351,6 +352,10 @@ export default function WorkSchedule() {
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
               <span className="text-sm">Khác</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border border-gray-300 rounded"></div>
+              <span className="text-sm">Đi khách hàng</span>
             </div>
           </div>
         </CardContent>
