@@ -237,10 +237,20 @@ export default function PublicDisplay() {
     }
   };
 
-  const renderWorkScheduleTable = () => (
+  const renderWorkScheduleTable = () => {
+    // Calculate dynamic grid template based on actual day positions
+    const getColumnWidth = (index: number) => {
+      const day = days[index];
+      const dayOfWeek = getDay(day); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      return (dayOfWeek === 0 || dayOfWeek === 6) ? '0.5fr' : '1fr'; // Weekend smaller
+    };
+    
+    const gridTemplate = `minmax(160px, 1fr) ${days.map((_, index) => getColumnWidth(index)).join(' ')}`;
+    
+    return (
     <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif' }}>
       {/* Table Header */}
-      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.5fr)' }}>
+      <div className="public-display-table-header bg-orange-500" style={{ display: 'grid', gridTemplateColumns: gridTemplate }}>
         <div className="p-2 text-white font-bold text-center border-r border-orange-600">
           <div className="text-sm">Lãnh đạo/ Ngày</div>
         </div>
@@ -262,7 +272,7 @@ export default function PublicDisplay() {
         {staff
           .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
           .map((staffMember, rowIndex) => (
-          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) repeat(5, 1fr) repeat(2, 0.5fr)' }}>
+          <div key={staffMember.id} className="public-display-row border-b border-gray-200" style={{ display: 'grid', gridTemplateColumns: gridTemplate }}>
             {/* Staff Name Column */}
             <div className="p-2 bg-teal-700 text-white font-bold border-r border-gray-300 flex items-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               <div>
@@ -372,7 +382,8 @@ export default function PublicDisplay() {
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   // Helper function to parse datetime for status checking and display with proper timezone
   const parseLocalDateTime = (dateTime: string | Date): Date => {
