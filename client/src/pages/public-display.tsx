@@ -30,7 +30,7 @@ interface Staff {
 
 // SCREEN_DURATION will be loaded from system config
 const SCREENS = [
-  { id: 'work-schedule', name: 'LỊCH HỌP' },
+  { id: 'work-schedule', name: 'Kế hoạch công tác' },
   { id: 'meeting-schedule', name: 'Lịch họp' },
   { id: 'other-events', name: 'Sự kiện khác' }
 ];
@@ -327,7 +327,9 @@ export default function PublicDisplay() {
                               <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '15px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
-                                  : schedule.workType}{isFullDay ? " - (Cả ngày)" : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
+                                  : schedule.workType === "Đi công tác nước ngoài" 
+                                    ? "Đi công tác NN" 
+                                    : schedule.workType}{isFullDay ? " - (Cả ngày)" : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
@@ -378,7 +380,7 @@ export default function PublicDisplay() {
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
-            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CT nước ngoài</span>
+            <span className="text-[10px]" style={{ fontFamily: 'Roboto, sans-serif' }}>CT NN</span>
           </div>
           <div className="flex items-center">
             <div className="w-2 h-2 rounded mr-1" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>

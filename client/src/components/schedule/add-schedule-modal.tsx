@@ -42,7 +42,7 @@ const workTypes = [
   { value: "Nghỉ phép", label: "Nghỉ phép" },
   { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
   { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
-  { value: "Đi công tác nước ngoài", label: "Đi công tác nước ngoài" },
+  { value: "Đi công tác nước ngoài", label: "Đi công tác NN" },
   { value: "Khác", label: "Khác" },
 ];
 

@@ -291,7 +291,9 @@ export default function WorkSchedule() {
                                     <div className="truncate">
                                       {schedule.workType === "Khác" && schedule.customContent 
                                         ? schedule.customContent 
-                                        : schedule.workType}
+                                        : schedule.workType === "Đi công tác nước ngoài" 
+                                          ? "Đi công tác NN" 
+                                          : schedule.workType}
                                     </div>
                                   </>
                                 )}
