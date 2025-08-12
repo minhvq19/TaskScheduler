@@ -124,8 +124,8 @@ export default function WorkSchedule() {
     const isCustomerVisit = workType === "Đi khách hàng";
     
     return {
-      backgroundColor: isWorkAtBranch || isCustomerVisit ? "transparent" : bgColor,
-      color: isWorkAtBranch ? "transparent" : (isCustomerVisit ? "#374151" : "white"), // Show text for customer visit but with dark color
+      backgroundColor: isWorkAtBranch ? "transparent" : (isCustomerVisit ? "#4a90a4" : bgColor),
+      color: isWorkAtBranch ? "transparent" : (isCustomerVisit ? "#ffffff" : "white"), // White text for customer visit
       border: isWorkAtBranch ? "none" : "none"
     };
   };
@@ -354,7 +354,7 @@ export default function WorkSchedule() {
               <span className="text-sm">Khác</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 border border-gray-300 rounded"></div>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: "#4a90a4" }}></div>
               <span className="text-sm">Đi khách hàng</span>
             </div>
           </div>
