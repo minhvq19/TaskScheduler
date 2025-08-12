@@ -156,6 +156,8 @@ export default function PublicDisplay() {
     queryKey: ["/api/public/display-data"],
     refetchInterval: screenDurationMs,
     refetchIntervalInBackground: true,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache data to ensure fresh image URLs
   });
 
   // Refetch data when screen changes
@@ -625,15 +627,19 @@ export default function PublicDisplay() {
                 {currentEvent.imageUrl ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <img 
-                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}` : currentEvent.imageUrl} 
+                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}?v=${Date.now()}` : currentEvent.imageUrl} 
                       alt={currentEvent.shortName}
                       className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                       style={{ width: 'auto', height: 'auto' }}
                       onError={(e) => {
                         console.error('Image failed to load:', currentEvent.imageUrl);
                         console.error('Attempted URL:', e.currentTarget.src);
+                        console.error('Current event data:', currentEvent);
                         // Hide the image element when it fails to load
                         e.currentTarget.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', currentEvent.imageUrl);
                       }}
                     />
                   </div>
