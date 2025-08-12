@@ -28,7 +28,7 @@ const formSchema = z.object({
   endTime: z.string().optional(),
   workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
   customContent: z.string().max(200).optional(),
-  customWorkType: z.string().optional(), // For sub-categories of "Khác"
+// Removed customWorkType field
   isFullDay: z.boolean().default(false),
 }).refine((data) => {
   if (!data.isFullDay) {
@@ -48,13 +48,11 @@ const workTypes = [
   { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
   { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
   { value: "Đi công tác nước ngoài", label: "Đi công tác nước ngoài" },
+  { value: "Đi khách hàng", label: "Đi khách hàng" },
   { value: "Khác", label: "Khác" },
 ];
 
-const customWorkTypes = [
-  { value: "general", label: "Khác" },
-  { value: "customer_visit", label: "Đi khách hàng" },
-];
+// Removed customWorkTypes as "Đi khách hàng" is now a main work type
 
 interface EnhancedScheduleModalProps {
   isOpen: boolean;
@@ -77,13 +75,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       endTime: "",
       workType: "",
       customContent: "",
-      customWorkType: "",
+// Removed customWorkType from defaultValues
       isFullDay: false,
     },
   });
 
   const watchedWorkType = form.watch("workType");
-  const watchedCustomWorkType = form.watch("customWorkType");
+// Removed watchedCustomWorkType
   const watchedIsFullDay = form.watch("isFullDay");
   const watchedStartDate = form.watch("startDate");
   const watchedEndDate = form.watch("endDate");
@@ -276,15 +274,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
       const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
 
-      // For "Khác" work type, determine if it's customer visit
-      const isCustomerVisit = data.workType === "Khác" && data.customWorkType === "customer_visit";
-      const finalWorkType = isCustomerVisit ? "Đi khách hàng" : data.workType;
-
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        workType: finalWorkType,
+        workType: data.workType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
@@ -313,15 +307,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
       const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
 
-      // For "Khác" work type, determine if it's customer visit
-      const isCustomerVisit = data.workType === "Khác" && data.customWorkType === "customer_visit";
-      const finalWorkType = isCustomerVisit ? "Đi khách hàng" : data.workType;
-
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        workType: finalWorkType,
+        workType: data.workType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);
@@ -356,20 +346,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       // Check if it's a full day (matches work hours)
       const isFullDay = startTimeStr === workStartTime && endTimeStr === workEndTime;
 
-      // Determine if it's customer visit type
-      const isCustomerVisit = schedule.workType === "Đi khách hàng";
-      const displayWorkType = isCustomerVisit ? "Khác" : schedule.workType;
-      const customWorkType = isCustomerVisit ? "customer_visit" : "general";
-
       form.reset({
         staffId: schedule.staffId,
         startDate: format(startDate, "yyyy-MM-dd"),
         endDate: format(endDate, "yyyy-MM-dd"),
         startTime: startTimeStr,
         endTime: endTimeStr,
-        workType: displayWorkType,
+        workType: schedule.workType,
         customContent: schedule.customContent || "",
-        customWorkType: isCustomerVisit ? customWorkType : "",
         isFullDay: isFullDay,
       });
     }
@@ -566,41 +550,20 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             </div>
           )}
 
-          {/* Custom Work Type (only for "Khác") */}
+          {/* Custom Content (only for "Khác") */}
           {watchedWorkType === "Khác" && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="customWorkType">Loại hình</Label>
-                <Select 
-                  value={watchedCustomWorkType} 
-                  onValueChange={(value) => form.setValue("customWorkType", value)}
-                >
-                  <SelectTrigger data-testid="select-custom-work-type">
-                    <SelectValue placeholder="Chọn loại hình" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customWorkTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="customContent">Nội dung cụ thể</Label>
-                <Textarea
-                  id="customContent"
-                  placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
-                  maxLength={200}
-                  {...form.register("customContent")}
-                  data-testid="textarea-custom-content"
-                />
-                {form.formState.errors.customContent && (
-                  <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="customContent">Nội dung cụ thể</Label>
+              <Textarea
+                id="customContent"
+                placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
+                maxLength={200}
+                {...form.register("customContent")}
+                data-testid="textarea-custom-content"
+              />
+              {form.formState.errors.customContent && (
+                <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
+              )}
             </div>
           )}
 
@@ -608,8 +571,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
             <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
             <p><strong>Lưu ý:</strong> Không thể chọn ngày/giờ quá khứ{allowWeekendSchedule ? "" : ", ngày cuối tuần (T7, CN)"} hoặc ngày lễ</p>
-            {watchedWorkType === "Khác" && watchedCustomWorkType === "customer_visit" && (
-              <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ không được tô màu nền trên lịch</p>
+            {watchedWorkType === "Đi khách hàng" && (
+              <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
             )}
           </div>
 
