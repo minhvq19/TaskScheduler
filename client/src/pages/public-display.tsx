@@ -299,6 +299,11 @@ export default function PublicDisplay() {
                     {schedules.slice(0, 8).map((schedule, idx) => {
                       const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
                       
+                      // Check if this is a full day schedule (08:00-17:30)
+                      const startTime = format(parseLocalDateTime(schedule.startDateTime), "HH:mm");
+                      const endTime = format(parseLocalDateTime(schedule.endDateTime), "HH:mm");
+                      const isFullDay = startTime === "08:00" && endTime === "17:30";
+                      
                       return (
                         <div
                           key={schedule.id}
@@ -316,13 +321,11 @@ export default function PublicDisplay() {
                         >
                           {!isWorkAtBranch && (
                             <>
-                              {/* Line 1: [Main content] - Time */}
+                              {/* Line 1: [Main content] - Time or Full Day */}
                               <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '15px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                                 {schedule.workType === "Khác" && schedule.customContent 
                                   ? schedule.customContent 
-                                  : schedule.workType} - (
-                                {format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – 
-                                {format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})
+                                  : schedule.workType}{isFullDay ? " - (Cả ngày)" : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
