@@ -750,27 +750,27 @@ export default function PublicDisplay4K() {
     return (
       <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
         {currentEvent ? (
-          <div className="h-full flex flex-col">
-            {/* Event title - similar to standard but larger fonts for 4K */}
-            <div className="text-center py-8 bg-teal-700">
-              <h2 className="text-5xl font-bold text-white px-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-                {currentEvent.shortName}
-              </h2>
-            </div>
-            
-            {/* Event image - full display below title */}
-            <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="h-full flex flex-col justify-center">
+            {/* Event image - full display matching standard display */}
+            <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
               {currentEvent.imageUrl ? (
-                <EventImageWithFallback 
-                  src={currentEvent.imageUrl}
-                  alt={currentEvent.shortName}
-                  event={currentEvent}
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <EventImageWithFallback 
+                    src={currentEvent.imageUrl}
+                    alt={currentEvent.shortName}
+                    event={currentEvent}
+                  />
+                </div>
               ) : (
-                <div className="text-center text-teal-800">
-                  <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                    {currentEvent.content || "Không có hình ảnh"}
-                  </p>
+                <div className="w-full h-full flex flex-col items-center justify-center p-12">
+                  <div className="text-center text-teal-800">
+                    <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                      {currentEvent.shortName}
+                    </h2>
+                    <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                      {currentEvent.content || "Không có nội dung"}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
