@@ -455,22 +455,27 @@ export default function PublicDisplay() {
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
-        {/* Table Header - Days of week */}
-        <div className="bg-orange-600" style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '280px repeat(7, 1fr)', // Cleaner syntax - 280px room column + 7 equal day columns
-          fontFamily: 'Roboto, sans-serif',
-          boxSizing: 'border-box'
-        }}>
-          <div className="text-white font-bold text-center" style={{ 
-            fontSize: '16px', 
-            fontWeight: '700',
-            padding: '12px',
-            borderRight: '1px solid rgb(194 65 12)', // orange-700
-            boxSizing: 'border-box'
-          }}>
-            Phòng họp/ Ngày
-          </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
+          <colgroup>
+            <col style={{ width: '280px' }} />
+            {weekDays.map((_, index) => (
+              <col key={index} style={{ width: 'calc((100% - 280px) / 7)' }} />
+            ))}
+          </colgroup>
+          <thead>
+            <tr className="bg-orange-600">
+              <th 
+                className="text-white font-bold text-center"
+                style={{ 
+                  fontSize: '16px', 
+                  fontWeight: '700',
+                  padding: '12px',
+                  borderRight: '1px solid rgb(194 65 12)', // orange-700
+                  verticalAlign: 'middle'
+                }}
+              >
+                Phòng họp/ Ngày
+              </th>
           {weekDays.map((day, index) => {
             const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
             const dayName = dayNames[getDay(day)];
@@ -478,57 +483,50 @@ export default function PublicDisplay() {
             const isLastColumn = index === weekDays.length - 1;
             
             return (
-              <div 
-                key={index} 
+              <th 
+                key={index}
                 className="text-white font-bold text-center"
                 style={{ 
                   fontSize: '14px', 
                   fontWeight: '700',
                   padding: '12px',
-                  borderRight: isLastColumn ? 'none' : '1px solid rgb(194 65 12)', // orange-700, no border on last column
-                  boxSizing: 'border-box'
+                  borderRight: isLastColumn ? 'none' : '1px solid rgb(194 65 12)', // orange-700
+                  verticalAlign: 'middle'
                 }}
               >
                 <div>{dayName}</div>
                 <div style={{ fontSize: '12px', fontWeight: '400' }}>
                   {format(day, 'dd/MM', { locale: vi })}
                 </div>
-              </div>
+              </th>
             );
           })}
-        </div>
-
-        {/* Table Body - Meeting Rooms */}
-        <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-          {meetingRooms.map((room: any) => (
-            <div 
-              key={room.id} 
-              className="border-b border-gray-200" 
-              style={{ 
-                display: 'grid', 
-                gridTemplateColumns: '280px repeat(7, 1fr)', // Match header exactly - 280px room + 7 equal day columns
-                minHeight: '80px',
-                alignItems: 'stretch', // Ensure all columns have equal height
-                boxSizing: 'border-box'
-              }}
-            >
-              {/* Room Name Column */}
-              <div className="bg-teal-600 text-white font-bold flex items-center" style={{
-                padding: '12px',
-                borderRight: '1px solid rgb(209 213 219)', // gray-300
-                boxSizing: 'border-box'
-              }}>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
-                    {room.name}
-                  </div>
-                  {room.location && (
-                    <div style={{ fontSize: '11px', fontWeight: '400', opacity: 0.9, marginTop: '2px' }}>
-                      {room.location}
+            </tr>
+          </thead>
+          <tbody>
+            {meetingRooms.map((room: any) => (
+              <tr key={room.id} className="border-b border-gray-200">
+                {/* Room Name Column */}
+                <td 
+                  className="bg-teal-600 text-white font-bold"
+                  style={{
+                    padding: '12px',
+                    borderRight: '1px solid rgb(209 213 219)', // gray-300
+                    verticalAlign: 'middle',
+                    minHeight: '80px'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
+                      {room.name}
                     </div>
-                  )}
-                </div>
-              </div>
+                    {room.location && (
+                      <div style={{ fontSize: '11px', fontWeight: '400', opacity: 0.9, marginTop: '2px' }}>
+                        {room.location}
+                      </div>
+                    )}
+                  </div>
+                </td>
 
               {/* Day Columns */}
               {weekDays.map((day, dayIndex) => {
@@ -539,14 +537,14 @@ export default function PublicDisplay() {
                 const isLastColumn = dayIndex === weekDays.length - 1;
                 
                 return (
-                  <div 
+                  <td 
                     key={dayIndex} 
                     className={isWeekend ? 'bg-gray-100' : 'bg-white'}
                     style={{ 
                       minHeight: '80px',
                       padding: '8px',
-                      borderRight: isLastColumn ? 'none' : '1px solid rgb(229 231 235)', // gray-200, no border on last column
-                      boxSizing: 'border-box'
+                      borderRight: isLastColumn ? 'none' : '1px solid rgb(229 231 235)', // gray-200
+                      verticalAlign: 'top'
                     }}
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
@@ -602,12 +600,13 @@ export default function PublicDisplay() {
                         </div>
                       );
                     })}
-                  </div>
+                  </td>
                 );
               })}
-            </div>
-          ))}
-        </div>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   };
