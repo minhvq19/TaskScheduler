@@ -400,20 +400,15 @@ export default function PublicDisplay() {
       return dateTime;
     }
     
-    // For datetime display, we need to handle timezone properly
-    const dateTimeString = dateTime.toString();
+    // Parse ISO string and convert to Vietnam timezone (GMT+7)
+    const utcDate = new Date(dateTime.toString());
     
-    // If it's an ISO string with Z (UTC), convert to local time
-    if (dateTimeString.includes('T') && dateTimeString.includes('Z')) {
-      return new Date(dateTimeString);
-    }
+    // Add 7 hours to convert from UTC to Vietnam time
+    const vietnamDate = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
     
-    // If it's a clean datetime string, treat as local time
-    const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+    console.log('Original:', dateTime.toString(), 'UTC:', utcDate.toISOString(), 'Vietnam:', vietnamDate.toISOString());
     
-    // Parse as local time by adding explicit timezone offset for Vietnam (GMT+7)
-    const localDate = new Date(cleanString + '+07:00');
-    return localDate;
+    return vietnamDate;
   };
 
   const renderMeetingScheduleTable = () => {
@@ -421,10 +416,8 @@ export default function PublicDisplay() {
     const today = new Date();
     const todayStart = startOfDay(today);
     
-    // Calculate end of current week (Sunday)
-    const currentDay = getDay(today); // 0 = Sunday, 1 = Monday, etc.
-    const daysToSunday = currentDay === 0 ? 0 : 7 - currentDay;
-    const endOfWeek = addDays(todayStart, daysToSunday);
+    // Show 7 days starting from today (13/08 - 19/08)
+    const endOfWeek = addDays(todayStart, 6);
     
     const weekDays = eachDayOfInterval({
       start: todayStart, // Start from today, not Monday
