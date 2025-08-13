@@ -580,12 +580,12 @@ export default function PublicDisplay() {
           </thead>
           <tbody style={{ height: 'calc(100% - 60px)' }}>
             {meetingRooms.map((room: any, roomIndex: number) => (
-              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc(100% / ${meetingRooms.length})` }}>
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 180px) / ${meetingRooms.length})`, minHeight: '80px' }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
                   style={{
-                    padding: '0',
+                    padding: '8px',
                     borderRight: '1px solid rgb(209 213 219)', // gray-300
                     verticalAlign: 'middle',
                     height: '100%',
@@ -593,12 +593,12 @@ export default function PublicDisplay() {
                   }}
                 >
                   <div style={{ 
-                    height: '60px',
+                    height: '100%',
                     display: 'flex', 
                     flexDirection: 'column', 
                     justifyContent: 'center',
                     overflow: 'hidden',
-                    position: 'relative'
+                    alignItems: 'flex-start'
                   }}>
                     <div style={{ 
                       fontSize: '14px', 
