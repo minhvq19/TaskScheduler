@@ -458,7 +458,7 @@ export default function PublicDisplay() {
         {/* Table Header - Days of week */}
         <div className="bg-orange-600" style={{ 
           display: 'grid', 
-          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr', // Weekend columns (Sat, Sun) are narrower but not too narrow
+          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 1fr 1fr', // All day columns equal width
           fontFamily: 'Roboto, sans-serif' 
         }}>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>
@@ -472,7 +472,7 @@ export default function PublicDisplay() {
             return (
               <div 
                 key={index} 
-                className={`p-3 text-white font-bold text-center ${index < weekDays.length - 1 ? 'border-r border-orange-700' : ''}`}
+                className="p-3 text-white font-bold text-center border-r border-orange-700"
                 style={{ fontSize: '14px', fontWeight: '700' }}
               >
                 <div>{dayName}</div>
@@ -492,7 +492,7 @@ export default function PublicDisplay() {
               className="border-b border-gray-200" 
               style={{ 
                 display: 'grid', 
-                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr', // Match header columns exactly
+                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 1fr 1fr', // Match header columns exactly
                 minHeight: '80px',
                 alignItems: 'stretch' // Ensure all columns have equal height
               }}
@@ -520,7 +520,7 @@ export default function PublicDisplay() {
                 return (
                   <div 
                     key={dayIndex} 
-                    className={`p-2 ${dayIndex < weekDays.length - 1 ? 'border-r border-gray-200' : ''} ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
+                    className={`p-2 border-r border-gray-200 ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
                     style={{ minHeight: '80px' }}
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
