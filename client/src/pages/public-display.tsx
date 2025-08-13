@@ -436,8 +436,13 @@ export default function PublicDisplay() {
     // Get meetings for current week (include meetings that overlap with current week)
     const weekMeetings = (displayData?.meetingSchedules || [])
       .filter((meeting: any) => {
-        const meetingStartDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
-        const meetingEndDate = startOfDay(parseLocalDateTime(meeting.endDateTime));
+        // Parse to Vietnam time first, then get the date part
+        const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
+        const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
+        
+        // Get the actual Vietnam date (not UTC date)
+        const meetingStartDate = startOfDay(vietnamStartTime);
+        const meetingEndDate = startOfDay(vietnamEndTime);
         const weekStartDate = todayStart;
         const weekEndDate = endOfWeek;
         
@@ -448,8 +453,10 @@ export default function PublicDisplay() {
           console.log('Meeting content:', meeting.meetingContent || 'NO CONTENT');
           console.log('Original startDateTime:', meeting.startDateTime);
           console.log('Original endDateTime:', meeting.endDateTime);
-          console.log('Parsed Meeting start:', format(meetingStartDate, 'yyyy-MM-dd HH:mm'));
-          console.log('Parsed Meeting end:', format(meetingEndDate, 'yyyy-MM-dd HH:mm'));
+          console.log('Vietnam start time:', format(vietnamStartTime, 'yyyy-MM-dd HH:mm'));
+          console.log('Vietnam end time:', format(vietnamEndTime, 'yyyy-MM-dd HH:mm'));
+          console.log('Parsed Meeting start date:', format(meetingStartDate, 'yyyy-MM-dd'));
+          console.log('Parsed Meeting end date:', format(meetingEndDate, 'yyyy-MM-dd'));
           console.log('Week start:', format(weekStartDate, 'yyyy-MM-dd'));
           console.log('Week end:', format(weekEndDate, 'yyyy-MM-dd'));
           console.log('Overlap check:', meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate);
@@ -474,8 +481,10 @@ export default function PublicDisplay() {
     });
 
     weekMeetings.forEach((meeting: any) => {
-      const meetingStart = startOfDay(parseLocalDateTime(meeting.startDateTime));
-      const meetingEnd = startOfDay(parseLocalDateTime(meeting.endDateTime));
+      const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
+      const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
+      const meetingStart = startOfDay(vietnamStartTime);
+      const meetingEnd = startOfDay(vietnamEndTime);
       
       // Add meeting to all days it spans within the current week
       weekDays.forEach(day => {
