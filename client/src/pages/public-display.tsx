@@ -538,19 +538,7 @@ export default function PublicDisplay() {
           </h3>
         </div>
         
-        {/* Date Time Display */}
-        <div className="bg-teal-600 text-white py-2 px-6 flex justify-between items-center" style={{ height: '40px' }}>
-          <div className="flex items-center gap-4">
-            <span className="text-sm">
-              {format(currentTime, 'EEEE, dd/MM/yyyy', { locale: vi })}
-            </span>
-          </div>
-          <div className="text-right">
-            <span className="text-sm font-mono">
-              {format(currentTime, 'HH:mm:ss')}
-            </span>
-          </div>
-        </div>
+
         
         {/* Navigation Controls */}
         <div 
@@ -606,7 +594,7 @@ export default function PublicDisplay() {
         </div>
         
         {/* Meeting Schedule Table */}
-        <div className="public-display-table bg-white" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }}>
+        <div className="public-display-table bg-white" style={{ height: 'calc(100vh - 120px)', overflow: 'hidden' }}>
         <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
           <colgroup>
             <col style={{ width: '280px' }} />
@@ -662,7 +650,7 @@ export default function PublicDisplay() {
           </thead>
           <tbody style={{ height: 'calc(100% - 60px)' }}>
             {meetingRooms.map((room: any, roomIndex: number) => (
-              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 220px) / ${meetingRooms.length})`, minHeight: `calc((100vh - 220px) / ${meetingRooms.length})`, maxHeight: `calc((100vh - 220px) / ${meetingRooms.length})` }}>
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 180px) / ${meetingRooms.length})`, minHeight: `calc((100vh - 180px) / ${meetingRooms.length})`, maxHeight: `calc((100vh - 180px) / ${meetingRooms.length})` }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
