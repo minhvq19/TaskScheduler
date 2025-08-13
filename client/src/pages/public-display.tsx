@@ -417,173 +417,169 @@ export default function PublicDisplay() {
   };
 
   const renderMeetingScheduleTable = () => {
-    // Get meeting max rows from system config
-    const meetingMaxRows = parseInt(systemConfig?.find((c: any) => c.key === 'display.meeting_max_rows')?.value || '10');
+    // Get current week dates
+    const today = new Date();
+    const startOfWeek = startOfDay(today);
+    const weekDays = eachDayOfInterval({
+      start: startOfWeek,
+      end: addDays(startOfWeek, 6)
+    });
+
+    // Get all meeting rooms
+    const meetingRooms = rooms || [];
     
-    // Get meeting schedules, filter out completed ones, sort by start time, limit by config
-    const now = new Date();
-    const sortedMeetings = (displayData?.meetingSchedules || [])
-      .filter((meeting: any) => parseLocalDateTime(meeting.endDateTime) > now) // Only show future and ongoing meetings
-      .sort((a: any, b: any) => parseLocalDateTime(a.startDateTime).getTime() - parseLocalDateTime(b.startDateTime).getTime())
-      .slice(0, meetingMaxRows);
+    // Get meetings for current week
+    const weekMeetings = (displayData?.meetingSchedules || [])
+      .filter((meeting: any) => {
+        const meetingDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
+        const endDate = addDays(startOfWeek, 6);
+        return meetingDate >= startOfWeek && meetingDate <= endDate;
+      });
+
+    // Group meetings by room and date
+    const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
+    meetingRooms.forEach(room => {
+      meetingsByRoomAndDate[room.id] = {};
+      weekDays.forEach(day => {
+        const dateKey = format(day, 'yyyy-MM-dd');
+        meetingsByRoomAndDate[room.id][dateKey] = [];
+      });
+    });
+
+    weekMeetings.forEach((meeting: any) => {
+      const dateKey = format(startOfDay(parseLocalDateTime(meeting.startDateTime)), 'yyyy-MM-dd');
+      if (meetingsByRoomAndDate[meeting.roomId] && meetingsByRoomAndDate[meeting.roomId][dateKey]) {
+        meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);
+      }
+    });
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
-        {/* Table Header */}
-        <div className="bg-orange-600" style={{ display: 'grid', gridTemplateColumns: '80px 250px 180px 1fr 200px 300px', fontFamily: 'Roboto, sans-serif' }}>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thứ tự</div>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Thời gian</div>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Địa điểm</div>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Nội dung cuộc họp</div>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>Trạng thái</div>
-          <div className="p-3 text-white font-bold text-center" style={{ fontSize: '16px', fontWeight: '700' }}>Đầu mối</div>
+        {/* Table Header - Days of week */}
+        <div className="bg-orange-600" style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.6fr 0.6fr', // Weekend columns (Sat, Sun) are narrower
+          fontFamily: 'Roboto, sans-serif' 
+        }}>
+          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>
+            Phòng họp/ Ngày
+          </div>
+          {weekDays.map((day, index) => {
+            const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            const dayName = dayNames[getDay(day)];
+            const isWeekend = getDay(day) === 0 || getDay(day) === 6; // Sunday or Saturday
+            
+            return (
+              <div 
+                key={index} 
+                className="p-3 text-white font-bold text-center border-r border-orange-700" 
+                style={{ fontSize: '14px', fontWeight: '700' }}
+              >
+                <div>{dayName}</div>
+                <div style={{ fontSize: '12px', fontWeight: '400' }}>
+                  {format(day, 'dd/MM', { locale: vi })}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        {/* Table Body */}
-        <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'hidden' }}>
-          {sortedMeetings.length > 0 ? (
-            <>              
-              {/* Render meeting rows */}
-              {sortedMeetings.map((meeting: any, index: number) => {
-                // Format datetime string to show both start and end times
-                const formatDateTime = (startDateTime: string, endDateTime: string): string => {
-                  const formatSingleDateTime = (dateTimeString: string) => {
-                    const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
-                    const [datePart, timePart] = dateTime.split(' ');
-                    const [year, month, day] = datePart.split('-');
-                    const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
-                    return { time: `${hour}:${minute}`, date: `${day}/${month}/${year}` };
-                  };
-                  
-                  const start = formatSingleDateTime(startDateTime);
-                  const end = formatSingleDateTime(endDateTime);
-                  
-                  return `${start.time} - ${start.date} (dự kiến kết thúc lúc ${end.time} - ${end.date})`;
-                };
 
-                // Get room name from rooms data
-                const room = rooms?.find((r: any) => r.id === meeting.roomId);
-                const roomName = room?.name || 'Phòng không xác định';
-                
-                // Determine meeting status
-                const now = new Date();
-                const meetingStart = parseLocalDateTime(meeting.startDateTime);
-                const meetingEnd = parseLocalDateTime(meeting.endDateTime);
-                
-                let status = "Sắp diễn ra";
-                let statusColor = "#f59e0b"; // yellow
-                
-                if (now >= meetingStart && now <= meetingEnd) {
-                  status = "Đang sử dụng";
-                  statusColor = "#32a852"; // green
-                }
+        {/* Table Body - Meeting Rooms */}
+        <div className="flex-1" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          {meetingRooms.map((room: any) => (
+            <div 
+              key={room.id} 
+              className="border-b border-gray-200" 
+              style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.6fr 0.6fr', // Match header columns
+                minHeight: '80px'
+              }}
+            >
+              {/* Room Name Column */}
+              <div className="p-3 bg-teal-600 text-white font-bold border-r border-gray-300 flex items-center">
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
+                    {room.name}
+                  </div>
+                  {room.location && (
+                    <div style={{ fontSize: '11px', fontWeight: '400', opacity: 0.9, marginTop: '2px' }}>
+                      {room.location}
+                    </div>
+                  )}
+                </div>
+              </div>
 
+              {/* Day Columns */}
+              {weekDays.map((day, dayIndex) => {
+                const dateKey = format(day, 'yyyy-MM-dd');
+                const dayMeetings = meetingsByRoomAndDate[room.id][dateKey] || [];
+                const isWeekend = getDay(day) === 0 || getDay(day) === 6;
+                
                 return (
                   <div 
-                    key={index} 
-                    className="border-b border-orange-400" 
-                    style={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
-                      backgroundColor: '#006b68',
-                      fontFamily: 'Roboto, sans-serif'
-                    }}
+                    key={dayIndex} 
+                    className={`p-2 border-r border-gray-200 ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
+                    style={{ minHeight: '80px' }}
                   >
-                    <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
-                      {index + 1}
-                    </div>
-                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                      {formatDateTime(meeting.startDateTime, meeting.endDateTime)}
-                    </div>
-                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                      {roomName}
-                    </div>
-                    <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
-                      {meeting.meetingContent || 'Không có thông tin'}
-                    </div>
-                    <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                      <div 
-                        className="px-2 py-1 rounded text-white font-medium text-xs"
-                        style={{ backgroundColor: statusColor, fontFamily: 'Roboto, sans-serif' }}
-                      >
-                        {status}
-                      </div>
-                    </div>
-                    <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
-                      {meeting.contactPerson || 'Chưa có thông tin'}
-                    </div>
+                    {dayMeetings.map((meeting: any, meetingIndex: number) => {
+                      // Format time only for grid display
+                      const formatTime = (dateTimeString: string): string => {
+                        const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
+                        const [datePart, timePart] = dateTime.split(' ');
+                        const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
+                        return `${hour}:${minute}`;
+                      };
+
+                      const startTime = formatTime(meeting.startDateTime);
+                      const endTime = formatTime(meeting.endDateTime);
+                      const timeRange = `${startTime} - ${endTime}`;
+
+                      // Determine meeting status
+                      const now = new Date();
+                      const meetingStart = parseLocalDateTime(meeting.startDateTime);
+                      const meetingEnd = parseLocalDateTime(meeting.endDateTime);
+                      
+                      let statusColor = "#10b981"; // green - completed
+                      let statusText = "Đã kết thúc";
+                      
+                      if (now < meetingStart) {
+                        statusColor = "#f59e0b"; // yellow - upcoming
+                        statusText = "Sắp diễn ra";
+                      } else if (now >= meetingStart && now <= meetingEnd) {
+                        statusColor = "#dc2626"; // red - ongoing
+                        statusText = "Đang diễn ra";
+                      }
+
+                      return (
+                        <div
+                          key={meetingIndex}
+                          className="mb-2 p-2 rounded text-xs border-l-2"
+                          style={{ 
+                            borderLeftColor: statusColor,
+                            backgroundColor: `${statusColor}15`,
+                            lineHeight: '1.3'
+                          }}
+                        >
+                          <div style={{ fontSize: '10px', fontWeight: '700', color: statusColor }}>
+                            {timeRange}
+                          </div>
+                          <div style={{ fontSize: '10px', marginTop: '2px', color: '#374151' }}>
+                            {meeting.meetingContent.length > 60 
+                              ? meeting.meetingContent.substring(0, 60) + '...' 
+                              : meeting.meetingContent}
+                          </div>
+                          <div style={{ fontSize: '9px', marginTop: '2px', color: '#6b7280' }}>
+                            {meeting.contactPerson}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
-              
-              {/* Fill empty rows to reach total of meetingMaxRows */}
-              {Array.from({ length: Math.max(0, meetingMaxRows - sortedMeetings.length) }, (_, index) => (
-                <div 
-                  key={`empty-${index}`}
-                  className="border-b border-orange-400" 
-                  style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
-                    backgroundColor: '#006b68',
-                    fontFamily: 'Roboto, sans-serif',
-                    minHeight: '48px'
-                  }}
-                >
-                  <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
-                    {sortedMeetings.length + index + 1}
-                  </div>
-                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                    ...
-                  </div>
-                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                    
-                  </div>
-                  <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
-                    
-                  </div>
-                  <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                    
-                  </div>
-                  <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
-                    
-                  </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            // Show empty table with meetingMaxRows when no meetings
-            (Array.from({ length: meetingMaxRows }, (_, index) => (
-              <div 
-                key={`empty-${index}`}
-                className="border-b border-orange-400" 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 250px 180px 1fr 200px 300px',
-                  backgroundColor: '#006b68',
-                  fontFamily: 'Roboto, sans-serif',
-                  minHeight: '48px'
-                }}
-              >
-                <div className="p-3 text-white font-bold text-center border-r border-orange-400" style={{ fontSize: '14px', fontWeight: '600' }}>
-                  {index + 1}
-                </div>
-                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                  {index < 3 ? '...' : ''}
-                </div>
-                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                  
-                </div>
-                <div className="p-3 text-white border-r border-orange-400" style={{ fontSize: '14px' }}>
-                  
-                </div>
-                <div className="p-3 text-white text-center border-r border-orange-400" style={{ fontSize: '14px' }}>
-                  
-                </div>
-                <div className="p-3 text-white text-center" style={{ fontSize: '14px' }}>
-                  
-                </div>
-              </div>
-            )))
-          )}
+            </div>
+          ))}
         </div>
       </div>
     );
