@@ -703,7 +703,7 @@ export default function PublicDisplay() {
                           }}
                         >
                           <div style={{ 
-                            fontSize: '11px', 
+                            fontSize: '12px', 
                             fontWeight: '500',
                             lineHeight: '1.2',
                             display: 'flex',
@@ -724,6 +724,7 @@ export default function PublicDisplay() {
                             <span style={{
                               color: '#006B68',
                               fontWeight: '500',
+                              fontSize: '12px',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
