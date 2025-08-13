@@ -5,6 +5,62 @@ import { vi } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import React from 'react';
 
+// Event Image with fallback component for error handling
+const EventImageWithFallback = ({ src, alt, event }: { src: string; alt: string; event: any }) => {
+  const [hasError, setHasError] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const maxAttempts = 3;
+
+  const imageUrl = src.startsWith('/') ? `${window.location.origin}${src}` : src;
+
+  const handleError = () => {
+    console.error('Image failed to load:', src);
+    console.error('Attempted URL:', imageUrl);
+    console.error('Current event data:', event);
+    
+    if (attempts < maxAttempts) {
+      // Retry loading the image with a delay
+      setTimeout(() => {
+        setAttempts(prev => prev + 1);
+      }, 1000 * (attempts + 1)); // Increasing delay
+    } else {
+      setHasError(true);
+    }
+  };
+
+  if (hasError) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gray-100 rounded-lg">
+        <div className="text-center text-teal-800">
+          <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+            {event.shortName}
+          </h2>
+          {event.content && (
+            <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              {event.content}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      key={attempts} // Force re-render on retry
+      src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
+      alt={alt}
+      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+      style={{ width: 'auto', height: 'auto' }}
+      onError={handleError}
+      onLoad={() => {
+        console.log('Image loaded successfully:', src);
+        setHasError(false);
+      }}
+    />
+  );
+};
+
 // 4K Display optimized for 3840x2160 resolution (65" TV)
 const SCREENS = [
   { id: 'work-schedule', name: 'Kế hoạch công tác' },
@@ -228,12 +284,24 @@ export default function PublicDisplay4K() {
       return <div className="flex items-center justify-center h-full text-4xl text-white">Đang tải dữ liệu...</div>;
     }
 
-    const gridTemplate = `300px repeat(7, 1fr)`;
+    // Adjust column widths: smaller for weekend columns, larger for weekday columns
+    const weekdayCount = weekDays.filter(day => !isWeekend(day)).length;
+    const weekendCount = weekDays.filter(day => isWeekend(day)).length;
+    
+    const gridTemplate = weekDays.map(day => {
+      if (isWeekend(day)) {
+        return '0.8fr'; // Smaller for weekend
+      } else {
+        return '1.2fr'; // Larger for weekday
+      }
+    }).join(' ');
+    
+    const fullGridTemplate = `300px ${gridTemplate}`;
 
     return (
       <div className="h-full overflow-hidden" style={{ fontFamily: 'Roboto, sans-serif' }}>
         {/* Header */}
-        <div className="grid border-b-4 border-gray-400 bg-yellow-400" style={{ gridTemplateColumns: gridTemplate }}>
+        <div className="grid border-b-4 border-gray-400 bg-yellow-400" style={{ gridTemplateColumns: fullGridTemplate }}>
           <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400">
             LÃNH ĐẠO
           </div>
@@ -259,10 +327,10 @@ export default function PublicDisplay4K() {
           {staff
             .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
             .map((staffMember, rowIndex) => (
-            <div key={staffMember.id} className="grid border-b-2 border-gray-300" style={{ gridTemplateColumns: gridTemplate, minHeight: '180px' }}>
+            <div key={staffMember.id} className="grid border-b-2 border-gray-300" style={{ gridTemplateColumns: fullGridTemplate, minHeight: '180px' }}>
               {/* Staff Name Column */}
               <div className="p-4 bg-teal-700 text-white font-bold border-r-2 border-gray-300 flex items-center">
-                <div className="text-2xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                <div className="text-4xl font-bold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                   {(staffMember as any).positionShort}. {staffMember.fullName}
                 </div>
               </div>
@@ -341,6 +409,37 @@ export default function PublicDisplay4K() {
             })}
             </div>
           ))}
+        </div>
+        
+        {/* Color Legend for 4K - same as standard display */}
+        <div className="bg-gray-50 p-4 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <div className="text-2xl font-bold text-gray-700 mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>GHI CHÚ MÀU SẮC</div>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>CN</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Nghỉ phép</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Trực LD</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Đi khách hàng") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Đi khách hàng</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>CT NN</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Khác</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -463,7 +562,7 @@ export default function PublicDisplay4K() {
                 <th 
                   className="text-white font-bold text-center"
                   style={{ 
-                    fontSize: '28px', 
+                    fontSize: '32px', 
                     fontWeight: '700',
                     padding: '20px',
                     borderRight: '2px solid rgb(194 65 12)',
@@ -483,7 +582,7 @@ export default function PublicDisplay4K() {
                       key={index}
                       className="text-white font-bold text-center"
                       style={{ 
-                        fontSize: '24px', 
+                        fontSize: '28px', 
                         fontWeight: '700',
                         padding: '20px',
                         borderRight: isLastColumn ? 'none' : '2px solid rgb(194 65 12)',
@@ -491,7 +590,7 @@ export default function PublicDisplay4K() {
                       }}
                     >
                       <div>{dayName}</div>
-                      <div style={{ fontSize: '20px', fontWeight: '400' }}>
+                      <div style={{ fontSize: '24px', fontWeight: '400' }}>
                         {format(day, 'dd/MM', { locale: vi })}
                       </div>
                     </th>
@@ -521,7 +620,7 @@ export default function PublicDisplay4K() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '24px',
+                      fontSize: '28px',
                       fontWeight: '700',
                       textAlign: 'center',
                       lineHeight: '1.3',
@@ -590,7 +689,7 @@ export default function PublicDisplay4K() {
                                 <div style={{
                                   color: '#9f224e',
                                   fontWeight: '700',
-                                  fontSize: '18px',
+                                  fontSize: '22px',
                                   marginBottom: '4px'
                                 }}>
                                   {timeRange}
@@ -598,7 +697,7 @@ export default function PublicDisplay4K() {
                                 <div style={{
                                   color: '#006B68',
                                   fontWeight: '500',
-                                  fontSize: '16px',
+                                  fontSize: '20px',
                                   lineHeight: '1.4',
                                   wordWrap: 'break-word',
                                   whiteSpace: 'normal'
@@ -654,21 +753,10 @@ export default function PublicDisplay4K() {
                 {/* Large image - full display (exactly same as standard) */}
                 {currentEvent.imageUrl ? (
                   <div className="w-full h-full flex items-center justify-center">
-                    <img 
-                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}?v=${Date.now()}` : currentEvent.imageUrl} 
+                    <EventImageWithFallback 
+                      src={currentEvent.imageUrl}
                       alt={currentEvent.shortName}
-                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                      style={{ width: 'auto', height: 'auto' }}
-                      onError={(e) => {
-                        console.error('Image failed to load:', currentEvent.imageUrl);
-                        console.error('Attempted URL:', e.currentTarget.src);
-                        console.error('Current event data:', currentEvent);
-                        // Hide the image element when it fails to load
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', currentEvent.imageUrl);
-                      }}
+                      event={currentEvent}
                     />
                   </div>
                 ) : (
