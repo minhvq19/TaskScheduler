@@ -18,7 +18,7 @@ export default function DisplaySelection() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black py-6 px-8 rounded-lg mb-8">
-            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <h1 className="font-bold mb-2 text-[32px]" style={{ fontFamily: 'Roboto, sans-serif' }}>
               NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
             </h1>
             <p className="text-2xl font-semibold">CHI NHÁNH SỞ GIAO DỊCH 1</p>
