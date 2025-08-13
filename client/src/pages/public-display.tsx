@@ -597,29 +597,30 @@ export default function PublicDisplay() {
                     display: 'flex', 
                     flexDirection: 'column', 
                     justifyContent: 'center',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    maxHeight: '100%'
                   }}>
                     <div style={{ 
-                      fontSize: '13px', 
+                      fontSize: '12px', 
                       fontWeight: '700', 
-                      lineHeight: '1.2',
+                      lineHeight: '1.3',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      marginBottom: room.location ? '2px' : '0'
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: 'vertical'
                     }}>
                       {room.name}
                     </div>
                     {room.location && (
                       <div style={{ 
-                        fontSize: '10px', 
+                        fontSize: '9px', 
                         fontWeight: '400', 
-                        opacity: 0.85,
+                        opacity: 0.8,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        marginTop: '1px'
                       }}>
                         {room.location}
                       </div>
