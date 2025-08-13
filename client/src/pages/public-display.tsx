@@ -572,9 +572,30 @@ export default function PublicDisplay() {
                         return `${hour}:${minute}`;
                       };
 
-                      const startTime = formatTime(meeting.startDateTime);
-                      const endTime = formatTime(meeting.endDateTime);
-                      const timeRange = `${startTime} - ${endTime}`;
+                      // Calculate actual time range for current day
+                      const meetingStartDate = parseLocalDateTime(meeting.startDateTime);
+                      const meetingEndDate = parseLocalDateTime(meeting.endDateTime);
+                      const currentDayStart = startOfDay(day);
+                      const currentDayEnd = new Date(currentDayStart);
+                      currentDayEnd.setHours(23, 59, 59, 999);
+
+                      let displayStartTime, displayEndTime;
+
+                      // If meeting starts on current day
+                      if (format(meetingStartDate, 'yyyy-MM-dd') === format(currentDayStart, 'yyyy-MM-dd')) {
+                        displayStartTime = formatTime(meeting.startDateTime);
+                      } else {
+                        displayStartTime = "00:00";
+                      }
+
+                      // If meeting ends on current day
+                      if (format(meetingEndDate, 'yyyy-MM-dd') === format(currentDayStart, 'yyyy-MM-dd')) {
+                        displayEndTime = formatTime(meeting.endDateTime);
+                      } else {
+                        displayEndTime = "23:59";
+                      }
+
+                      const timeRange = `${displayStartTime} - ${displayEndTime}`;
 
                       // Determine meeting status
                       const now = new Date();
