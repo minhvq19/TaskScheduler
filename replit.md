@@ -1,6 +1,6 @@
 # Overview
 
-This system provides a comprehensive work schedule management solution for BIDV, encompassing staff scheduling, meeting room booking, event management, and organizational data display. It supports both administrative operations and public information dissemination. The project aims to streamline scheduling processes within the organization, enhance operational efficiency, and provide clear visibility into daily activities.
+This system provides a comprehensive work schedule management solution for BIDV, encompassing staff scheduling, meeting room booking, event management, and organizational data display. It supports both administrative operations and public information dissemination with dual display capabilities: standard resolution (1920x1080) and 4K resolution (3840x2160) optimized for large TV displays. The project aims to streamline scheduling processes within the organization, enhance operational efficiency, and provide clear visibility into daily activities through adaptive layouts.
 
 # User Preferences
 
@@ -10,7 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Frontend Architecture
 
-The client-side application is built with React 18 and TypeScript, leveraging a component-based architecture with `shadcn/ui` for consistent design. It uses Wouter for lightweight routing and TanStack Query for server state management and caching. Styling is managed with Tailwind CSS, utilizing custom properties for BIDV brand colors. Vite is used for fast development and optimized production builds.
+The client-side application is built with React 18 and TypeScript, leveraging a component-based architecture with `shadcn/ui` for consistent design. It uses Wouter for lightweight routing and TanStack Query for server state management and caching. The system features dual display modes:
+
+- **Standard Display (1920x1080)**: Optimized for regular monitors and laptops
+- **4K Display (3840x2160)**: Specially designed for 65-inch TV displays with larger fonts, increased spacing, and optimized layouts
+
+Public display routes include:
+- `/select-display`: Display selection interface
+- `/public-display`: Standard resolution display
+- `/public-display-4k`: 4K resolution display
+
+Styling is managed with Tailwind CSS, utilizing custom properties for BIDV brand colors. Vite is used for fast development and optimized production builds.
 
 ## Backend Architecture
 

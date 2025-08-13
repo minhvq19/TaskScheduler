@@ -335,95 +335,231 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Meeting Schedule Table for 4K
+  // Meeting Schedule Table for 4K - matching standard display layout
   const renderMeetingScheduleTable4K = () => {
     if (!displayData?.meetingSchedules) {
       return <div className="flex items-center justify-center h-full text-4xl text-white">Không có dữ liệu lịch họp</div>;
     }
 
-    const today = new Date();
-    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-
-    const todayMeetings = displayData.meetingSchedules.filter((meeting: any) => {
-      const meetingStart = parseLocalDateTime(meeting.startDateTime);
-      return meetingStart >= startOfToday && meetingStart <= endOfToday;
-    }).sort((a: any, b: any) => {
-      const startA = parseLocalDateTime(a.startDateTime);
-      const startB = parseLocalDateTime(b.startDateTime);
-      return startA.getTime() - startB.getTime();
+    // Generate week days for table headers (same as standard display)
+    const getDay = (date: Date) => date.getDay();
+    
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      return day;
     });
 
-    const visibleMeetings = todayMeetings.slice(0, 10); // Show max 10 meetings for 4K
+    // Get meetings for a specific room and day
+    const getMeetingsForRoomAndDay = (roomId: string, day: Date) => {
+      const dayStart = new Date(day);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(day);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      return (displayData?.meetingSchedules || [])
+        .filter((meeting: any) => {
+          if (meeting.meetingRoomId !== roomId) return false;
+          const meetingStart = parseLocalDateTime(meeting.startDateTime);
+          const meetingEnd = parseLocalDateTime(meeting.endDateTime);
+          return (meetingStart <= dayEnd && meetingEnd >= dayStart);
+        })
+        .sort((a: any, b: any) => {
+          const startA = parseLocalDateTime(a.startDateTime);
+          const startB = parseLocalDateTime(b.startDateTime);
+          return startA.getTime() - startB.getTime();
+        });
+    };
 
     return (
-      <div className="h-full overflow-hidden p-8" style={{ fontFamily: 'Roboto, sans-serif' }}>
-        <div className="bg-white rounded-lg shadow-2xl h-full overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-teal-600 to-teal-800 text-white p-8">
-            <h2 className="text-5xl font-bold text-center">LỊCH HỌP HÔM NAY</h2>
-            <p className="text-2xl text-center mt-4">{format(today, 'EEEE, dd/MM/yyyy', { locale: vi })}</p>
-          </div>
-
-          {/* Meetings List */}
-          <div className="p-8 space-y-6 overflow-auto" style={{ height: 'calc(100% - 200px)' }}>
-            {visibleMeetings.length > 0 ? (
-              visibleMeetings.map((meeting: any, index: number) => {
-                const startTime = format(parseLocalDateTime(meeting.startDateTime), 'HH:mm');
-                const endTime = format(parseLocalDateTime(meeting.endDateTime), 'HH:mm');
-                const meetingRoom = meetingRooms.find((room: any) => room.id === meeting.meetingRoomId);
-                
+      <div className="h-full overflow-hidden" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        {/* Meeting Schedule Table */}
+        <div className="bg-white h-full overflow-hidden">
+          <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '420px' }} /> {/* Wider for 4K */}
+              {weekDays.map((day, index) => {
+                const isWeekend = getDay(day) === 0 || getDay(day) === 6;
                 return (
-                  <div 
-                    key={meeting.id} 
-                    className="bg-gradient-to-r from-blue-50 to-blue-100 border-l-8 border-blue-500 rounded-lg p-6 shadow-lg"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="text-3xl font-bold text-blue-900 mb-3">
-                          {meeting.title}
-                        </div>
-                        <div className="text-xl text-gray-700 mb-2">
-                          <span className="font-semibold text-blue-700">Thời gian:</span> {startTime} - {endTime}
-                        </div>
-                        <div className="text-xl text-gray-700 mb-2">
-                          <span className="font-semibold text-blue-700">Phòng họp:</span> {meetingRoom?.name || 'Chưa xác định'}
-                        </div>
-                        {meeting.organizer && (
-                          <div className="text-xl text-gray-700">
-                            <span className="font-semibold text-blue-700">Chủ trì:</span> {meeting.organizer}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-4xl font-bold text-blue-500 ml-6">
-                        {String(index + 1).padStart(2, '0')}
-                      </div>
-                    </div>
-                  </div>
+                  <col key={index} style={{ 
+                    width: isWeekend ? 'calc((100% - 420px) * 0.1)' : 'calc((100% - 420px) * 0.18)' 
+                  }} />
                 );
-              })
-            ) : (
-              <div className="text-center text-4xl text-gray-500 py-20">
-                Hôm nay không có cuộc họp nào được lên lịch
-              </div>
-            )}
-          </div>
+              })}
+            </colgroup>
+            <thead style={{ height: '100px' }}> {/* Taller for 4K */}
+              <tr className="bg-orange-600" style={{ height: '100px' }}>
+                <th 
+                  className="text-white font-bold text-center"
+                  style={{ 
+                    fontSize: '28px', 
+                    fontWeight: '700',
+                    padding: '20px',
+                    borderRight: '2px solid rgb(194 65 12)',
+                    verticalAlign: 'middle'
+                  }}
+                >
+                  Phòng họp/ Ngày
+                </th>
+                {weekDays.map((day, index) => {
+                  const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                  const dayName = dayNames[getDay(day)];
+                  const isWeekend = getDay(day) === 0 || getDay(day) === 6;
+                  const isLastColumn = index === weekDays.length - 1;
+                  
+                  return (
+                    <th 
+                      key={index}
+                      className="text-white font-bold text-center"
+                      style={{ 
+                        fontSize: '24px', 
+                        fontWeight: '700',
+                        padding: '20px',
+                        borderRight: isLastColumn ? 'none' : '2px solid rgb(194 65 12)',
+                        verticalAlign: 'middle'
+                      }}
+                    >
+                      <div>{dayName}</div>
+                      <div style={{ fontSize: '20px', fontWeight: '400' }}>
+                        {format(day, 'dd/MM', { locale: vi })}
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody style={{ height: 'calc(100% - 100px)' }}>
+              {meetingRooms.slice(0, 8).map((room: any, roomIndex: number) => ( // Limit to 8 rooms for 4K
+                <tr key={room.id} className="border-b-2 border-gray-200" style={{ 
+                  height: `calc((100vh - 300px) / ${Math.min(meetingRooms.length, 8)})`,
+                  minHeight: '120px' 
+                }}>
+                  {/* Room Name Column */}
+                  <td 
+                    className="bg-teal-600 text-white font-bold"
+                    style={{
+                      padding: '16px',
+                      borderRight: '2px solid rgb(209 213 219)',
+                      verticalAlign: 'middle',
+                      height: '100%',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ 
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      fontWeight: '700',
+                      textAlign: 'center',
+                      lineHeight: '1.3',
+                      wordWrap: 'break-word'
+                    }}>
+                      {room.name}
+                    </div>
+                  </td>
+
+                  {/* Meeting columns for each day */}
+                  {weekDays.map((day, dayIndex) => {
+                    const dayMeetings = getMeetingsForRoomAndDay(room.id, day);
+                    const isWeekend = getDay(day) === 0 || getDay(day) === 6;
+                    const isLastColumn = dayIndex === weekDays.length - 1;
+                    
+                    return (
+                      <td 
+                        key={dayIndex}
+                        style={{
+                          padding: '12px',
+                          borderRight: isLastColumn ? 'none' : '2px solid rgb(209 213 219)',
+                          backgroundColor: isWeekend ? '#f3f4f6' : 'white',
+                          verticalAlign: 'top',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {dayMeetings.map((meeting: any, meetingIndex: number) => {
+                          // Calculate time display (same logic as standard)
+                          const utcStartTime = new Date(meeting.startDateTime);
+                          const utcEndTime = new Date(meeting.endDateTime);
+                          
+                          const meetingStartDate = `${utcStartTime.getUTCFullYear()}-${String(utcStartTime.getUTCMonth() + 1).padStart(2, '0')}-${String(utcStartTime.getUTCDate()).padStart(2, '0')}`;
+                          const meetingEndDate = `${utcEndTime.getUTCFullYear()}-${String(utcEndTime.getUTCMonth() + 1).padStart(2, '0')}-${String(utcEndTime.getUTCDate()).padStart(2, '0')}`;
+                          const currentDayDate = format(day, 'yyyy-MM-dd');
+
+                          let displayStartTime, displayEndTime;
+                          if (meetingStartDate === currentDayDate) {
+                            displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, '0')}:${String(utcStartTime.getUTCMinutes()).padStart(2, '0')}`;
+                          } else {
+                            displayStartTime = "00:00";
+                          }
+
+                          if (meetingEndDate === currentDayDate) {
+                            displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, '0')}:${String(utcEndTime.getUTCMinutes()).padStart(2, '0')}`;
+                          } else {
+                            displayEndTime = "23:59";
+                          }
+
+                          const timeRange = `${displayStartTime} - ${displayEndTime}`;
+
+                          return (
+                            <div
+                              key={meetingIndex}
+                              className="mb-3"
+                              style={{ 
+                                padding: '0',
+                                lineHeight: '1.3'
+                              }}
+                            >
+                              <div style={{ 
+                                fontSize: '18px', // Larger for 4K
+                                fontWeight: '500',
+                                lineHeight: '1.3',
+                                marginBottom: '6px'
+                              }}>
+                                <div style={{
+                                  color: '#9f224e',
+                                  fontWeight: '700',
+                                  fontSize: '18px',
+                                  marginBottom: '4px'
+                                }}>
+                                  {timeRange}
+                                </div>
+                                <div style={{
+                                  color: '#006B68',
+                                  fontWeight: '500',
+                                  fontSize: '16px',
+                                  lineHeight: '1.4',
+                                  wordWrap: 'break-word',
+                                  whiteSpace: 'normal'
+                                }}>
+                                  {meeting.meetingContent}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
   };
 
-  // Other Events Display for 4K
+  // Other Events Display for 4K - matching standard display layout
   const renderOtherEventsDisplay4K = () => {
-    if (!displayData?.otherEvents) {
-      return <div className="flex items-center justify-center h-full text-4xl text-white">Không có sự kiện nào</div>;
-    }
-
+    // Filter to show ongoing events OR events starting within the next 30 days (same as standard)
     const now = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(now.getDate() + 30);
     
-    const relevantEvents = displayData.otherEvents
+    const relevantEvents = (displayData?.otherEvents || [])
       .filter((event: any) => {
         const start = new Date(event.startDateTime);
         const end = new Date(event.endDateTime);
@@ -437,73 +573,106 @@ export default function PublicDisplay4K() {
         return startA.getTime() - startB.getTime();
       });
 
-    if (relevantEvents.length === 0) {
-      return <div className="flex items-center justify-center h-full text-4xl text-white">Không có sự kiện nào trong thời gian tới</div>;
-    }
-
+    // Show only the current event based on currentEventIndex (same as standard)
     const currentEvent = relevantEvents[currentEventIndex];
 
     return (
-      <div className="h-full flex items-center justify-center p-8" style={{ fontFamily: 'Roboto, sans-serif' }}>
-        <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full h-full overflow-hidden">
-          <div className="h-full flex flex-col">
-            {/* Event Title */}
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-8">
-              <h1 className="text-5xl font-bold text-center leading-tight">
-                {currentEvent.shortName}
-              </h1>
-            </div>
-
-            {/* Event Content */}
-            <div className="flex-1 p-8 flex">
-              {/* Image Section */}
-              {currentEvent.imageUrl && (
-                <div className="w-1/2 pr-8">
-                  <img 
-                    src={currentEvent.imageUrl}
-                    alt={currentEvent.shortName}
-                    className="w-full h-full object-contain rounded-lg shadow-lg"
-                    onError={(e) => {
-                      console.log('Image failed to load:', currentEvent.imageUrl);
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Content Section */}
-              <div className={`${currentEvent.imageUrl ? 'w-1/2' : 'w-full'} flex flex-col justify-center`}>
-                <div className="text-3xl text-gray-800 leading-relaxed mb-8">
-                  {currentEvent.content}
+      <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="p-12 h-full"> {/* Larger padding for 4K */}
+          {currentEvent ? (
+            <div className="h-full flex flex-col">
+              {/* Event Title and Info */}
+              <div className="mb-8">
+                <div className="text-5xl font-bold text-gray-800 mb-6 leading-tight"> {/* Larger text for 4K */}
+                  {currentEvent.shortName}
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="text-2xl text-gray-600">
-                    <span className="font-semibold text-purple-700">Thời gian bắt đầu:</span><br />
-                    {format(new Date(currentEvent.startDateTime), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi })}
+                {/* Time Information */}
+                <div className="grid grid-cols-2 gap-8 mb-8">
+                  <div className="bg-green-50 p-6 rounded-lg">
+                    <div className="text-2xl font-semibold text-green-700 mb-2">Thời gian bắt đầu</div>
+                    <div className="text-3xl text-green-800">
+                      {format(new Date(currentEvent.startDateTime), 'HH:mm', { locale: vi })}
+                    </div>
+                    <div className="text-xl text-green-600">
+                      {format(new Date(currentEvent.startDateTime), 'EEEE, dd/MM/yyyy', { locale: vi })}
+                    </div>
                   </div>
-                  <div className="text-2xl text-gray-600">
-                    <span className="font-semibold text-purple-700">Thời gian kết thúc:</span><br />
-                    {format(new Date(currentEvent.endDateTime), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi })}
+                  
+                  <div className="bg-red-50 p-6 rounded-lg">
+                    <div className="text-2xl font-semibold text-red-700 mb-2">Thời gian kết thúc</div>
+                    <div className="text-3xl text-red-800">
+                      {format(new Date(currentEvent.endDateTime), 'HH:mm', { locale: vi })}
+                    </div>
+                    <div className="text-xl text-red-600">
+                      {format(new Date(currentEvent.endDateTime), 'EEEE, dd/MM/yyyy', { locale: vi })}
+                    </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Main Content Area */}
+              <div className="flex-1 flex gap-8">
+                {/* Image Section */}
+                {currentEvent.imageUrl && (
+                  <div className="w-1/2">
+                    <div className="h-full border-4 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+                      <img 
+                        src={currentEvent.imageUrl}
+                        alt={currentEvent.shortName}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          console.log('Image failed to load:', currentEvent.imageUrl);
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          // Show placeholder
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'flex items-center justify-center text-4xl text-gray-400 h-full w-full';
+                          placeholder.textContent = 'Hình ảnh không khả dụng';
+                          target.parentNode?.appendChild(placeholder);
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Content Section */}
+                <div className={`${currentEvent.imageUrl ? 'w-1/2' : 'w-full'} flex flex-col justify-center`}>
+                  <div className="bg-blue-50 p-8 rounded-lg h-full flex items-center">
+                    <div className="text-3xl text-gray-700 leading-relaxed"> {/* Larger text for 4K */}
+                      {currentEvent.content}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress indicator at bottom */}
+              {relevantEvents.length > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <div className="flex space-x-3">
+                    {relevantEvents.map((_: any, index: number) => (
+                      <div
+                        key={index}
+                        className={`w-6 h-6 rounded-full ${index === currentEventIndex ? 'bg-blue-600' : 'bg-gray-300'}`} // Larger indicators for 4K
+                      />
+                    ))}
+                    <div className="ml-6 text-2xl text-gray-600 font-medium">
+                      {currentEventIndex + 1} / {relevantEvents.length}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl text-gray-400 mb-8">📅</div> {/* Larger icon for 4K */}
+                <div className="text-4xl text-gray-600">
+                  Không có sự kiện nào trong thời gian tới
                 </div>
               </div>
             </div>
-
-            {/* Progress Indicator */}
-            {relevantEvents.length > 1 && (
-              <div className="bg-gray-100 p-4">
-                <div className="flex justify-center space-x-2">
-                  {relevantEvents.map((_: any, index: number) => (
-                    <div
-                      key={index}
-                      className={`w-4 h-4 rounded-full ${index === currentEventIndex ? 'bg-purple-600' : 'bg-gray-300'}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     );
