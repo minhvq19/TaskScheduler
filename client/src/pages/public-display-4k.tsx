@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, startOfDay, addDays, eachDayOfInterval } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import React from 'react';
@@ -172,8 +172,17 @@ export default function PublicDisplay4K() {
     return new Date(date.setDate(diff));
   };
 
-  const days = getWeekDays(getMonday(new Date()));
+  // Use current week starting from today (same as standard display)
+  const today = new Date();
+  const todayStart = startOfDay(today);
+  const endOfWeek = addDays(todayStart, 6);
   
+  const weekDays = eachDayOfInterval({
+    start: todayStart, // Start from today, not Monday
+    end: endOfWeek
+  });
+  
+  const getDay = (date: Date) => date.getDay();
   const isWeekend = (date: Date) => {
     const day = date.getDay();
     return day === 0 || day === 6;
@@ -228,7 +237,9 @@ export default function PublicDisplay4K() {
           <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400">
             LÃNH ĐẠO
           </div>
-          {days.map((day, index) => {
+          {weekDays.map((day, index) => {
+            const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            const dayName = dayNames[getDay(day)];
             const isWeekendDay = isWeekend(day);
             return (
               <div 
@@ -236,7 +247,7 @@ export default function PublicDisplay4K() {
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? 'bg-gray-300' : 'bg-yellow-400'}`}
                 style={{ fontFamily: 'Roboto, sans-serif' }}
               >
-                <div className="text-xl font-bold">{format(day, 'EEEE', { locale: vi })}</div>
+                <div className="text-xl font-bold">{dayName}</div>
                 <div className="text-2xl font-bold">{format(day, 'dd/MM', { locale: vi })}</div>
               </div>
             );
@@ -257,7 +268,7 @@ export default function PublicDisplay4K() {
               </div>
             
             {/* Schedule Columns for each day */}
-            {days.map((day, dayIndex) => {
+            {weekDays.map((day, dayIndex) => {
               const schedules = getSchedulesForStaffAndDay(staffMember.id, day);
               const isWeekendDay = isWeekend(day);
               
@@ -341,18 +352,21 @@ export default function PublicDisplay4K() {
       return <div className="flex items-center justify-center h-full text-4xl text-white">Không có dữ liệu lịch họp</div>;
     }
 
-    // Generate week days for table headers (same as standard display)
-    const getDay = (date: Date) => date.getDay();
+    // Generate week days for table headers (exactly same as standard display)
+    const today = new Date();
+    const todayStart = startOfDay(today);
     
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
-    const weekDays = Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      return day;
+    // Show 7 days starting from today (same as standard display)
+    const endOfWeek = addDays(todayStart, 6);
+    
+    const weekDays = eachDayOfInterval({
+      start: todayStart, // Start from today, not Monday
+      end: endOfWeek
     });
+    
+    const getDay = (date: Date) => date.getDay();
 
-    // Get meetings for a specific room and day
+    // Get meetings for a specific room and day (must use correct field name)
     const getMeetingsForRoomAndDay = (roomId: string, day: Date) => {
       const dayStart = new Date(day);
       dayStart.setHours(0, 0, 0, 0);
@@ -361,7 +375,8 @@ export default function PublicDisplay4K() {
 
       return (displayData?.meetingSchedules || [])
         .filter((meeting: any) => {
-          if (meeting.meetingRoomId !== roomId) return false;
+          // Use roomId not meetingRoomId - this is the bug!
+          if (meeting.roomId !== roomId) return false;
           const meetingStart = parseLocalDateTime(meeting.startDateTime);
           const meetingEnd = parseLocalDateTime(meeting.endDateTime);
           return (meetingStart <= dayEnd && meetingEnd >= dayStart);
@@ -552,7 +567,7 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Other Events Display for 4K - matching standard display layout
+  // Other Events Display for 4K - exactly matching standard display layout
   const renderOtherEventsDisplay4K = () => {
     // Filter to show ongoing events OR events starting within the next 30 days (same as standard)
     const now = new Date();
@@ -578,98 +593,51 @@ export default function PublicDisplay4K() {
 
     return (
       <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
-        <div className="p-12 h-full"> {/* Larger padding for 4K */}
+        <div className="p-8 h-full"> {/* Standard padding for 4K to match layout */}
           {currentEvent ? (
-            <div className="h-full flex flex-col">
-              {/* Event Title and Info */}
-              <div className="mb-8">
-                <div className="text-5xl font-bold text-gray-800 mb-6 leading-tight"> {/* Larger text for 4K */}
-                  {currentEvent.shortName}
-                </div>
-                
-                {/* Time Information */}
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="bg-green-50 p-6 rounded-lg">
-                    <div className="text-2xl font-semibold text-green-700 mb-2">Thời gian bắt đầu</div>
-                    <div className="text-3xl text-green-800">
-                      {format(new Date(currentEvent.startDateTime), 'HH:mm', { locale: vi })}
-                    </div>
-                    <div className="text-xl text-green-600">
-                      {format(new Date(currentEvent.startDateTime), 'EEEE, dd/MM/yyyy', { locale: vi })}
-                    </div>
+            <div className="h-full flex flex-col justify-center">
+              <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                {/* Large image - full display (exactly same as standard) */}
+                {currentEvent.imageUrl ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <img 
+                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}?v=${Date.now()}` : currentEvent.imageUrl} 
+                      alt={currentEvent.shortName}
+                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                      style={{ width: 'auto', height: 'auto' }}
+                      onError={(e) => {
+                        console.error('Image failed to load:', currentEvent.imageUrl);
+                        console.error('Attempted URL:', e.currentTarget.src);
+                        console.error('Current event data:', currentEvent);
+                        // Hide the image element when it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', currentEvent.imageUrl);
+                      }}
+                    />
                   </div>
-                  
-                  <div className="bg-red-50 p-6 rounded-lg">
-                    <div className="text-2xl font-semibold text-red-700 mb-2">Thời gian kết thúc</div>
-                    <div className="text-3xl text-red-800">
-                      {format(new Date(currentEvent.endDateTime), 'HH:mm', { locale: vi })}
+                ) : (
+                  /* Show event details when no image (exactly same as standard) */
+                  (<div className="w-full h-full flex flex-col items-center justify-center p-12">
+                    <div className="text-center text-teal-800">
+                      <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}> {/* Larger for 4K */}
+                        {currentEvent.shortName}
+                      </h2>
+                      {currentEvent.detailedContent && (
+                        <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}> {/* Larger for 4K */}
+                          {currentEvent.detailedContent}
+                        </p>
+                      )}
                     </div>
-                    <div className="text-xl text-red-600">
-                      {format(new Date(currentEvent.endDateTime), 'EEEE, dd/MM/yyyy', { locale: vi })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Main Content Area */}
-              <div className="flex-1 flex gap-8">
-                {/* Image Section */}
-                {currentEvent.imageUrl && (
-                  <div className="w-1/2">
-                    <div className="h-full border-4 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-                      <img 
-                        src={currentEvent.imageUrl}
-                        alt={currentEvent.shortName}
-                        className="max-w-full max-h-full object-contain"
-                        onError={(e) => {
-                          console.log('Image failed to load:', currentEvent.imageUrl);
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          // Show placeholder
-                          const placeholder = document.createElement('div');
-                          placeholder.className = 'flex items-center justify-center text-4xl text-gray-400 h-full w-full';
-                          placeholder.textContent = 'Hình ảnh không khả dụng';
-                          target.parentNode?.appendChild(placeholder);
-                        }}
-                      />
-                    </div>
-                  </div>
+                  </div>)
                 )}
-
-                {/* Content Section */}
-                <div className={`${currentEvent.imageUrl ? 'w-1/2' : 'w-full'} flex flex-col justify-center`}>
-                  <div className="bg-blue-50 p-8 rounded-lg h-full flex items-center">
-                    <div className="text-3xl text-gray-700 leading-relaxed"> {/* Larger text for 4K */}
-                      {currentEvent.content}
-                    </div>
-                  </div>
-                </div>
               </div>
-
-              {/* Progress indicator at bottom */}
-              {relevantEvents.length > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <div className="flex space-x-3">
-                    {relevantEvents.map((_: any, index: number) => (
-                      <div
-                        key={index}
-                        className={`w-6 h-6 rounded-full ${index === currentEventIndex ? 'bg-blue-600' : 'bg-gray-300'}`} // Larger indicators for 4K
-                      />
-                    ))}
-                    <div className="ml-6 text-2xl text-gray-600 font-medium">
-                      {currentEventIndex + 1} / {relevantEvents.length}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl text-gray-400 mb-8">📅</div> {/* Larger icon for 4K */}
-                <div className="text-4xl text-gray-600">
-                  Không có sự kiện nào trong thời gian tới
-                </div>
+              <div className="text-gray-500 text-4xl text-center" style={{ fontFamily: 'Roboto, sans-serif' }}> {/* Larger for 4K */}
+                Hiện tại không có sự kiện nào đang diễn ra
               </div>
             </div>
           )}
@@ -682,15 +650,12 @@ export default function PublicDisplay4K() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-800 to-teal-900 relative overflow-hidden" style={{ width: '100vw', height: '100vh' }}>
-      {/* Header with BIDV branding */}
-      <div className="relative bg-gradient-to-r from-yellow-400 to-yellow-500 text-center py-6 border-b-4 border-yellow-600">
-        <div className="text-center font-bold text-3xl text-black" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-          NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
+      {/* Header with BIDV branding - matching standard display colors */}
+      <div className="public-display-header bg-teal-900 text-center py-6 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
+        <div className="text-yellow-400 font-bold text-3xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
+        <div className="text-center font-bold text-3xl text-[#facc15]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
         </div>
-        <div className="text-center font-bold text-2xl text-black" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>
-          CHI NHÁNH SỞ GIAO DỊCH 1
-        </div>
-        <div className="font-bold mt-4 text-black text-6xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+        <div className="font-bold mt-4 text-[#ffffff] text-6xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
           {(() => {
             if (currentScreen.id === 'other-events' && displayData?.otherEvents) {
               const now = new Date();
