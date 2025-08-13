@@ -366,26 +366,80 @@ export default function PublicDisplay4K() {
     
     const getDay = (date: Date) => date.getDay();
 
-    // Get meetings for a specific room and day (must use correct field name)
-    const getMeetingsForRoomAndDay = (roomId: string, day: Date) => {
-      const dayStart = new Date(day);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(day);
-      dayEnd.setHours(23, 59, 59, 999);
+    // Get all meeting rooms (same as standard display)
+    const rooms = meetingRooms || [];
+    
+    // Get meetings for current week (include meetings that overlap with current week) - same logic as standard
+    const weekMeetings = (displayData?.meetingSchedules || [])
+      .filter((meeting: any) => {
+        // Use UTC date for meeting date calculation (not Vietnam time) - exact same as standard 
+        const utcStartTime = new Date(meeting.startDateTime);
+        const utcEndTime = new Date(meeting.endDateTime);
+        
+        // Get the UTC date by using the UTC components (not local timezone) - exact same as standard
+        const startYear = utcStartTime.getUTCFullYear();
+        const startMonth = utcStartTime.getUTCMonth();
+        const startDay = utcStartTime.getUTCDate();
+        const meetingStartDate = new Date(startYear, startMonth, startDay);
+        
+        const endYear = utcEndTime.getUTCFullYear();
+        const endMonth = utcEndTime.getUTCMonth();
+        const endDay = utcEndTime.getUTCDate();
+        const meetingEndDate = new Date(endYear, endMonth, endDay);
+        const weekStartDate = todayStart;
+        const weekEndDate = endOfWeek;
+        
+        // Include meeting if it overlaps with current week - exact same as standard
+        // Meeting overlaps if: meeting starts before or on week end AND meeting ends after or on week start
+        return meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate;
+      });
 
-      return (displayData?.meetingSchedules || [])
-        .filter((meeting: any) => {
-          // Use roomId not meetingRoomId - this is the bug!
-          if (meeting.roomId !== roomId) return false;
-          const meetingStart = parseLocalDateTime(meeting.startDateTime);
-          const meetingEnd = parseLocalDateTime(meeting.endDateTime);
-          return (meetingStart <= dayEnd && meetingEnd >= dayStart);
-        })
-        .sort((a: any, b: any) => {
-          const startA = parseLocalDateTime(a.startDateTime);
-          const startB = parseLocalDateTime(b.startDateTime);
-          return startA.getTime() - startB.getTime();
-        });
+    // Group meetings by room and date - exact same logic as standard
+    const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
+    rooms.forEach(room => {
+      meetingsByRoomAndDate[room.id] = {};
+      weekDays.forEach(day => {
+        const dateKey = format(day, 'yyyy-MM-dd');
+        meetingsByRoomAndDate[room.id][dateKey] = [];
+      });
+    });
+
+    weekMeetings.forEach((meeting: any) => {
+      // Use UTC date for meeting grouping - exact same as standard
+      const utcStartTime = new Date(meeting.startDateTime);
+      const utcEndTime = new Date(meeting.endDateTime);
+      
+      // Get the UTC date by using the UTC components (not local timezone) - exact same as standard
+      const startYear = utcStartTime.getUTCFullYear();
+      const startMonth = utcStartTime.getUTCMonth();
+      const startDay = utcStartTime.getUTCDate();
+      const meetingStart = new Date(startYear, startMonth, startDay);
+      
+      const endYear = utcEndTime.getUTCFullYear();
+      const endMonth = utcEndTime.getUTCMonth();
+      const endDay = utcEndTime.getUTCDate();
+      const meetingEnd = new Date(endYear, endMonth, endDay);
+      
+      // For multi-day meetings, add to each day - exact same as standard
+      const startDate = meetingStart;
+      const endDate = meetingEnd;
+      
+      for (let currentDate = new Date(startDate); currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+        const dateKey = format(currentDate, 'yyyy-MM-dd');
+        
+        // Check if this date is within our week display range
+        const isWithinWeek = weekDays.some(day => format(day, 'yyyy-MM-dd') === dateKey);
+        
+        if (isWithinWeek && meetingsByRoomAndDate[meeting.roomId]) {
+          meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);
+        }
+      }
+    });
+
+    // Get meetings for a specific room and day helper - exact same as standard  
+    const getMeetingsForRoomAndDay = (roomId: string, day: Date) => {
+      const dateKey = format(day, 'yyyy-MM-dd');
+      return meetingsByRoomAndDate[roomId]?.[dateKey] || [];
     };
 
     return (
@@ -446,9 +500,9 @@ export default function PublicDisplay4K() {
               </tr>
             </thead>
             <tbody style={{ height: 'calc(100% - 100px)' }}>
-              {meetingRooms.slice(0, 8).map((room: any, roomIndex: number) => ( // Limit to 8 rooms for 4K
+              {rooms.slice(0, 8).map((room: any, roomIndex: number) => ( // Limit to 8 rooms for 4K
                 <tr key={room.id} className="border-b-2 border-gray-200" style={{ 
-                  height: `calc((100vh - 300px) / ${Math.min(meetingRooms.length, 8)})`,
+                  height: `calc((100vh - 300px) / ${Math.min(rooms.length, 8)})`,
                   minHeight: '120px' 
                 }}>
                   {/* Room Name Column */}
