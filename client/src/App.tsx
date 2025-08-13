@@ -8,6 +8,8 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import PublicDisplay from "@/pages/public-display";
+import PublicDisplay4K from "@/pages/public-display-4k";
+import DisplaySelection from "@/pages/display-selection";
 import SystemConfig from "@/pages/system-config";
 
 function Router() {
@@ -15,10 +17,18 @@ function Router() {
 
   return (
     <Switch>
-      {/* Public display route - always accessible */}
+      {/* Display Selection - choose between standard and 4K */}
+      <Route path="/select-display" component={DisplaySelection} />
+      
+      {/* Public display routes - always accessible */}
       <Route path="/display" component={PublicDisplay} />
       <Route path="/public-display" component={PublicDisplay} />
       <Route path="/public" component={PublicDisplay} />
+      
+      {/* 4K Public display routes for 65" TV (3840x2160) */}
+      <Route path="/display-4k" component={PublicDisplay4K} />
+      <Route path="/public-display-4k" component={PublicDisplay4K} />
+      <Route path="/public-4k" component={PublicDisplay4K} />
       
       {/* Protected routes */}
       {isLoading ? (
