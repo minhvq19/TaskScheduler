@@ -695,32 +695,43 @@ export default function PublicDisplay() {
                           style={{ 
                             backgroundColor: bidvBgColor,
                             border: `2px solid ${bidvStatusColor}`,
-                            padding: '6px 8px',
-                            lineHeight: '1.4'
+                            padding: '4px 6px',
+                            lineHeight: '1.2',
+                            minHeight: '24px',
+                            maxHeight: '40px',
+                            overflow: 'hidden'
                           }}
                         >
                           <div style={{ 
-                            fontSize: '12px', 
+                            fontSize: '11px', 
                             fontWeight: '500',
-                            lineHeight: '1.3',
+                            lineHeight: '1.2',
                             display: 'flex',
                             alignItems: 'flex-start',
-                            gap: '6px'
+                            gap: '4px',
+                            maxHeight: '32px',
+                            overflow: 'hidden'
                           }}>
                             <span style={{
                               color: '#9f224e',
                               fontWeight: '700',
-                              fontSize: '13px',
-                              flexShrink: 0
+                              fontSize: '12px',
+                              flexShrink: 0,
+                              whiteSpace: 'nowrap'
                             }}>
                               {timeRange}
                             </span>
                             <span style={{
                               color: '#006B68',
-                              fontWeight: '500'
+                              fontWeight: '500',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                              minWidth: 0
                             }}>
-                              {meeting.meetingContent.length > 40 
-                                ? meeting.meetingContent.substring(0, 40) + '...' 
+                              {meeting.meetingContent.length > 35 
+                                ? meeting.meetingContent.substring(0, 35) + '...' 
                                 : meeting.meetingContent}
                             </span>
                           </div>
