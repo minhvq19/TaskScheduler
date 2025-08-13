@@ -622,9 +622,7 @@ export default function PublicDisplay() {
                       verticalAlign: 'top'
                     }}
                   >
-                    {dayMeetings.length > 0 && console.log(`Day ${dateKey} has ${dayMeetings.length} meetings for room ${room.name}`)}
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
-                      console.log(`Rendering meeting: ${meeting.meetingContent} for room ${room.name} on ${dateKey}`);
                       
                       // Format time only for grid display
                       const formatTime = (dateTimeString: string): string => {
@@ -660,8 +658,7 @@ export default function PublicDisplay() {
                       }
 
                       const timeRange = `${displayStartTime} - ${displayEndTime}`;
-                      console.log(`Meeting ${meeting.meetingContent} on ${dateKey}: ${timeRange}`);
-                      console.log(`Meeting start date: ${meetingStartDate}, Meeting end date: ${meetingEndDate}, Current day: ${currentDayDate}`);
+
 
                       // Determine meeting status
                       const now = new Date();
@@ -703,30 +700,29 @@ export default function PublicDisplay() {
                           }}
                         >
                           <div style={{ 
-                            fontSize: '13px', 
-                            fontWeight: '700', 
-                            color: '#9f224e',
-                            marginBottom: '2px'
-                          }}>
-                            {timeRange}
-                          </div>
-                          <div style={{ 
                             fontSize: '12px', 
-                            color: '#1f2937', 
                             fontWeight: '500',
-                            marginBottom: '2px',
-                            lineHeight: '1.3'
+                            lineHeight: '1.3',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '6px'
                           }}>
-                            {meeting.meetingContent.length > 50 
-                              ? meeting.meetingContent.substring(0, 50) + '...' 
-                              : meeting.meetingContent}
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#006B68', 
-                            fontWeight: '600'
-                          }}>
-                            Đầu mối: {meeting.contactPerson}
+                            <span style={{
+                              color: '#9f224e',
+                              fontWeight: '700',
+                              fontSize: '13px',
+                              flexShrink: 0
+                            }}>
+                              {timeRange}
+                            </span>
+                            <span style={{
+                              color: '#006B68',
+                              fontWeight: '500'
+                            }}>
+                              {meeting.meetingContent.length > 40 
+                                ? meeting.meetingContent.substring(0, 40) + '...' 
+                                : meeting.meetingContent}
+                            </span>
                           </div>
                         </div>
                       );
