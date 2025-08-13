@@ -458,9 +458,14 @@ export default function PublicDisplay() {
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
           <colgroup>
             <col style={{ width: '280px' }} />
-            {weekDays.map((_, index) => (
-              <col key={index} style={{ width: 'calc((100% - 280px) / 7)' }} />
-            ))}
+            {weekDays.map((day, index) => {
+              const isWeekend = getDay(day) === 0 || getDay(day) === 6; // Sunday or Saturday
+              return (
+                <col key={index} style={{ 
+                  width: isWeekend ? 'calc((100% - 280px) * 0.1)' : 'calc((100% - 280px) * 0.18)' 
+                }} />
+              );
+            })}
           </colgroup>
           <thead>
             <tr className="bg-orange-600">
