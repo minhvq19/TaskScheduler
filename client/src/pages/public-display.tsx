@@ -430,6 +430,11 @@ export default function PublicDisplay() {
       end: addDays(mondayOfWeek, 6)
     });
 
+    // Debug log
+    console.log('Today:', format(today, 'yyyy-MM-dd HH:mm:ss'));
+    console.log('Monday of week:', format(mondayOfWeek, 'yyyy-MM-dd'));
+    console.log('Week days:', weekDays.map(d => format(d, 'yyyy-MM-dd')));
+
     // Get all meeting rooms
     const meetingRooms = rooms || [];
     
@@ -441,10 +446,22 @@ export default function PublicDisplay() {
         const weekStartDate = mondayOfWeek;
         const weekEndDate = addDays(mondayOfWeek, 6);
         
+        // Debug log for specific meeting
+        if (meeting.roomId && meeting.meetingContent) {
+          console.log('Meeting:', meeting.meetingContent.substring(0, 30));
+          console.log('Meeting start:', format(meetingStartDate, 'yyyy-MM-dd'));
+          console.log('Meeting end:', format(meetingEndDate, 'yyyy-MM-dd'));
+          console.log('Week start:', format(weekStartDate, 'yyyy-MM-dd'));
+          console.log('Week end:', format(weekEndDate, 'yyyy-MM-dd'));
+          console.log('Overlap check:', meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate);
+        }
+        
         // Include meeting if it overlaps with current week
         // Meeting overlaps if: meeting starts before or on week end AND meeting ends after or on week start
         return meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate;
       });
+
+    console.log('Total meetings found:', weekMeetings.length);
 
     // Group meetings by room and date
     const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
