@@ -428,12 +428,17 @@ export default function PublicDisplay() {
     // Get all meeting rooms
     const meetingRooms = rooms || [];
     
-    // Get meetings for current week
+    // Get meetings for current week (include meetings that overlap with current week)
     const weekMeetings = (displayData?.meetingSchedules || [])
       .filter((meeting: any) => {
-        const meetingDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
-        const endDate = addDays(startOfWeek, 6);
-        return meetingDate >= startOfWeek && meetingDate <= endDate;
+        const meetingStartDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
+        const meetingEndDate = startOfDay(parseLocalDateTime(meeting.endDateTime));
+        const weekStartDate = startOfWeek;
+        const weekEndDate = addDays(startOfWeek, 6);
+        
+        // Include meeting if it overlaps with current week
+        // Meeting overlaps if: meeting starts before week ends AND meeting ends after week starts
+        return meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate;
       });
 
     // Group meetings by room and date
