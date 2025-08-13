@@ -436,13 +436,13 @@ export default function PublicDisplay() {
     // Get meetings for current week (include meetings that overlap with current week)
     const weekMeetings = (displayData?.meetingSchedules || [])
       .filter((meeting: any) => {
-        // Parse to Vietnam time first, then get the date part
-        const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
-        const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
+        // Use UTC date for meeting date calculation (not Vietnam time)
+        const utcStartTime = new Date(meeting.startDateTime);
+        const utcEndTime = new Date(meeting.endDateTime);
         
-        // Get the actual Vietnam date (not UTC date)
-        const meetingStartDate = startOfDay(vietnamStartTime);
-        const meetingEndDate = startOfDay(vietnamEndTime);
+        // Get the UTC date (this will show 13/08 for 2025-08-13T19:00:00.000Z)
+        const meetingStartDate = startOfDay(utcStartTime);
+        const meetingEndDate = startOfDay(utcEndTime);
         const weekStartDate = todayStart;
         const weekEndDate = endOfWeek;
         
@@ -453,10 +453,10 @@ export default function PublicDisplay() {
           console.log('Meeting content:', meeting.meetingContent || 'NO CONTENT');
           console.log('Original startDateTime:', meeting.startDateTime);
           console.log('Original endDateTime:', meeting.endDateTime);
-          console.log('Vietnam start time:', format(vietnamStartTime, 'yyyy-MM-dd HH:mm'));
-          console.log('Vietnam end time:', format(vietnamEndTime, 'yyyy-MM-dd HH:mm'));
-          console.log('Parsed Meeting start date:', format(meetingStartDate, 'yyyy-MM-dd'));
-          console.log('Parsed Meeting end date:', format(meetingEndDate, 'yyyy-MM-dd'));
+          console.log('UTC start time:', format(utcStartTime, 'yyyy-MM-dd HH:mm'));
+          console.log('UTC end time:', format(utcEndTime, 'yyyy-MM-dd HH:mm'));
+          console.log('Meeting start date (UTC):', format(meetingStartDate, 'yyyy-MM-dd'));
+          console.log('Meeting end date (UTC):', format(meetingEndDate, 'yyyy-MM-dd'));
           console.log('Week start:', format(weekStartDate, 'yyyy-MM-dd'));
           console.log('Week end:', format(weekEndDate, 'yyyy-MM-dd'));
           console.log('Overlap check:', meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate);
@@ -481,10 +481,11 @@ export default function PublicDisplay() {
     });
 
     weekMeetings.forEach((meeting: any) => {
-      const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
-      const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
-      const meetingStart = startOfDay(vietnamStartTime);
-      const meetingEnd = startOfDay(vietnamEndTime);
+      // Use UTC date for meeting grouping
+      const utcStartTime = new Date(meeting.startDateTime);
+      const utcEndTime = new Date(meeting.endDateTime);
+      const meetingStart = startOfDay(utcStartTime);
+      const meetingEnd = startOfDay(utcEndTime);
       
       // Add meeting to all days it spans within the current week
       weekDays.forEach(day => {
