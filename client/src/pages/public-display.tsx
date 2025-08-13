@@ -447,10 +447,21 @@ export default function PublicDisplay() {
     });
 
     weekMeetings.forEach((meeting: any) => {
-      const dateKey = format(startOfDay(parseLocalDateTime(meeting.startDateTime)), 'yyyy-MM-dd');
-      if (meetingsByRoomAndDate[meeting.roomId] && meetingsByRoomAndDate[meeting.roomId][dateKey]) {
-        meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);
-      }
+      const meetingStart = startOfDay(parseLocalDateTime(meeting.startDateTime));
+      const meetingEnd = startOfDay(parseLocalDateTime(meeting.endDateTime));
+      
+      // Add meeting to all days it spans within the current week
+      weekDays.forEach(day => {
+        const currentDay = startOfDay(day);
+        const dateKey = format(currentDay, 'yyyy-MM-dd');
+        
+        // Check if current day falls within meeting duration
+        if (currentDay >= meetingStart && currentDay <= meetingEnd) {
+          if (meetingsByRoomAndDate[meeting.roomId] && meetingsByRoomAndDate[meeting.roomId][dateKey]) {
+            meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);
+          }
+        }
+      });
     });
 
     return (
