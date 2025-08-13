@@ -638,9 +638,9 @@ export default function PublicDisplay() {
                       const utcStartTime = new Date(meeting.startDateTime);
                       const utcEndTime = new Date(meeting.endDateTime);
                       
-                      // Get UTC date components for comparison
-                      const meetingStartDate = format(utcStartTime, 'yyyy-MM-dd');
-                      const meetingEndDate = format(utcEndTime, 'yyyy-MM-dd');
+                      // Get UTC date strings for comparison (using UTC components to avoid timezone issues)
+                      const meetingStartDate = `${utcStartTime.getUTCFullYear()}-${String(utcStartTime.getUTCMonth() + 1).padStart(2, '0')}-${String(utcStartTime.getUTCDate()).padStart(2, '0')}`;
+                      const meetingEndDate = `${utcEndTime.getUTCFullYear()}-${String(utcEndTime.getUTCMonth() + 1).padStart(2, '0')}-${String(utcEndTime.getUTCDate()).padStart(2, '0')}`;
                       const currentDayDate = format(day, 'yyyy-MM-dd');
 
                       let displayStartTime, displayEndTime;
@@ -663,6 +663,7 @@ export default function PublicDisplay() {
 
                       const timeRange = `${displayStartTime} - ${displayEndTime}`;
                       console.log(`Meeting ${meeting.meetingContent} on ${dateKey}: ${timeRange}`);
+                      console.log(`Meeting start date: ${meetingStartDate}, Meeting end date: ${meetingEndDate}, Current day: ${currentDayDate}`);
 
                       // Determine meeting status
                       const now = new Date();
