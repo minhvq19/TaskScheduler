@@ -458,7 +458,7 @@ export default function PublicDisplay() {
         {/* Table Header - Days of week */}
         <div className="bg-orange-600" style={{ 
           display: 'grid', 
-          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.6fr 0.6fr', // Weekend columns (Sat, Sun) are narrower
+          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr', // Weekend columns (Sat, Sun) are narrower but not too narrow
           fontFamily: 'Roboto, sans-serif' 
         }}>
           <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>
@@ -492,8 +492,9 @@ export default function PublicDisplay() {
               className="border-b border-gray-200" 
               style={{ 
                 display: 'grid', 
-                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.6fr 0.6fr', // Match header columns
-                minHeight: '80px'
+                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr', // Match header columns exactly
+                minHeight: '80px',
+                alignItems: 'stretch' // Ensure all columns have equal height
               }}
             >
               {/* Room Name Column */}
@@ -570,7 +571,7 @@ export default function PublicDisplay() {
                               : meeting.meetingContent}
                           </div>
                           <div style={{ fontSize: '9px', marginTop: '2px', color: '#6b7280' }}>
-                            {meeting.contactPerson}
+                            Đầu mối: {meeting.contactPerson}
                           </div>
                         </div>
                       );
