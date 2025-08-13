@@ -480,7 +480,6 @@ export default function PublicDisplay() {
       });
 
     console.log('Total meetings found:', weekMeetings.length);
-    console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     // Group meetings by room and date
     const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
@@ -521,6 +520,8 @@ export default function PublicDisplay() {
         }
       });
     });
+
+    console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
