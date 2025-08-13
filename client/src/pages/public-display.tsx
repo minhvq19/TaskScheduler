@@ -546,8 +546,8 @@ export default function PublicDisplay() {
                     key={dayIndex} 
                     className={isWeekend ? 'bg-gray-100' : 'bg-white'}
                     style={{ 
-                      minHeight: '80px',
-                      padding: '8px',
+                      minHeight: '90px',
+                      padding: '6px',
                       borderRight: isLastColumn ? 'none' : '1px solid rgb(229 231 235)', // gray-200
                       verticalAlign: 'top'
                     }}
@@ -581,25 +581,53 @@ export default function PublicDisplay() {
                         statusText = "Đang diễn ra";
                       }
 
+                      // Apply BIDV colors based on status
+                      let bidvStatusColor = "#006B68"; // BIDV Teal - default
+                      let bidvBgColor = "#006B6820"; // Teal with transparency
+                      
+                      if (now < meetingStart) {
+                        bidvStatusColor = "#FFC62F"; // BIDV Yellow - upcoming
+                        bidvBgColor = "#FFC62F20"; // Yellow with transparency
+                      } else if (now >= meetingStart && now <= meetingEnd) {
+                        bidvStatusColor = "#dc2626"; // Red - ongoing (keep red for urgency)
+                        bidvBgColor = "#dc262620"; // Red with transparency
+                      }
+
                       return (
                         <div
                           key={meetingIndex}
-                          className="mb-2 p-2 rounded text-xs border-l-2"
+                          className="mb-1 rounded"
                           style={{ 
-                            borderLeftColor: statusColor,
-                            backgroundColor: `${statusColor}15`,
-                            lineHeight: '1.3'
+                            backgroundColor: bidvBgColor,
+                            border: `2px solid ${bidvStatusColor}`,
+                            padding: '6px 8px',
+                            lineHeight: '1.4'
                           }}
                         >
-                          <div style={{ fontSize: '10px', fontWeight: '700', color: statusColor }}>
+                          <div style={{ 
+                            fontSize: '13px', 
+                            fontWeight: '700', 
+                            color: bidvStatusColor,
+                            marginBottom: '2px'
+                          }}>
                             {timeRange}
                           </div>
-                          <div style={{ fontSize: '10px', marginTop: '2px', color: '#374151' }}>
-                            {meeting.meetingContent.length > 60 
-                              ? meeting.meetingContent.substring(0, 60) + '...' 
+                          <div style={{ 
+                            fontSize: '12px', 
+                            color: '#1f2937', 
+                            fontWeight: '500',
+                            marginBottom: '2px',
+                            lineHeight: '1.3'
+                          }}>
+                            {meeting.meetingContent.length > 50 
+                              ? meeting.meetingContent.substring(0, 50) + '...' 
                               : meeting.meetingContent}
                           </div>
-                          <div style={{ fontSize: '9px', marginTop: '2px', color: '#6b7280' }}>
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#006B68', 
+                            fontWeight: '600'
+                          }}>
                             Đầu mối: {meeting.contactPerson}
                           </div>
                         </div>
