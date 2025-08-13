@@ -51,11 +51,21 @@ export default function PublicDisplay() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch system config to get refresh interval
+  // Fetch system config to get refresh interval and work hours
   const { data: systemConfig = [] } = useQuery<any[]>({
     queryKey: ["/api/system-config"],
     refetchInterval: 60000,
   });
+
+  // Get work hours from system config
+  const workHours = React.useMemo(() => {
+    const startConfig = systemConfig.find(config => config.key === 'work_hours.start_time');
+    const endConfig = systemConfig.find(config => config.key === 'work_hours.end_time');
+    return {
+      start: startConfig?.value || '08:00',
+      end: endConfig?.value || '17:30'
+    };
+  }, [systemConfig]);
 
   // Get screen duration from config, default to 15 seconds
   const screenDurationMs = React.useMemo(() => {
@@ -303,10 +313,10 @@ export default function PublicDisplay() {
                     {schedules.slice(0, 8).map((schedule, idx) => {
                       const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
                       
-                      // Check if this is a full day schedule (08:00-17:30)
+                      // Check if this is a full day schedule using system work hours
                       const startTime = format(parseLocalDateTime(schedule.startDateTime), "HH:mm");
                       const endTime = format(parseLocalDateTime(schedule.endDateTime), "HH:mm");
-                      const isFullDay = startTime === "08:00" && endTime === "17:30";
+                      const isFullDay = startTime === workHours.start && endTime === workHours.end;
                       
                       return (
                         <div
@@ -400,15 +410,13 @@ export default function PublicDisplay() {
       return dateTime;
     }
     
-    // Parse ISO string and convert to Vietnam timezone (GMT+7)
-    const utcDate = new Date(dateTime.toString());
+    // The datetime from server is already in UTC, just parse it directly
+    // No need to add timezone offset since the server data is already correctly stored
+    const parsedDate = new Date(dateTime.toString());
     
-    // Add 7 hours to convert from UTC to Vietnam time
-    const vietnamDate = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
+    console.log('Original:', dateTime.toString(), 'UTC:', parsedDate.toISOString(), 'Vietnam:', parsedDate.toISOString());
     
-    console.log('Original:', dateTime.toString(), 'UTC:', utcDate.toISOString(), 'Vietnam:', vietnamDate.toISOString());
-    
-    return vietnamDate;
+    return parsedDate;
   };
 
   const renderMeetingScheduleTable = () => {
