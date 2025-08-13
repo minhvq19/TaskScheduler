@@ -524,7 +524,36 @@ export default function PublicDisplay() {
     console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     return (
-      <div className="public-display-table bg-white rounded-lg shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100vh', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 1000, margin: 0, padding: 0 }}>
+      <div className="public-display-container" style={{ fontFamily: 'Roboto, sans-serif', height: '100vh', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 1000, margin: 0, padding: 0, backgroundColor: 'white' }}>
+        {/* Header */}
+        <div className="bg-teal-700 text-white py-4 px-6" style={{ height: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+          <h1 className="text-xl font-bold text-center mb-1" style={{ fontSize: '20px', fontWeight: '700', color: '#FDE68A', margin: 0, lineHeight: '1.2' }}>
+            NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
+          </h1>
+          <h2 className="text-lg font-semibold text-center mb-2" style={{ fontSize: '16px', fontWeight: '600', color: '#FDE68A', margin: 0, lineHeight: '1.2' }}>
+            CHI NHÁNH SỞ GIAO DỊCH 1
+          </h2>
+          <h3 className="text-2xl font-bold text-center" style={{ fontSize: '24px', fontWeight: '700', color: 'white', margin: 0, lineHeight: '1.2' }}>
+            LỊCH HỌP
+          </h3>
+        </div>
+        
+        {/* Date Time Display */}
+        <div className="bg-teal-600 text-white py-2 px-6 flex justify-between items-center" style={{ height: '40px' }}>
+          <div className="flex items-center gap-4">
+            <span className="text-sm">
+              {format(currentTime, 'EEEE, dd/MM/yyyy', { locale: vi })}
+            </span>
+          </div>
+          <div className="text-right">
+            <span className="text-sm font-mono">
+              {format(currentTime, 'HH:mm:ss')}
+            </span>
+          </div>
+        </div>
+        
+        {/* Meeting Schedule Table */}
+        <div className="public-display-table bg-white" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }}>
         <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
           <colgroup>
             <col style={{ width: '280px' }} />
@@ -580,7 +609,7 @@ export default function PublicDisplay() {
           </thead>
           <tbody style={{ height: 'calc(100% - 60px)' }}>
             {meetingRooms.map((room: any, roomIndex: number) => (
-              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 60px) / ${meetingRooms.length})`, minHeight: `calc((100vh - 60px) / ${meetingRooms.length})`, maxHeight: `calc((100vh - 60px) / ${meetingRooms.length})` }}>
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 220px) / ${meetingRooms.length})`, minHeight: `calc((100vh - 220px) / ${meetingRooms.length})`, maxHeight: `calc((100vh - 220px) / ${meetingRooms.length})` }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
@@ -758,6 +787,7 @@ export default function PublicDisplay() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
