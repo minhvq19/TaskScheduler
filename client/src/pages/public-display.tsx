@@ -554,7 +554,7 @@ export default function PublicDisplay() {
         
         {/* Navigation Controls */}
         <div 
-          className="fixed bottom-4 left-4 flex items-center gap-2 bg-black bg-opacity-75 rounded-lg px-3 py-2 z-50"
+          className="fixed top-4 right-4 flex items-center gap-2 bg-black bg-opacity-75 rounded-lg px-3 py-2 z-50"
           style={{ 
             fontFamily: 'Roboto, sans-serif',
             fontSize: '12px',
