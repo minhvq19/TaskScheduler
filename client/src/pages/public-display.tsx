@@ -645,18 +645,16 @@ export default function PublicDisplay() {
 
                       let displayStartTime, displayEndTime;
 
-                      // If meeting starts on current day, show actual start time converted to Vietnam time
+                      // If meeting starts on current day, show actual UTC time
                       if (meetingStartDate === currentDayDate) {
-                        const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
-                        displayStartTime = format(vietnamStartTime, 'HH:mm');
+                        displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, '0')}:${String(utcStartTime.getUTCMinutes()).padStart(2, '0')}`;
                       } else {
                         displayStartTime = "00:00";
                       }
 
-                      // If meeting ends on current day, show actual end time converted to Vietnam time
+                      // If meeting ends on current day, show actual UTC time
                       if (meetingEndDate === currentDayDate) {
-                        const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
-                        displayEndTime = format(vietnamEndTime, 'HH:mm');
+                        displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, '0')}:${String(utcEndTime.getUTCMinutes()).padStart(2, '0')}`;
                       } else {
                         displayEndTime = "23:59";
                       }
