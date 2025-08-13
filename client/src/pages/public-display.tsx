@@ -629,25 +629,29 @@ export default function PublicDisplay() {
                         return `${hour}:${minute}`;
                       };
 
-                      // Calculate actual time range for current day
-                      const meetingStartDate = parseLocalDateTime(meeting.startDateTime);
-                      const meetingEndDate = parseLocalDateTime(meeting.endDateTime);
-                      const currentDayStart = startOfDay(day);
-                      const currentDayEnd = new Date(currentDayStart);
-                      currentDayEnd.setHours(23, 59, 59, 999);
+                      // Calculate actual time range for current day using UTC dates
+                      const utcStartTime = new Date(meeting.startDateTime);
+                      const utcEndTime = new Date(meeting.endDateTime);
+                      
+                      // Get UTC date components for comparison
+                      const meetingStartDate = format(utcStartTime, 'yyyy-MM-dd');
+                      const meetingEndDate = format(utcEndTime, 'yyyy-MM-dd');
+                      const currentDayDate = format(day, 'yyyy-MM-dd');
 
                       let displayStartTime, displayEndTime;
 
-                      // If meeting starts on current day
-                      if (format(meetingStartDate, 'yyyy-MM-dd') === format(currentDayStart, 'yyyy-MM-dd')) {
-                        displayStartTime = formatTime(meeting.startDateTime);
+                      // If meeting starts on current day, show actual start time converted to Vietnam time
+                      if (meetingStartDate === currentDayDate) {
+                        const vietnamStartTime = parseLocalDateTime(meeting.startDateTime);
+                        displayStartTime = format(vietnamStartTime, 'HH:mm');
                       } else {
                         displayStartTime = "00:00";
                       }
 
-                      // If meeting ends on current day
-                      if (format(meetingEndDate, 'yyyy-MM-dd') === format(currentDayStart, 'yyyy-MM-dd')) {
-                        displayEndTime = formatTime(meeting.endDateTime);
+                      // If meeting ends on current day, show actual end time converted to Vietnam time
+                      if (meetingEndDate === currentDayDate) {
+                        const vietnamEndTime = parseLocalDateTime(meeting.endDateTime);
+                        displayEndTime = format(vietnamEndTime, 'HH:mm');
                       } else {
                         displayEndTime = "23:59";
                       }
