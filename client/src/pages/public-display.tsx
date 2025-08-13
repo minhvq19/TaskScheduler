@@ -480,6 +480,7 @@ export default function PublicDisplay() {
       });
 
     console.log('Total meetings found:', weekMeetings.length);
+    console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     // Group meetings by room and date
     const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
@@ -620,7 +621,10 @@ export default function PublicDisplay() {
                       verticalAlign: 'top'
                     }}
                   >
+                    {dayMeetings.length > 0 && console.log(`Day ${dateKey} has ${dayMeetings.length} meetings for room ${room.name}`)}
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
+                      console.log(`Rendering meeting: ${meeting.meetingContent} for room ${room.name} on ${dateKey}`);
+                      
                       // Format time only for grid display
                       const formatTime = (dateTimeString: string): string => {
                         const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
@@ -657,6 +661,7 @@ export default function PublicDisplay() {
                       }
 
                       const timeRange = `${displayStartTime} - ${displayEndTime}`;
+                      console.log(`Meeting ${meeting.meetingContent} on ${dateKey}: ${timeRange}`);
 
                       // Determine meeting status
                       const now = new Date();
