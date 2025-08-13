@@ -458,22 +458,36 @@ export default function PublicDisplay() {
         {/* Table Header - Days of week */}
         <div className="bg-orange-600" style={{ 
           display: 'grid', 
-          gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 1fr 1fr', // All day columns equal width
-          fontFamily: 'Roboto, sans-serif' 
+          gridTemplateColumns: '280px repeat(7, 1fr)', // Cleaner syntax - 280px room column + 7 equal day columns
+          fontFamily: 'Roboto, sans-serif',
+          boxSizing: 'border-box'
         }}>
-          <div className="p-3 text-white font-bold text-center border-r border-orange-700" style={{ fontSize: '16px', fontWeight: '700' }}>
+          <div className="text-white font-bold text-center" style={{ 
+            fontSize: '16px', 
+            fontWeight: '700',
+            padding: '12px',
+            borderRight: '1px solid rgb(194 65 12)', // orange-700
+            boxSizing: 'border-box'
+          }}>
             Phòng họp/ Ngày
           </div>
           {weekDays.map((day, index) => {
             const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
             const dayName = dayNames[getDay(day)];
             const isWeekend = getDay(day) === 0 || getDay(day) === 6; // Sunday or Saturday
+            const isLastColumn = index === weekDays.length - 1;
             
             return (
               <div 
                 key={index} 
-                className="p-3 text-white font-bold text-center border-r border-orange-700"
-                style={{ fontSize: '14px', fontWeight: '700' }}
+                className="text-white font-bold text-center"
+                style={{ 
+                  fontSize: '14px', 
+                  fontWeight: '700',
+                  padding: '12px',
+                  borderRight: isLastColumn ? 'none' : '1px solid rgb(194 65 12)', // orange-700, no border on last column
+                  boxSizing: 'border-box'
+                }}
               >
                 <div>{dayName}</div>
                 <div style={{ fontSize: '12px', fontWeight: '400' }}>
@@ -492,13 +506,18 @@ export default function PublicDisplay() {
               className="border-b border-gray-200" 
               style={{ 
                 display: 'grid', 
-                gridTemplateColumns: '280px 1fr 1fr 1fr 1fr 1fr 1fr 1fr', // Match header columns exactly
+                gridTemplateColumns: '280px repeat(7, 1fr)', // Match header exactly - 280px room + 7 equal day columns
                 minHeight: '80px',
-                alignItems: 'stretch' // Ensure all columns have equal height
+                alignItems: 'stretch', // Ensure all columns have equal height
+                boxSizing: 'border-box'
               }}
             >
               {/* Room Name Column */}
-              <div className="p-3 bg-teal-600 text-white font-bold border-r border-gray-300 flex items-center">
+              <div className="bg-teal-600 text-white font-bold flex items-center" style={{
+                padding: '12px',
+                borderRight: '1px solid rgb(209 213 219)', // gray-300
+                boxSizing: 'border-box'
+              }}>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
                     {room.name}
@@ -517,11 +536,18 @@ export default function PublicDisplay() {
                 const dayMeetings = meetingsByRoomAndDate[room.id][dateKey] || [];
                 const isWeekend = getDay(day) === 0 || getDay(day) === 6;
                 
+                const isLastColumn = dayIndex === weekDays.length - 1;
+                
                 return (
                   <div 
                     key={dayIndex} 
-                    className={`p-2 border-r border-gray-200 ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
-                    style={{ minHeight: '80px' }}
+                    className={isWeekend ? 'bg-gray-100' : 'bg-white'}
+                    style={{ 
+                      minHeight: '80px',
+                      padding: '8px',
+                      borderRight: isLastColumn ? 'none' : '1px solid rgb(229 231 235)', // gray-200, no border on last column
+                      boxSizing: 'border-box'
+                    }}
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
                       // Format time only for grid display
