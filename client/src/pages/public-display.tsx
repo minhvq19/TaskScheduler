@@ -585,7 +585,7 @@ export default function PublicDisplay() {
                 <td 
                   className="bg-teal-600 text-white font-bold"
                   style={{
-                    padding: '8px',
+                    padding: '0',
                     borderRight: '1px solid rgb(209 213 219)', // gray-300
                     verticalAlign: 'middle',
                     height: '100%',
@@ -593,17 +593,17 @@ export default function PublicDisplay() {
                   }}
                 >
                   <div style={{ 
-                    height: '100%', 
+                    height: '60px',
                     display: 'flex', 
                     flexDirection: 'column', 
                     justifyContent: 'center',
                     overflow: 'hidden',
-                    maxHeight: '100%'
+                    position: 'relative'
                   }}>
                     <div style={{ 
-                      fontSize: '12px', 
+                      fontSize: '14px', 
                       fontWeight: '700', 
-                      lineHeight: '1.3',
+                      lineHeight: '1.2',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
@@ -614,13 +614,13 @@ export default function PublicDisplay() {
                     </div>
                     {room.location && (
                       <div style={{ 
-                        fontSize: '9px', 
+                        fontSize: '11px', 
                         fontWeight: '400', 
-                        opacity: 0.8,
+                        opacity: 0.9,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        marginTop: '1px'
+                        marginTop: '2px'
                       }}>
                         {room.location}
                       </div>
