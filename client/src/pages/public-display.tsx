@@ -472,7 +472,7 @@ export default function PublicDisplay() {
             return (
               <div 
                 key={index} 
-                className="p-3 text-white font-bold text-center border-r border-orange-700" 
+                className={`p-3 text-white font-bold text-center ${index < weekDays.length - 1 ? 'border-r border-orange-700' : ''}`}
                 style={{ fontSize: '14px', fontWeight: '700' }}
               >
                 <div>{dayName}</div>
@@ -520,7 +520,7 @@ export default function PublicDisplay() {
                 return (
                   <div 
                     key={dayIndex} 
-                    className={`p-2 border-r border-gray-200 ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
+                    className={`p-2 ${dayIndex < weekDays.length - 1 ? 'border-r border-gray-200' : ''} ${isWeekend ? 'bg-gray-100' : 'bg-white'}`}
                     style={{ minHeight: '80px' }}
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
