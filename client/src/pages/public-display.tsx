@@ -956,7 +956,7 @@ export default function PublicDisplay() {
               
               const currentEvent = relevantEvents[currentEventIndex];
               if (currentEvent) {
-                return `SỰ KIỆN KHÁC: ${currentEvent.shortName.toUpperCase()}`;
+                return `${currentEvent.shortName.toUpperCase()}`;
               }
             }
             return currentScreen.name.toUpperCase();
