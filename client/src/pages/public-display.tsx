@@ -585,18 +585,42 @@ export default function PublicDisplay() {
                 <td 
                   className="bg-teal-600 text-white font-bold"
                   style={{
-                    padding: '12px',
+                    padding: '8px',
                     borderRight: '1px solid rgb(209 213 219)', // gray-300
                     verticalAlign: 'middle',
-                    height: '100%'
+                    height: '100%',
+                    overflow: 'hidden'
                   }}
                 >
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'center',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      fontWeight: '700', 
+                      lineHeight: '1.2',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      marginBottom: room.location ? '2px' : '0'
+                    }}>
                       {room.name}
                     </div>
                     {room.location && (
-                      <div style={{ fontSize: '11px', fontWeight: '400', opacity: 0.9, marginTop: '2px' }}>
+                      <div style={{ 
+                        fontSize: '10px', 
+                        fontWeight: '400', 
+                        opacity: 0.85,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
                         {room.location}
                       </div>
                     )}
