@@ -524,8 +524,8 @@ export default function PublicDisplay() {
     console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     return (
-      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: '100%' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: 'calc(100vh - 120px)' }}>
+        <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
           <colgroup>
             <col style={{ width: '280px' }} />
             {weekDays.map((day, index) => {
@@ -537,8 +537,8 @@ export default function PublicDisplay() {
               );
             })}
           </colgroup>
-          <thead>
-            <tr className="bg-orange-600">
+          <thead style={{ height: '60px' }}>
+            <tr className="bg-orange-600" style={{ height: '60px' }}>
               <th 
                 className="text-white font-bold text-center"
                 style={{ 
@@ -578,9 +578,9 @@ export default function PublicDisplay() {
           })}
             </tr>
           </thead>
-          <tbody>
-            {meetingRooms.map((room: any) => (
-              <tr key={room.id} className="border-b border-gray-200">
+          <tbody style={{ height: 'calc(100% - 60px)' }}>
+            {meetingRooms.map((room: any, roomIndex: number) => (
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc(100% / ${meetingRooms.length})` }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
@@ -588,7 +588,7 @@ export default function PublicDisplay() {
                     padding: '12px',
                     borderRight: '1px solid rgb(209 213 219)', // gray-300
                     verticalAlign: 'middle',
-                    minHeight: '80px'
+                    height: '100%'
                   }}
                 >
                   <div>
@@ -616,10 +616,11 @@ export default function PublicDisplay() {
                     key={dayIndex} 
                     className={isWeekend ? 'bg-gray-100' : 'bg-white'}
                     style={{ 
-                      minHeight: '90px',
-                      padding: '6px',
+                      height: '100%',
+                      padding: '8px',
                       borderRight: isLastColumn ? 'none' : '1px solid rgb(229 231 235)', // gray-200
-                      verticalAlign: 'top'
+                      verticalAlign: 'top',
+                      overflow: 'hidden'
                     }}
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
