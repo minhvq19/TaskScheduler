@@ -446,14 +446,19 @@ export default function PublicDisplay() {
         const weekStartDate = mondayOfWeek;
         const weekEndDate = addDays(mondayOfWeek, 6);
         
-        // Debug log for specific meeting
-        if (meeting.roomId && meeting.meetingContent) {
-          console.log('Meeting:', meeting.meetingContent.substring(0, 30));
-          console.log('Meeting start:', format(meetingStartDate, 'yyyy-MM-dd'));
-          console.log('Meeting end:', format(meetingEndDate, 'yyyy-MM-dd'));
+        // Debug log for ALL meetings
+        if (meeting.roomId) {
+          console.log('=== MEETING DEBUG ===');
+          console.log('Room ID:', meeting.roomId);
+          console.log('Meeting content:', meeting.meetingContent || 'NO CONTENT');
+          console.log('Original startDateTime:', meeting.startDateTime);
+          console.log('Original endDateTime:', meeting.endDateTime);
+          console.log('Parsed Meeting start:', format(meetingStartDate, 'yyyy-MM-dd HH:mm'));
+          console.log('Parsed Meeting end:', format(meetingEndDate, 'yyyy-MM-dd HH:mm'));
           console.log('Week start:', format(weekStartDate, 'yyyy-MM-dd'));
           console.log('Week end:', format(weekEndDate, 'yyyy-MM-dd'));
           console.log('Overlap check:', meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate);
+          console.log('===================');
         }
         
         // Include meeting if it overlaps with current week
