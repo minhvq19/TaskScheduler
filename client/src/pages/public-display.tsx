@@ -524,7 +524,7 @@ export default function PublicDisplay() {
     console.log('Meetings by room and date:', JSON.stringify(meetingsByRoomAndDate, null, 2));
 
     return (
-      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: 'calc(100vh - 120px)' }}>
+      <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg" style={{ fontFamily: 'Roboto, sans-serif', height: 'calc(100vh - 100px)', maxHeight: 'calc(100vh - 100px)' }}>
         <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
           <colgroup>
             <col style={{ width: '280px' }} />
@@ -580,7 +580,7 @@ export default function PublicDisplay() {
           </thead>
           <tbody style={{ height: 'calc(100% - 60px)' }}>
             {meetingRooms.map((room: any, roomIndex: number) => (
-              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 180px) / ${meetingRooms.length})`, minHeight: '80px' }}>
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 160px) / ${meetingRooms.length})`, maxHeight: `calc((100vh - 160px) / ${meetingRooms.length})` }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
