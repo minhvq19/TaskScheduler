@@ -32,14 +32,12 @@ const EventImageWithFallback = ({ src, alt, event }: { src: string; alt: string;
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gray-100 rounded-lg">
         <div className="text-center text-teal-800">
-          <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-            {event.shortName}
-          </h2>
-          {event.content && (
-            <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
-              {event.content}
-            </p>
-          )}
+          <div className="text-red-600 mb-6 text-3xl" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            🖼️ Không thể tải ảnh
+          </div>
+          <p className="text-3xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            {event.content || event.shortName}
+          </p>
         </div>
       </div>
     );
@@ -51,7 +49,12 @@ const EventImageWithFallback = ({ src, alt, event }: { src: string; alt: string;
       src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
       alt={alt}
       className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-      style={{ width: 'auto', height: 'auto' }}
+      style={{ 
+        width: 'auto', 
+        height: 'auto',
+        maxWidth: '100%',
+        maxHeight: '100%'
+      }}
       onError={handleError}
       onLoad={() => {
         console.log('Image loaded successfully:', src);
@@ -746,44 +749,39 @@ export default function PublicDisplay4K() {
 
     return (
       <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
-        <div className="p-8 h-full"> {/* Standard padding for 4K to match layout */}
-          {currentEvent ? (
-            <div className="h-full flex flex-col justify-center">
-              <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                {/* Large image - full display (exactly same as standard) */}
-                {currentEvent.imageUrl ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <EventImageWithFallback 
-                      src={currentEvent.imageUrl}
-                      alt={currentEvent.shortName}
-                      event={currentEvent}
-                    />
-                  </div>
-                ) : (
-                  /* Show event details when no image (exactly same as standard) */
-                  (<div className="w-full h-full flex flex-col items-center justify-center p-12">
-                    <div className="text-center text-teal-800">
-                      <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}> {/* Larger for 4K */}
-                        {currentEvent.shortName}
-                      </h2>
-                      {currentEvent.detailedContent && (
-                        <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}> {/* Larger for 4K */}
-                          {currentEvent.detailedContent}
-                        </p>
-                      )}
-                    </div>
-                  </div>)
-                )}
-              </div>
+        {currentEvent ? (
+          <div className="h-full flex flex-col">
+            {/* Event title - similar to standard but larger fonts for 4K */}
+            <div className="text-center py-8 bg-teal-700">
+              <h2 className="text-5xl font-bold text-white px-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                {currentEvent.shortName}
+              </h2>
             </div>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-gray-500 text-4xl text-center" style={{ fontFamily: 'Roboto, sans-serif' }}> {/* Larger for 4K */}
-                Hiện tại không có sự kiện nào đang diễn ra
-              </div>
+            
+            {/* Event image - full display below title */}
+            <div className="flex-1 p-6 flex items-center justify-center">
+              {currentEvent.imageUrl ? (
+                <EventImageWithFallback 
+                  src={currentEvent.imageUrl}
+                  alt={currentEvent.shortName}
+                  event={currentEvent}
+                />
+              ) : (
+                <div className="text-center text-teal-800">
+                  <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                    {currentEvent.content || "Không có hình ảnh"}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-gray-500 text-4xl text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Hiện tại không có sự kiện nào đang diễn ra
+            </div>
+          </div>
+        )}
       </div>
     );
   };
