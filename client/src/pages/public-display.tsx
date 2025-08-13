@@ -552,6 +552,59 @@ export default function PublicDisplay() {
           </div>
         </div>
         
+        {/* Navigation Controls */}
+        <div 
+          className="fixed bottom-4 left-4 flex items-center gap-2 bg-black bg-opacity-75 rounded-lg px-3 py-2 z-50"
+          style={{ 
+            fontFamily: 'Roboto, sans-serif',
+            fontSize: '12px',
+            color: 'white'
+          }}
+        >
+          {/* Previous Button */}
+          <button
+            onClick={() => setCurrentScreenIndex(prev => prev > 0 ? prev - 1 : SCREENS.length - 1)}
+            className="bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-full transition-colors"
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          {/* Play/Pause Button */}
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full transition-colors"
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            {isPaused ? <Play size={16} /> : <Pause size={16} />}
+          </button>
+          
+          {/* Next Button */}
+          <button
+            onClick={() => setCurrentScreenIndex(prev => prev < SCREENS.length - 1 ? prev + 1 : 0)}
+            className="bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-full transition-colors"
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <ChevronRight size={16} />
+          </button>
+          
+          {/* Screen Info */}
+          <div className="ml-3 text-white" style={{ minWidth: '100px' }}>
+            <div style={{ fontSize: '14px', fontWeight: '700', lineHeight: '1.2' }}>
+              {format(currentTime, 'HH:mm:ss')}
+            </div>
+            <div style={{ fontSize: '11px', lineHeight: '1.2', opacity: 0.9 }}>
+              {format(currentTime, 'dd/MM/yyyy')}
+            </div>
+            <div style={{ fontSize: '11px', lineHeight: '1.2', color: '#FDE68A' }}>
+              Màn hình: {currentScreenIndex + 1}/{SCREENS.length}
+            </div>
+            <div style={{ fontSize: '11px', lineHeight: '1.2', color: isPaused ? '#FCA5A5' : '#86EFAC' }}>
+              {isPaused ? 'Đã tạm dừng' : `${timeRemaining}s`}
+            </div>
+          </div>
+        </div>
+        
         {/* Meeting Schedule Table */}
         <div className="public-display-table bg-white" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }}>
         <table style={{ width: '100%', height: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'Roboto, sans-serif' }}>
