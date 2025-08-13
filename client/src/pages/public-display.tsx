@@ -607,7 +607,7 @@ export default function PublicDisplay() {
                           <div style={{ 
                             fontSize: '13px', 
                             fontWeight: '700', 
-                            color: bidvStatusColor,
+                            color: '#9f224e',
                             marginBottom: '2px'
                           }}>
                             {timeRange}
