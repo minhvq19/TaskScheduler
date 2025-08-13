@@ -580,7 +580,7 @@ export default function PublicDisplay() {
           </thead>
           <tbody style={{ height: 'calc(100% - 60px)' }}>
             {meetingRooms.map((room: any, roomIndex: number) => (
-              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 60px) / ${meetingRooms.length})`, minHeight: `calc((100vh - 60px) / ${meetingRooms.length})` }}>
+              <tr key={room.id} className="border-b border-gray-200" style={{ height: `calc((100vh - 60px) * 0.75 / ${meetingRooms.length})`, minHeight: `calc((100vh - 60px) * 0.75 / ${meetingRooms.length})` }}>
                 {/* Room Name Column */}
                 <td 
                   className="bg-teal-600 text-white font-bold"
