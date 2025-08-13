@@ -695,10 +695,10 @@ export default function PublicDisplay() {
                           style={{ 
                             backgroundColor: bidvBgColor,
                             border: `2px solid ${bidvStatusColor}`,
-                            padding: '4px 6px',
+                            padding: '5px 8px',
                             lineHeight: '1.2',
-                            minHeight: '24px',
-                            maxHeight: '40px',
+                            minHeight: '28px',
+                            maxHeight: '44px',
                             overflow: 'hidden'
                           }}
                         >
@@ -708,8 +708,8 @@ export default function PublicDisplay() {
                             lineHeight: '1.2',
                             display: 'flex',
                             alignItems: 'flex-start',
-                            gap: '4px',
-                            maxHeight: '32px',
+                            gap: '6px',
+                            maxHeight: '36px',
                             overflow: 'hidden'
                           }}>
                             <span style={{
@@ -731,8 +731,8 @@ export default function PublicDisplay() {
                               flex: 1,
                               minWidth: 0
                             }}>
-                              {meeting.meetingContent.length > 35 
-                                ? meeting.meetingContent.substring(0, 35) + '...' 
+                              {meeting.meetingContent.length > 50 
+                                ? meeting.meetingContent.substring(0, 50) + '...' 
                                 : meeting.meetingContent}
                             </span>
                           </div>
