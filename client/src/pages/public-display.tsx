@@ -691,50 +691,36 @@ export default function PublicDisplay() {
                       return (
                         <div
                           key={meetingIndex}
-                          className="mb-1 rounded"
+                          className="mb-2"
                           style={{ 
-                            backgroundColor: bidvBgColor,
-                            border: `2px solid ${bidvStatusColor}`,
-                            padding: '5px 8px',
-                            lineHeight: '1.2',
-                            minHeight: '28px',
-                            maxHeight: '44px',
-                            overflow: 'hidden'
+                            padding: '0',
+                            lineHeight: '1.3'
                           }}
                         >
                           <div style={{ 
                             fontSize: '12px', 
                             fontWeight: '500',
-                            lineHeight: '1.2',
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '6px',
-                            maxHeight: '36px',
-                            overflow: 'hidden'
+                            lineHeight: '1.3',
+                            marginBottom: '4px'
                           }}>
-                            <span style={{
+                            <div style={{
                               color: '#9f224e',
                               fontWeight: '700',
                               fontSize: '12px',
-                              flexShrink: 0,
-                              whiteSpace: 'nowrap'
+                              marginBottom: '2px'
                             }}>
                               {timeRange}
-                            </span>
-                            <span style={{
+                            </div>
+                            <div style={{
                               color: '#006B68',
                               fontWeight: '500',
                               fontSize: '12px',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                              minWidth: 0
+                              lineHeight: '1.4',
+                              wordWrap: 'break-word',
+                              whiteSpace: 'normal'
                             }}>
-                              {meeting.meetingContent.length > 50 
-                                ? meeting.meetingContent.substring(0, 50) + '...' 
-                                : meeting.meetingContent}
-                            </span>
+                              {meeting.meetingContent}
+                            </div>
                           </div>
                         </div>
                       );
