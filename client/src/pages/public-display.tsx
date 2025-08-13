@@ -417,12 +417,17 @@ export default function PublicDisplay() {
   };
 
   const renderMeetingScheduleTable = () => {
-    // Get current week dates
+    // Get current week dates (Monday to Sunday)
     const today = new Date();
-    const startOfWeek = startOfDay(today);
+    const currentDay = getDay(today); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Calculate Monday of current week
+    const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // If Sunday, go back 6 days
+    const mondayOfWeek = startOfDay(addDays(today, -daysFromMonday));
+    
     const weekDays = eachDayOfInterval({
-      start: startOfWeek,
-      end: addDays(startOfWeek, 6)
+      start: mondayOfWeek,
+      end: addDays(mondayOfWeek, 6)
     });
 
     // Get all meeting rooms
@@ -433,11 +438,11 @@ export default function PublicDisplay() {
       .filter((meeting: any) => {
         const meetingStartDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
         const meetingEndDate = startOfDay(parseLocalDateTime(meeting.endDateTime));
-        const weekStartDate = startOfWeek;
-        const weekEndDate = addDays(startOfWeek, 6);
+        const weekStartDate = mondayOfWeek;
+        const weekEndDate = addDays(mondayOfWeek, 6);
         
         // Include meeting if it overlaps with current week
-        // Meeting overlaps if: meeting starts before week ends AND meeting ends after week starts
+        // Meeting overlaps if: meeting starts before or on week end AND meeting ends after or on week start
         return meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate;
       });
 
