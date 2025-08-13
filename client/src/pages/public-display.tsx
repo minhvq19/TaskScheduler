@@ -417,22 +417,24 @@ export default function PublicDisplay() {
   };
 
   const renderMeetingScheduleTable = () => {
-    // Get current week dates (Monday to Sunday)
+    // Get current week dates - from today to end of week (not past days)
     const today = new Date();
-    const currentDay = getDay(today); // 0 = Sunday, 1 = Monday, etc.
+    const todayStart = startOfDay(today);
     
-    // Calculate Monday of current week
-    const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // If Sunday, go back 6 days
-    const mondayOfWeek = startOfDay(addDays(today, -daysFromMonday));
+    // Calculate end of current week (Sunday)
+    const currentDay = getDay(today); // 0 = Sunday, 1 = Monday, etc.
+    const daysToSunday = currentDay === 0 ? 0 : 7 - currentDay;
+    const endOfWeek = addDays(todayStart, daysToSunday);
     
     const weekDays = eachDayOfInterval({
-      start: mondayOfWeek,
-      end: addDays(mondayOfWeek, 6)
+      start: todayStart, // Start from today, not Monday
+      end: endOfWeek
     });
 
     // Debug log
     console.log('Today:', format(today, 'yyyy-MM-dd HH:mm:ss'));
-    console.log('Monday of week:', format(mondayOfWeek, 'yyyy-MM-dd'));
+    console.log('Week start (today):', format(todayStart, 'yyyy-MM-dd'));
+    console.log('Week end (Sunday):', format(endOfWeek, 'yyyy-MM-dd'));
     console.log('Week days:', weekDays.map(d => format(d, 'yyyy-MM-dd')));
 
     // Get all meeting rooms
@@ -443,8 +445,8 @@ export default function PublicDisplay() {
       .filter((meeting: any) => {
         const meetingStartDate = startOfDay(parseLocalDateTime(meeting.startDateTime));
         const meetingEndDate = startOfDay(parseLocalDateTime(meeting.endDateTime));
-        const weekStartDate = mondayOfWeek;
-        const weekEndDate = addDays(mondayOfWeek, 6);
+        const weekStartDate = todayStart;
+        const weekEndDate = endOfWeek;
         
         // Debug log for ALL meetings
         if (meeting.roomId) {
