@@ -723,7 +723,95 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Other Events Display for 4K - exactly matching standard display layout
+  // Flexible Image Layout Component for 4K
+  const FlexibleImageLayout4K = ({ images, eventName }: { images: string[], eventName: string }) => {
+    const renderImage = (src: string, index: number, className: string = "") => (
+      <EventImageWithFallback 
+        key={index}
+        src={src}
+        alt={`${eventName} - Image ${index + 1}`}
+        event={{ shortName: eventName, content: eventName }}
+        additionalClassName={`object-cover rounded-lg shadow-lg ${className}`}
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          maxWidth: '100%',
+          maxHeight: '100%'
+        }}
+      />
+    );
+
+    switch (images.length) {
+      case 1:
+        // Single image - full size
+        return (
+          <div className="w-full h-full flex items-center justify-center p-6">
+            {renderImage(images[0], 0, "max-w-full max-h-full")}
+          </div>
+        );
+        
+      case 2:
+        // Two images - side by side
+        return (
+          <div className="w-full h-full flex gap-4 p-6">
+            <div className="flex-1 h-full">
+              {renderImage(images[0], 0)}
+            </div>
+            <div className="flex-1 h-full">
+              {renderImage(images[1], 1)}
+            </div>
+          </div>
+        );
+        
+      case 3:
+        // Three images - 2 top, 1 center bottom
+        return (
+          <div className="w-full h-full flex flex-col gap-4 p-6">
+            <div className="flex gap-4 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[0], 0)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[1], 1)}
+              </div>
+            </div>
+            <div className="h-1/2 flex justify-center">
+              <div className="w-1/2 h-full">
+                {renderImage(images[2], 2)}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 4:
+        // Four images - 2x2 grid
+        return (
+          <div className="w-full h-full flex flex-col gap-4 p-6">
+            <div className="flex gap-4 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[0], 0)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[1], 1)}
+              </div>
+            </div>
+            <div className="flex gap-4 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[2], 2)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[3], 3)}
+              </div>
+            </div>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
+  };
+
+  // Other Events Display for 4K - with flexible image layouts
   const renderOtherEventsDisplay4K = () => {
     // Filter to show ongoing events OR events starting within the next 30 days (same as standard)
     const now = new Date();
@@ -751,28 +839,31 @@ export default function PublicDisplay4K() {
       <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
         {currentEvent ? (
           <div className="h-full flex flex-col justify-center">
-            {/* Event image - full display matching standard display */}
+            {/* Flexible image display based on number of images */}
             <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
-              {currentEvent.imageUrl ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <EventImageWithFallback 
-                    src={currentEvent.imageUrl}
-                    alt={currentEvent.shortName}
-                    event={currentEvent}
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-12">
-                  <div className="text-center text-teal-800">
-                    <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-                      {currentEvent.shortName}
-                    </h2>
-                    <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                      {currentEvent.content || "Không có nội dung"}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {(() => {
+                // Get all available images (imageUrls array or fallback to single imageUrl)
+                const images = currentEvent.imageUrls && currentEvent.imageUrls.length > 0 
+                  ? currentEvent.imageUrls.filter(Boolean) 
+                  : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
+
+                if (images.length > 0) {
+                  return <FlexibleImageLayout4K images={images} eventName={currentEvent.shortName} />;
+                } else {
+                  return (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-12">
+                      <div className="text-center text-teal-800">
+                        <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                          {currentEvent.shortName}
+                        </h2>
+                        <p className="text-4xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                          {currentEvent.content || "Không có nội dung"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
         ) : (

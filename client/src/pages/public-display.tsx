@@ -841,6 +841,99 @@ export default function PublicDisplay() {
     );
   };
 
+  // Flexible Image Layout Component for Standard Display
+  const FlexibleImageLayout = ({ images, eventName }: { images: string[], eventName: string }) => {
+    const renderImage = (src: string, index: number, className: string = "") => (
+      <img 
+        key={index}
+        src={src.startsWith('/') ? `${window.location.origin}${src}?v=${Date.now()}` : src} 
+        alt={`${eventName} - Image ${index + 1}`}
+        className={`object-cover rounded-lg shadow-lg ${className}`}
+        style={{ 
+          width: '100%', 
+          height: '100%'
+        }}
+        onError={(e) => {
+          console.error('Image failed to load:', src);
+          console.error('Attempted URL:', e.currentTarget.src);
+          e.currentTarget.style.display = 'none';
+        }}
+        onLoad={() => {
+          console.log('Image loaded successfully:', src);
+        }}
+      />
+    );
+
+    switch (images.length) {
+      case 1:
+        // Single image - full size
+        return (
+          <div className="w-full h-full flex items-center justify-center p-4">
+            {renderImage(images[0], 0, "max-w-full max-h-full object-contain")}
+          </div>
+        );
+        
+      case 2:
+        // Two images - side by side
+        return (
+          <div className="w-full h-full flex gap-3 p-4">
+            <div className="flex-1 h-full">
+              {renderImage(images[0], 0)}
+            </div>
+            <div className="flex-1 h-full">
+              {renderImage(images[1], 1)}
+            </div>
+          </div>
+        );
+        
+      case 3:
+        // Three images - 2 top, 1 center bottom
+        return (
+          <div className="w-full h-full flex flex-col gap-3 p-4">
+            <div className="flex gap-3 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[0], 0)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[1], 1)}
+              </div>
+            </div>
+            <div className="h-1/2 flex justify-center">
+              <div className="w-1/2 h-full">
+                {renderImage(images[2], 2)}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 4:
+        // Four images - 2x2 grid
+        return (
+          <div className="w-full h-full flex flex-col gap-3 p-4">
+            <div className="flex gap-3 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[0], 0)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[1], 1)}
+              </div>
+            </div>
+            <div className="flex gap-3 h-1/2">
+              <div className="flex-1 h-full">
+                {renderImage(images[2], 2)}
+              </div>
+              <div className="flex-1 h-full">
+                {renderImage(images[3], 3)}
+              </div>
+            </div>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
+  };
+
   const renderOtherEventsTable = () => {
     // Filter to show ongoing events OR events starting within the next 30 days
     const now = new Date();
@@ -875,41 +968,29 @@ export default function PublicDisplay() {
           {currentEvent ? (
             <div className="h-full flex flex-col justify-center">
               <div className="text-center h-full flex items-center justify-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                {/* Large image - full display */}
-                {currentEvent.imageUrl ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img 
-                      src={currentEvent.imageUrl.startsWith('/') ? `${window.location.origin}${currentEvent.imageUrl}?v=${Date.now()}` : currentEvent.imageUrl} 
-                      alt={currentEvent.shortName}
-                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                      style={{ width: 'auto', height: 'auto' }}
-                      onError={(e) => {
-                        console.error('Image failed to load:', currentEvent.imageUrl);
-                        console.error('Attempted URL:', e.currentTarget.src);
-                        console.error('Current event data:', currentEvent);
-                        // Hide the image element when it fails to load
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', currentEvent.imageUrl);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  /* Show event details when no image */
-                  (<div className="w-full h-full flex flex-col items-center justify-center p-8">
-                    <div className="text-center text-teal-800">
-                      <h2 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
-                        {currentEvent.shortName}
-                      </h2>
-                      {currentEvent.detailedContent && (
-                        <p className="text-2xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
-                          {currentEvent.detailedContent}
-                        </p>
-                      )}
-                    </div>
-                  </div>)
-                )}
+                {(() => {
+                  // Get all available images (imageUrls array or fallback to single imageUrl)
+                  const images = currentEvent.imageUrls && currentEvent.imageUrls.length > 0 
+                    ? currentEvent.imageUrls.filter(Boolean) 
+                    : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
+
+                  if (images.length > 0) {
+                    return <FlexibleImageLayout images={images} eventName={currentEvent.shortName} />;
+                  } else {
+                    return (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                        <div className="text-center text-teal-800">
+                          <h2 className="text-4xl font-bold mb-6" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                            {currentEvent.shortName}
+                          </h2>
+                          <p className="text-2xl leading-relaxed" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                            {currentEvent.content || "Không có nội dung"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                })()}
               </div>
             </div>
           ) : (

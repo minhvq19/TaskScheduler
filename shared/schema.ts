@@ -117,7 +117,8 @@ export const otherEvents = pgTable("other_events", {
   startDateTime: timestamp("start_date_time").notNull(),
   endDateTime: timestamp("end_date_time").notNull(),
   content: text("content").notNull(),
-  imageUrl: varchar("image_url"), // for uploaded images
+  imageUrl: varchar("image_url"), // for backward compatibility - first image
+  imageUrls: text("image_urls").array(), // array of image URLs (up to 4)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

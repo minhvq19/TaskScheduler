@@ -464,37 +464,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/other-events', requireAuth, upload.single('image'), async (req, res) => {
+  app.post('/api/other-events', requireAuth, upload.array('images', 4), async (req, res) => {
     try {
       let imageUrl = undefined;
+      let imageUrls: string[] = [];
       
-      if (req.file) {
-        // Move file to public directory and generate URL
-        const filename = `${Date.now()}-${req.file.originalname}`;
-        const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
-        
-        // Ensure uploads directory exists
-        const uploadsDir = path.dirname(publicPath);
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
+      if (req.files && Array.isArray(req.files)) {
+        // Process multiple files
+        for (const file of req.files) {
+          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
+          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+          
+          // Ensure uploads directory exists
+          const uploadsDir = path.dirname(publicPath);
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          }
+          
+          fs.renameSync(file.path, publicPath);
+          
+          // Also copy to the backup uploads directory for compatibility
+          const backupPath = path.join(process.cwd(), 'uploads', filename);
+          const backupDir = path.dirname(backupPath);
+          if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+          }
+          fs.copyFileSync(publicPath, backupPath);
+          
+          const fileUrl = `/uploads/${filename}`;
+          imageUrls.push(fileUrl);
         }
         
-        fs.renameSync(req.file.path, publicPath);
-        
-        // Also copy to the backup uploads directory for compatibility
-        const backupPath = path.join(process.cwd(), 'uploads', filename);
-        const backupDir = path.dirname(backupPath);
-        if (!fs.existsSync(backupDir)) {
-          fs.mkdirSync(backupDir, { recursive: true });
+        // Set first image as primary imageUrl for backward compatibility
+        if (imageUrls.length > 0) {
+          imageUrl = imageUrls[0];
         }
-        fs.copyFileSync(publicPath, backupPath);
-        
-        imageUrl = `/uploads/${filename}`;
       }
 
       const validatedData = insertOtherEventSchema.parse({
         ...req.body,
         imageUrl,
+        imageUrls,
       });
       
       const event = await storage.createOtherEvent(validatedData);
@@ -508,38 +518,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/other-events/:id', requireAuth, upload.single('image'), async (req, res) => {
+  app.put('/api/other-events/:id', requireAuth, upload.array('images', 4), async (req, res) => {
     try {
       const { id } = req.params;
       let imageUrl = req.body.imageUrl; // Keep existing image if no new file uploaded
+      let imageUrls = req.body.imageUrls ? JSON.parse(req.body.imageUrls) : [];
       
-      if (req.file) {
-        // Move file to public directory and generate URL
-        const filename = `${Date.now()}-${req.file.originalname}`;
-        const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
-        
-        // Ensure uploads directory exists
-        const uploadsDir = path.dirname(publicPath);
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
+      if (req.files && Array.isArray(req.files)) {
+        // Process new files
+        const newImageUrls: string[] = [];
+        for (const file of req.files) {
+          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
+          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+          
+          // Ensure uploads directory exists
+          const uploadsDir = path.dirname(publicPath);
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          }
+          
+          fs.renameSync(file.path, publicPath);
+          
+          // Also copy to the backup uploads directory for compatibility
+          const backupPath = path.join(process.cwd(), 'uploads', filename);
+          const backupDir = path.dirname(backupPath);
+          if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+          }
+          fs.copyFileSync(publicPath, backupPath);
+          
+          const fileUrl = `/uploads/${filename}`;
+          newImageUrls.push(fileUrl);
         }
         
-        fs.renameSync(req.file.path, publicPath);
+        // Add new images to existing array (up to 4 total)
+        imageUrls = [...imageUrls, ...newImageUrls].slice(0, 4);
         
-        // Also copy to the backup uploads directory for compatibility
-        const backupPath = path.join(process.cwd(), 'uploads', filename);
-        const backupDir = path.dirname(backupPath);
-        if (!fs.existsSync(backupDir)) {
-          fs.mkdirSync(backupDir, { recursive: true });
+        // Set first image as primary imageUrl for backward compatibility
+        if (imageUrls.length > 0) {
+          imageUrl = imageUrls[0];
         }
-        fs.copyFileSync(publicPath, backupPath);
-        
-        imageUrl = `/uploads/${filename}`;
       }
 
       const validatedData = insertOtherEventSchema.partial().parse({
         ...req.body,
         imageUrl,
+        imageUrls,
       });
       
       const event = await storage.updateOtherEvent(id, validatedData);
