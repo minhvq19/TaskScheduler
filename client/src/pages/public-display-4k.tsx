@@ -588,7 +588,7 @@ export default function PublicDisplay4K() {
                 className="text-xl"
                 style={{
                   fontFamily: "Roboto, sans-serif",
-                  color: "#260705",
+                  color: "#ffffff",
                   fontSize: "26pt",
                 }}
               >
@@ -935,7 +935,7 @@ export default function PublicDisplay4K() {
                             borderRight: isLastColumn
                               ? "none"
                               : "2px solid rgb(209 213 219)",
-                            backgroundColor: isWeekend ? "#f3f4f6" : "white",
+                            backgroundColor: isWeekend ? "#adacac" : "white",
                             verticalAlign: "top",
                             overflow: "hidden",
                           }}
