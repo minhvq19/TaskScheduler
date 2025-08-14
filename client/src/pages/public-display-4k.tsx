@@ -144,41 +144,43 @@ export default function PublicDisplay4K() {
         if (prev <= 1) {
           const currentScreen = SCREENS[currentScreenIndex];
           
-          if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
-            const now = new Date();
-            const thirtyDaysFromNow = new Date();
-            thirtyDaysFromNow.setDate(now.getDate() + 30);
+          // Change screen - each screen shows for full duration regardless of content
+          setCurrentScreenIndex(prev => {
+            const nextScreenIndex = (prev + 1) % SCREENS.length;
+            const nextScreen = SCREENS[nextScreenIndex];
             
-            const relevantEvents = displayData.otherEvents
-              .filter((event: any) => {
-                const start = new Date(event.startDateTime);
-                const end = new Date(event.endDateTime);
-                const isOngoing = now >= start && now <= end;
-                const isUpcoming = start >= now && start <= thirtyDaysFromNow;
-                return isOngoing || isUpcoming;
-              })
-              .sort((a: any, b: any) => {
-                const startA = new Date(a.startDateTime);
-                const startB = new Date(b.startDateTime);
-                return startA.getTime() - startB.getTime();
-              });
+            // When moving to 'other-events' screen, set to next event in rotation
+            if (nextScreen.id === 'other-events' && displayData && displayData.otherEvents) {
+              const now = new Date();
+              const thirtyDaysFromNow = new Date();
+              thirtyDaysFromNow.setDate(now.getDate() + 30);
               
-            if (relevantEvents.length > 0) {
-              const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
-              if (nextEventIndex === 0) {
-                setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
-                setCurrentEventIndex(0);
-              } else {
+              const relevantEvents = displayData.otherEvents
+                .filter((event: any) => {
+                  const start = new Date(event.startDateTime);
+                  const end = new Date(event.endDateTime);
+                  const isOngoing = now >= start && now <= end;
+                  const isUpcoming = start >= now && start <= thirtyDaysFromNow;
+                  return isOngoing || isUpcoming;
+                })
+                .sort((a: any, b: any) => {
+                  const startA = new Date(a.startDateTime);
+                  const startB = new Date(b.startDateTime);
+                  return startA.getTime() - startB.getTime();
+                });
+                
+              if (relevantEvents.length > 0) {
+                const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
                 setCurrentEventIndex(nextEventIndex);
+              } else {
+                setCurrentEventIndex(0);
               }
             } else {
-              setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
               setCurrentEventIndex(0);
             }
-          } else {
-            setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
-            setCurrentEventIndex(0);
-          }
+            
+            return nextScreenIndex;
+          });
           return screenDurationMs / 1000;
         }
         return prev - 1;
@@ -841,16 +843,17 @@ export default function PublicDisplay4K() {
     // Show only the current event based on currentEventIndex (same as standard)
     const currentEvent = relevantEvents[currentEventIndex];
     
-    // Debug the flashing issue
-    console.log('4K Display - Debug Info:', {
+    // Debug the event display timing
+    console.log('4K Display - Other Events Info:', {
       relevantEventsCount: relevantEvents.length,
       currentEventIndex,
       currentEvent: currentEvent ? {
         id: currentEvent.id,
-        shortName: currentEvent.shortName,
+        shortName: currentEvent.shortName.substring(0, 50) + '...',
         startTime: currentEvent.startDateTime,
         endTime: currentEvent.endDateTime
       } : null,
+      screenDuration: 'Full screen rotation time',
       currentTime: now.toISOString()
     });
 
