@@ -310,7 +310,7 @@ export default function PublicDisplay4K() {
     const fullGridTemplate = `300px ${gridTemplate}`;
 
     return (
-      <div className="h-full overflow-hidden" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="h-full overflow-hidden" style={{ fontFamily: 'Roboto, sans-serif', backgroundColor: '#260705' }}>
         {/* Header */}
         <div className="grid border-b-4 border-gray-400 bg-yellow-400" style={{ gridTemplateColumns: fullGridTemplate }}>
           <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400">
@@ -333,7 +333,7 @@ export default function PublicDisplay4K() {
           })}
         </div>
         {/* Body with rows for each staff member */}
-        <div className="overflow-auto" style={{ height: 'calc(100% - 120px)' }}>
+        <div className="overflow-auto" style={{ height: 'calc(100% - 120px)', backgroundColor: '#260705' }}>
           {staff
             .filter(s => s.department && s.department.name.toLowerCase().includes("giám đốc"))
             .map((staffMember, rowIndex) => (
@@ -355,7 +355,7 @@ export default function PublicDisplay4K() {
                   key={dayIndex} 
                   className="border-r-2 border-gray-300 relative p-2"
                   style={{ 
-                    backgroundColor: isWeekendDay ? '#9ca3af' : '#006b68',
+                    backgroundColor: 'white',
                     fontFamily: 'Roboto, sans-serif'
                   }}
                 >
@@ -372,7 +372,7 @@ export default function PublicDisplay4K() {
                         return (
                           <div
                             key={schedule.id}
-                            className="text-lg p-2 rounded text-white font-medium"
+                            className="text-lg p-2 rounded font-medium"
                             style={{
                               backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
                               fontSize: "40pt",
@@ -387,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt' }}>
+                                <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: 'black' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
@@ -396,7 +396,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 {/* Additional content */}
                                 {schedule.workType !== "Khác" && schedule.customContent && (
-                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt' }}>
+                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: 'black' }}>
                                     {schedule.customContent}
                                   </div>
                                 )}
@@ -421,32 +421,32 @@ export default function PublicDisplay4K() {
           ))}
         </div>
         {/* Color Legend for 4K - same as standard display */}
-        <div className="bg-gray-50 p-4 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
-          <div className="text-2xl font-bold text-gray-700 mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>GHI CHÚ MÀU SẮC</div>
+        <div className="p-4 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif', backgroundColor: '#260705' }}>
+          <div className="text-2xl font-bold mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', color: 'white' }}>GHI CHÚ MÀU SẮC</div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Làm việc tại CN") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>CN</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>CN</span>
             </div>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Nghỉ phép</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>Nghỉ phép</span>
             </div>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Trực lãnh đạo") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Trực LD</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>Trực LD</span>
             </div>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Đi khách hàng") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Đi khách hàng</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>Đi khách hàng</span>
             </div>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Đi công tác nước ngoài") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>CT NN</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>CT NN</span>
             </div>
             <div className="flex items-center">
               <div className="w-6 h-6 rounded mr-3" style={{ backgroundColor: getWorkScheduleColor("Khác") }}></div>
-              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif' }}>Khác</span>
+              <span className="text-xl" style={{ fontFamily: 'Roboto, sans-serif', color: 'white' }}>Khác</span>
             </div>
           </div>
         </div>
