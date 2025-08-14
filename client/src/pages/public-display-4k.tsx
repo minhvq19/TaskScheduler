@@ -874,7 +874,7 @@ export default function PublicDisplay4K() {
                 })}
               </tr>
             </thead>
-            <tbody style={{ height: "calc(100% - 50px)" }}>
+            <tbody style={{ height: "calc(100% - 40px)" }}>
               {rooms.slice(0, 10).map(
                 (
                   room: any,
@@ -885,8 +885,8 @@ export default function PublicDisplay4K() {
                     className="border-b-2 border-gray-200"
                     style={{
                       height: `calc((100vh - 300px) / ${Math.min(rooms.length, 10)})`,
-                      minHeight: "80px",
-                      maxHeight: "100px",
+                      minHeight: "60px",
+                      maxHeight: "80px",
                     }}
                   >
                     {/* Room Name Column */}
