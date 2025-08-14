@@ -340,7 +340,7 @@ export default function PublicDisplay4K() {
             <div key={staffMember.id} className="grid border-b-2 border-gray-300" style={{ gridTemplateColumns: fullGridTemplate, minHeight: '180px' }}>
               {/* Staff Name Column */}
               <div className="p-4 text-white font-bold border-r-2 border-gray-300 flex items-center" style={{ backgroundColor: '#260705' }}>
-                <div className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[42px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
+                <div className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[32px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                   {(staffMember as any).positionShort}. {staffMember.fullName}
                 </div>
               </div>
