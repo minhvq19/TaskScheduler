@@ -829,16 +829,16 @@ export default function PublicDisplay4K() {
                 );
               })}
             </colgroup>
-            <thead style={{ height: "100px" }}>
+            <thead style={{ height: "60px" }}>
               {" "}
-              {/* Taller for 4K */}
-              <tr className="bg-orange-600" style={{ height: "100px" }}>
+              {/* Optimized height for 4K */}
+              <tr className="bg-orange-600" style={{ height: "60px" }}>
                 <th
                   className="text-white font-bold text-center"
                   style={{
-                    fontSize: "30pt",
+                    fontSize: "26pt",
                     fontWeight: "700",
-                    padding: "20px",
+                    padding: "10px",
                     borderRight: "2px solid rgb(194 65 12)",
                     verticalAlign: "middle",
                   }}
@@ -856,9 +856,9 @@ export default function PublicDisplay4K() {
                       key={index}
                       className="text-white font-bold text-center"
                       style={{
-                        fontSize: "30pt",
+                        fontSize: "26pt",
                         fontWeight: "700",
-                        padding: "20px",
+                        padding: "10px",
                         borderRight: isLastColumn
                           ? "none"
                           : "2px solid rgb(194 65 12)",
@@ -866,7 +866,7 @@ export default function PublicDisplay4K() {
                       }}
                     >
                       <div>{dayName}</div>
-                      <div style={{ fontSize: "30pt", fontWeight: "400" }}>
+                      <div style={{ fontSize: "24pt", fontWeight: "400" }}>
                         {format(day, "dd/MM", { locale: vi })}
                       </div>
                     </th>
