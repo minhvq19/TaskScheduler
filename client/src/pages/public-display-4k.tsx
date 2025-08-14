@@ -387,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: 'black' }}>
+                                <div className="font-semibold text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: '#ffffff' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
@@ -396,7 +396,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 {/* Additional content */}
                                 {schedule.workType !== "Khác" && schedule.customContent && (
-                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: 'black' }}>
+                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: '#ffffff' }}>
                                     {schedule.customContent}
                                   </div>
                                 )}
@@ -707,7 +707,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 <div
                                   style={{
-                                    color: '#ffffff',
+                                    color: '#006b68',
                                     fontWeight: '500',
                                     fontSize: '40pt',
                                     lineHeight: '1.4',
