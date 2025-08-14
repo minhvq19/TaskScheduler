@@ -840,6 +840,19 @@ export default function PublicDisplay4K() {
 
     // Show only the current event based on currentEventIndex (same as standard)
     const currentEvent = relevantEvents[currentEventIndex];
+    
+    // Debug the flashing issue
+    console.log('4K Display - Debug Info:', {
+      relevantEventsCount: relevantEvents.length,
+      currentEventIndex,
+      currentEvent: currentEvent ? {
+        id: currentEvent.id,
+        shortName: currentEvent.shortName,
+        startTime: currentEvent.startDateTime,
+        endTime: currentEvent.endDateTime
+      } : null,
+      currentTime: now.toISOString()
+    });
 
     return (
       <div className="bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
