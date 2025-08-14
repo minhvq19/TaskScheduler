@@ -57,8 +57,9 @@ const parseLocalDateTime = (dateTime: string | Date): Date => {
 export default function EventManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<OtherEvent | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string>("createdAt-desc");
   const { toast } = useToast();
@@ -88,9 +89,10 @@ export default function EventManagement() {
       formData.append("endDateTime", data.endDateTime);
       formData.append("content", data.content);
       
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      }
+      // Append multiple images
+      selectedFiles.forEach((file, index) => {
+        formData.append("images", file);
+      });
 
       const response = await fetch("/api/other-events", {
         method: "POST",
@@ -130,12 +132,18 @@ export default function EventManagement() {
       formData.append("endDateTime", data.endDateTime);
       formData.append("content", data.content);
       
-      // Keep existing image if no new file selected
-      if (editingEvent?.imageUrl && !selectedFile) {
-        formData.append("imageUrl", editingEvent.imageUrl);
-      } else if (selectedFile) {
-        formData.append("image", selectedFile);
+      // Include existing images that haven't been removed
+      formData.append("imageUrls", JSON.stringify(existingImages));
+      
+      // Keep first existing image as imageUrl for backward compatibility
+      if (existingImages.length > 0) {
+        formData.append("imageUrl", existingImages[0]);
       }
+      
+      // Append new images
+      selectedFiles.forEach((file, index) => {
+        formData.append("images", file);
+      });
 
       const response = await fetch(`/api/other-events/${editingEvent?.id}`, {
         method: "PUT",
@@ -202,8 +210,14 @@ export default function EventManagement() {
       endDateTime: format(new Date(event.endDateTime), "yyyy-MM-dd'T'HH:mm"),
       content: event.content,
     });
-    setSelectedFile(null);
-    setPreviewUrl(event.imageUrl || null);
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+    
+    // Set existing images from both imageUrls array and single imageUrl for backward compatibility
+    const images = event.imageUrls && event.imageUrls.length > 0 
+      ? event.imageUrls.filter(Boolean) 
+      : event.imageUrl ? [event.imageUrl] : [];
+    setExistingImages(images);
     setShowModal(true);
   };
 
@@ -216,50 +230,78 @@ export default function EventManagement() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingEvent(null);
-    setSelectedFile(null);
-    setPreviewUrl(null);
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+    setExistingImages([]);
     form.reset();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
+    // Check if adding these files would exceed the limit
+    const totalImages = existingImages.length + selectedFiles.length + files.length;
+    if (totalImages > 4) {
       toast({
         title: "Lỗi",
-        description: "Chỉ chấp nhận file ảnh định dạng: JPG, JPEG, PNG, GIF",
+        description: `Chỉ được phép tối đa 4 ảnh. Hiện tại có ${existingImages.length + selectedFiles.length} ảnh, bạn chỉ có thể thêm ${4 - existingImages.length - selectedFiles.length} ảnh nữa.`,
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file size (10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-    if (file.size > maxSize) {
-      toast({
-        title: "Lỗi",
-        description: "Kích thước file không được vượt quá 10MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedFile(file);
+    const validFiles: File[] = [];
+    const newPreviewUrls: string[] = [];
     
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    for (const file of files) {
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Lỗi",
+          description: `File ${file.name}: Chỉ chấp nhận file ảnh định dạng: JPG, JPEG, PNG, GIF`,
+          variant: "destructive",
+        });
+        continue;
+      }
+
+      // Validate file size (10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        toast({
+          title: "Lỗi",
+          description: `File ${file.name}: Kích thước file không được vượt quá 10MB`,
+          variant: "destructive",
+        });
+        continue;
+      }
+
+      validFiles.push(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newPreviewUrls.push(e.target?.result as string);
+        if (newPreviewUrls.length === validFiles.length) {
+          setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+    }
   };
 
-  const removeFile = () => {
-    setSelectedFile(null);
-    setPreviewUrl(editingEvent?.imageUrl || null);
+  const removeNewFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const onSubmit = (data: FormData) => {
@@ -454,15 +496,40 @@ export default function EventManagement() {
                         </div>
                       </TableCell>
                       <TableCell data-testid={`img-event-${event.id}`}>
-                        {event.imageUrl ? (
-                          <img 
-                            src={event.imageUrl} 
-                            alt="Event" 
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-sm">Không có hình</span>
-                        )}
+                        {(() => {
+                          // Get all images - prioritize imageUrls array, fallback to single imageUrl
+                          const images = event.imageUrls && event.imageUrls.length > 0 
+                            ? event.imageUrls.filter(Boolean) 
+                            : event.imageUrl ? [event.imageUrl] : [];
+                          
+                          if (images.length === 0) {
+                            return <span className="text-gray-400 text-sm">Không có hình</span>;
+                          }
+                          
+                          if (images.length === 1) {
+                            return (
+                              <img 
+                                src={images[0].startsWith('/') ? `${window.location.origin}${images[0]}` : images[0]}
+                                alt="Event" 
+                                className="w-16 h-16 object-cover rounded-lg"
+                              />
+                            );
+                          }
+                          
+                          // Multiple images - show first image with count indicator
+                          return (
+                            <div className="relative">
+                              <img 
+                                src={images[0].startsWith('/') ? `${window.location.origin}${images[0]}` : images[0]}
+                                alt="Event" 
+                                className="w-16 h-16 object-cover rounded-lg"
+                              />
+                              <div className="absolute -top-1 -right-1 bg-bidv-teal text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {images.length}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell data-testid={`status-event-${event.id}`}>
                         <Badge className={status.className}>{status.label}</Badge>
@@ -587,42 +654,79 @@ export default function EventManagement() {
 
               <div>
                 <Label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hình ảnh (tùy chọn)
+                  Hình ảnh (tùy chọn, tối đa 4 ảnh)
                 </Label>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/gif"
-                      onChange={handleFileChange}
-                      className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
-                      data-testid="input-image"
-                    />
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Upload className="w-4 h-4" />
-                      <span>JPG, PNG, GIF (tối đa 10MB)</span>
-                    </div>
-                  </div>
-                  
-                  {previewUrl && (
-                    <div className="relative">
-                      <img 
-                        src={previewUrl} 
-                        alt="Preview" 
-                        className="w-32 h-32 object-cover rounded-lg border"
+                  {(existingImages.length + selectedFiles.length) < 4 && (
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/gif"
+                        onChange={handleFileChange}
+                        multiple
+                        className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                        data-testid="input-image"
                       />
-                      {selectedFile && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={removeFile}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 h-6 w-6"
-                          data-testid="button-remove-image"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Upload className="w-4 h-4" />
+                        <span>JPG, PNG, GIF (tối đa 10MB, còn lại {4 - existingImages.length - selectedFiles.length})</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Existing images */}
+                  {existingImages.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Ảnh hiện có:</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {existingImages.map((imageUrl, index) => (
+                          <div key={index} className="relative">
+                            <img 
+                              src={imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl} 
+                              alt={`Existing ${index + 1}`} 
+                              className="w-24 h-24 object-cover rounded-lg border"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeExistingImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 h-5 w-5"
+                              data-testid={`button-remove-existing-${index}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* New images preview */}
+                  {previewUrls.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Ảnh mới sẽ thêm:</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {previewUrls.map((url, index) => (
+                          <div key={index} className="relative">
+                            <img 
+                              src={url} 
+                              alt={`Preview ${index + 1}`} 
+                              className="w-24 h-24 object-cover rounded-lg border"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeNewFile(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 h-5 w-5"
+                              data-testid={`button-remove-new-${index}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
