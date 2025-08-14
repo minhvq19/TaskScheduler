@@ -387,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: 'black' }}>
+                                <div className="font-semibold text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: 'black' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
