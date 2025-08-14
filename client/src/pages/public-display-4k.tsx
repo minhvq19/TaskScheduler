@@ -339,7 +339,7 @@ export default function PublicDisplay4K() {
             .map((staffMember, rowIndex) => (
             <div key={staffMember.id} className="grid border-b-2 border-gray-300" style={{ gridTemplateColumns: fullGridTemplate, minHeight: '180px' }}>
               {/* Staff Name Column */}
-              <div className="p-4 bg-teal-700 text-white font-bold border-r-2 border-gray-300 flex items-center">
+              <div className="p-4 text-white font-bold border-r-2 border-gray-300 flex items-center" style={{ backgroundColor: '#260705' }}>
                 <div className="font-bold text-[46px] pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                   {(staffMember as any).positionShort}. {staffMember.fullName}
                 </div>
@@ -615,8 +615,9 @@ export default function PublicDisplay4K() {
                 }}>
                   {/* Room Name Column */}
                   <td 
-                    className="bg-teal-600 text-white font-bold"
+                    className="text-white font-bold"
                     style={{
+                      backgroundColor: '#260705',
                       padding: '16px',
                       borderRight: '2px solid rgb(209 213 219)',
                       verticalAlign: 'middle',
@@ -706,7 +707,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 <div
                                   style={{
-                                    color: '#006B68',
+                                    color: '#260705',
                                     fontWeight: '500',
                                     fontSize: '40pt',
                                     lineHeight: '1.4',
@@ -876,7 +877,7 @@ export default function PublicDisplay4K() {
                 } else {
                   return (
                     <div className="w-full h-full flex flex-col items-center justify-center p-12">
-                      <div className="text-center text-teal-800">
+                      <div className="text-center" style={{ color: '#260705' }}>
                         <h2 className="text-6xl font-bold mb-8" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
                           {currentEvent.shortName}
                         </h2>
@@ -904,9 +905,9 @@ export default function PublicDisplay4K() {
   const currentScreen = SCREENS[currentScreenIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-800 to-teal-900 relative overflow-hidden" style={{ width: '100vw', height: '100vh' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ width: '100vw', height: '100vh', background: `linear-gradient(to bottom right, #260705, #1a0504)` }}>
       {/* Header with BIDV branding - matching standard display colors */}
-      <div className="public-display-header bg-teal-900 text-center py-6 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <div className="public-display-header text-center py-6 relative" style={{ fontFamily: 'Roboto, sans-serif', backgroundColor: '#260705' }}>
         <div className="text-yellow-400 font-bold text-[42px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-center font-bold text-[#facc15] text-[42px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
         </div>
