@@ -874,18 +874,19 @@ export default function PublicDisplay4K() {
                 })}
               </tr>
             </thead>
-            <tbody style={{ height: "calc(100% - 100px)" }}>
-              {rooms.slice(0, 8).map(
+            <tbody style={{ height: "calc(100% - 60px)" }}>
+              {rooms.slice(0, 10).map(
                 (
                   room: any,
-                  roomIndex: number, // Limit to 8 rooms for 4K
+                  roomIndex: number, // Limit to 10 rooms for 4K
                 ) => (
                   <tr
                     key={room.id}
                     className="border-b-2 border-gray-200"
                     style={{
-                      height: `calc((100vh - 300px) / ${Math.min(rooms.length, 8)})`,
-                      minHeight: "120px",
+                      height: `calc((100vh - 300px) / ${Math.min(rooms.length, 10)})`,
+                      minHeight: "80px",
+                      maxHeight: "100px",
                     }}
                   >
                     {/* Room Name Column */}
@@ -906,10 +907,10 @@ export default function PublicDisplay4K() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: "30pt",
+                          fontSize: "22pt",
                           fontWeight: "700",
                           textAlign: "center",
-                          lineHeight: "1.3",
+                          lineHeight: "1.2",
                           wordWrap: "break-word",
                         }}
                         className="text-[#791301]"
