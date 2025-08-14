@@ -704,14 +704,16 @@ export default function PublicDisplay4K() {
                                 }}>
                                   {timeRange}
                                 </div>
-                                <div style={{
-                                  color: '#006B68',
-                                  fontWeight: '500',
-                                  fontSize: '20px',
-                                  lineHeight: '1.4',
-                                  wordWrap: 'break-word',
-                                  whiteSpace: 'normal'
-                                }}>
+                                <div
+                                  style={{
+                                    color: '#006B68',
+                                    fontWeight: '500',
+                                    fontSize: '20px',
+                                    lineHeight: '1.4',
+                                    wordWrap: 'break-word',
+                                    whiteSpace: 'normal'
+                                  }}
+                                  className="text-[40px]">
                                   {meeting.meetingContent}
                                 </div>
                               </div>
