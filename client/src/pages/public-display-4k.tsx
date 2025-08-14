@@ -394,7 +394,7 @@ export default function PublicDisplay4K() {
         {/* Body with rows for each staff member */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 240px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 300px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -554,10 +554,12 @@ export default function PublicDisplay4K() {
         </div>
         {/* Color Legend for 4K - same as standard display */}
         <div
-          className="p-4 border-t border-gray-300"
+          className="p-8 border-t border-gray-300"
           style={{
             fontFamily: "Roboto, sans-serif",
             backgroundColor: "#f5f0dc",
+            marginTop: "20px",
+            marginBottom: "20px",
           }}
         >
           <div
