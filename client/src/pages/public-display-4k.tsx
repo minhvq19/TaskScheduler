@@ -904,7 +904,7 @@ export default function PublicDisplay4K() {
     <div className="min-h-screen bg-gradient-to-br from-teal-800 to-teal-900 relative overflow-hidden" style={{ width: '100vw', height: '100vh' }}>
       {/* Header with BIDV branding - matching standard display colors */}
       <div className="public-display-header bg-teal-900 text-center py-6 relative" style={{ fontFamily: 'Roboto, sans-serif' }}>
-        <div className="text-yellow-400 font-bold text-3xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
+        <div className="text-yellow-400 font-bold text-[36px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM</div>
         <div className="text-center font-bold text-3xl text-[#facc15]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '600' }}>CHI NHÁNH SỞ GIAO DỊCH 1
         </div>
         <div className="font-bold mt-4 text-[#ffffff] text-6xl" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>
@@ -996,7 +996,6 @@ export default function PublicDisplay4K() {
           </div>
         </div>
       </div>
-
       {/* Main content area */}
       <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
         {currentScreen.id === 'work-schedule' && renderWorkScheduleTable4K()}
