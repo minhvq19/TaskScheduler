@@ -886,7 +886,7 @@ export default function PublicDisplay4K() {
                           lineHeight: "1.3",
                           wordWrap: "break-word",
                         }}
-                      >
+                        className="text-[#791301]">
                         {room.name}
                       </div>
                     </td>
