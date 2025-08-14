@@ -1212,7 +1212,7 @@ export default function PublicDisplay4K() {
           CHI NHÁNH SỞ GIAO DỊCH 1
         </div>
         <div
-          className="font-bold mt-4 text-[#ffffff] text-6xl"
+          className="font-bold mt-4 text-6xl text-[#421001]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
         >
           {(() => {
