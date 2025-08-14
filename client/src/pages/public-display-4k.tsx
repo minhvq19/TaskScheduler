@@ -853,6 +853,8 @@ export default function PublicDisplay4K() {
                   ? currentEvent.imageUrls.filter(Boolean) 
                   : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
 
+
+
                 if (images.length > 0) {
                   return <FlexibleImageLayout4K images={images} eventName={currentEvent.shortName} />;
                 } else {
