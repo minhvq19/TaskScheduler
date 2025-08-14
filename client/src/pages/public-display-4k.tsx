@@ -624,17 +624,19 @@ export default function PublicDisplay4K() {
                       overflow: 'hidden'
                     }}
                   >
-                    <div style={{ 
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '28px',
-                      fontWeight: '700',
-                      textAlign: 'center',
-                      lineHeight: '1.3',
-                      wordWrap: 'break-word'
-                    }}>
+                    <div
+                      style={{ 
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '28px',
+                        fontWeight: '700',
+                        textAlign: 'center',
+                        lineHeight: '1.3',
+                        wordWrap: 'break-word'
+                      }}
+                      className="text-[36px]">
                       {room.name}
                     </div>
                   </td>
