@@ -1206,7 +1206,7 @@ export default function PublicDisplay4K() {
           NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
         </div>
         <div
-          className="text-center font-bold text-[#facc15] text-[42px]"
+          className="text-center font-bold text-[42px] text-[#791301]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "600" }}
         >
           CHI NHÁNH SỞ GIAO DỊCH 1
