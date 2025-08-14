@@ -375,7 +375,7 @@ export default function PublicDisplay4K() {
                             className="text-lg p-2 rounded font-medium"
                             style={{
                               backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                              fontSize: "40pt",
+                              fontSize: "30pt",
                               lineHeight: "1.4",
                               opacity: isWorkAtBranch ? 0 : 1,
                               fontFamily: 'Roboto, sans-serif',
@@ -387,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt', color: '#ffffff' }}>
+                                <div className="font-semibold text-[#ffffff]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '30pt', color: '#ffffff' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
@@ -396,7 +396,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 {/* Additional content */}
                                 {schedule.workType !== "Khác" && schedule.customContent && (
-                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: '#ffffff' }}>
+                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '30pt', color: '#ffffff' }}>
                                     {schedule.customContent}
                                   </div>
                                 )}
@@ -406,7 +406,7 @@ export default function PublicDisplay4K() {
                         );
                       })}
                       {schedules.filter((s: any) => s.workType !== "Làm việc tại CN").length > 6 && (
-                        <div className="text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: '#d1d5db' }}>
+                        <div className="text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '30pt', color: '#d1d5db' }}>
                           +{schedules.filter((s: any) => s.workType !== "Làm việc tại CN").length - 6} more
                         </div>
                       )}
@@ -571,7 +571,7 @@ export default function PublicDisplay4K() {
                 <th 
                   className="text-white font-bold text-center"
                   style={{ 
-                    fontSize: '40pt', 
+                    fontSize: '30pt', 
                     fontWeight: '700',
                     padding: '20px',
                     borderRight: '2px solid rgb(194 65 12)',
@@ -591,7 +591,7 @@ export default function PublicDisplay4K() {
                       key={index}
                       className="text-white font-bold text-center"
                       style={{ 
-                        fontSize: '40pt', 
+                        fontSize: '30pt', 
                         fontWeight: '700',
                         padding: '20px',
                         borderRight: isLastColumn ? 'none' : '2px solid rgb(194 65 12)',
@@ -599,7 +599,7 @@ export default function PublicDisplay4K() {
                       }}
                     >
                       <div>{dayName}</div>
-                      <div style={{ fontSize: '40pt', fontWeight: '400' }}>
+                      <div style={{ fontSize: '30pt', fontWeight: '400' }}>
                         {format(day, 'dd/MM', { locale: vi })}
                       </div>
                     </th>
@@ -631,7 +631,7 @@ export default function PublicDisplay4K() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '40pt',
+                        fontSize: '30pt',
                         fontWeight: '700',
                         textAlign: 'center',
                         lineHeight: '1.3',
@@ -691,7 +691,7 @@ export default function PublicDisplay4K() {
                               }}
                             >
                               <div style={{ 
-                                fontSize: '40pt', // Larger for 4K
+                                fontSize: '30pt', // Adjusted for 4K
                                 fontWeight: '500',
                                 lineHeight: '1.3',
                                 marginBottom: '6px'
@@ -700,7 +700,7 @@ export default function PublicDisplay4K() {
                                   style={{
                                     color: '#9f224e',
                                     fontWeight: '700',
-                                    fontSize: '40pt',
+                                    fontSize: '30pt',
                                     marginBottom: '4px'
                                   }}>
                                   {timeRange}
@@ -709,7 +709,7 @@ export default function PublicDisplay4K() {
                                   style={{
                                     color: '#006b68',
                                     fontWeight: '500',
-                                    fontSize: '40pt',
+                                    fontSize: '30pt',
                                     lineHeight: '1.4',
                                     wordWrap: 'break-word',
                                     whiteSpace: 'normal'
