@@ -71,15 +71,15 @@ const EventImageWithFallback = ({
       key={attempts} // Force re-render on retry
       src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
       alt={alt}
-      className={`max-w-full max-h-full object-contain rounded-lg shadow-lg ${additionalClassName}`}
-      style={
-        style || {
-          width: "auto",
-          height: "auto",
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }
-      }
+      className={`object-contain rounded-lg shadow-lg ${additionalClassName}`}
+      style={{
+        width: "100%",
+        height: "100%",
+        maxWidth: "100%",
+        maxHeight: "100%",
+        objectFit: "contain",
+        ...style,
+      }}
       onError={handleError}
       onLoad={() => {
         console.log("Image loaded successfully:", src);
@@ -1043,13 +1043,7 @@ export default function PublicDisplay4K() {
         src={src}
         alt={`${eventName} - Image ${index + 1}`}
         event={{ shortName: eventName, content: eventName }}
-        additionalClassName={`object-cover rounded-lg shadow-lg ${className}`}
-        style={{
-          width: "100%",
-          height: "100%",
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }}
+        additionalClassName={className}
       />
     );
 
