@@ -863,6 +863,7 @@ export default function PublicDisplay4K() {
                           ? "none"
                           : "2px solid rgb(194 65 12)",
                         verticalAlign: "middle",
+                        backgroundColor: isWeekend ? "#adacac" : "inherit",
                       }}
                     >
                       <div>{dayName}</div>
