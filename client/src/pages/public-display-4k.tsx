@@ -829,16 +829,16 @@ export default function PublicDisplay4K() {
                 );
               })}
             </colgroup>
-            <thead style={{ height: "60px" }}>
+            <thead style={{ height: "45px" }}>
               {" "}
               {/* Optimized height for 4K */}
-              <tr className="bg-orange-600" style={{ height: "50px" }}>
+              <tr className="bg-orange-600" style={{ height: "40px" }}>
                 <th
                   className="text-white font-bold text-center"
                   style={{
-                    fontSize: "26pt",
+                    fontSize: "22pt",
                     fontWeight: "700",
-                    padding: "10px",
+                    padding: "6px",
                     borderRight: "2px solid rgb(194 65 12)",
                     verticalAlign: "middle",
                   }}
@@ -856,9 +856,9 @@ export default function PublicDisplay4K() {
                       key={index}
                       className="text-white font-bold text-center"
                       style={{
-                        fontSize: "26pt",
+                        fontSize: "22pt",
                         fontWeight: "700",
-                        padding: "10px",
+                        padding: "6px",
                         borderRight: isLastColumn
                           ? "none"
                           : "2px solid rgb(194 65 12)",
@@ -866,7 +866,7 @@ export default function PublicDisplay4K() {
                       }}
                     >
                       <div>{dayName}</div>
-                      <div style={{ fontSize: "24pt", fontWeight: "400" }}>
+                      <div style={{ fontSize: "20pt", fontWeight: "400" }}>
                         {format(day, "dd/MM", { locale: vi })}
                       </div>
                     </th>
@@ -874,7 +874,7 @@ export default function PublicDisplay4K() {
                 })}
               </tr>
             </thead>
-            <tbody style={{ height: "calc(100% - 40px)" }}>
+            <tbody style={{ height: "calc(100% - 35px)" }}>
               {rooms.slice(0, 10).map(
                 (
                   room: any,
@@ -884,7 +884,7 @@ export default function PublicDisplay4K() {
                     key={room.id}
                     className="border-b-2 border-gray-200"
                     style={{
-                      height: `calc((100vh - 280px) / ${Math.min(rooms.length, 10)})`,
+                      height: `calc((100vh - 250px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
                       maxHeight: "80px",
                     }}
@@ -999,7 +999,7 @@ export default function PublicDisplay4K() {
                                         color: "#006b68",
                                         fontWeight: "500",
                                         fontSize: "30pt",
-                                        lineHeight: "1.4",
+                                        lineHeight: "1.1",
                                         wordWrap: "break-word",
                                         whiteSpace: "normal",
                                       }}
