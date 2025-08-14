@@ -913,7 +913,7 @@ export default function PublicDisplay4K() {
                           lineHeight: "1.2",
                           wordWrap: "break-word",
                         }}
-                        className="text-[#791301]"
+                        className="text-[#791301] text-[24px]"
                       >
                         {room.name}
                       </div>
