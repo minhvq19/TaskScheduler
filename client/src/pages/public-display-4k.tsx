@@ -696,12 +696,14 @@ export default function PublicDisplay4K() {
                                 lineHeight: '1.3',
                                 marginBottom: '6px'
                               }}>
-                                <div style={{
-                                  color: '#9f224e',
-                                  fontWeight: '700',
-                                  fontSize: '22px',
-                                  marginBottom: '4px'
-                                }}>
+                                <div
+                                  style={{
+                                    color: '#9f224e',
+                                    fontWeight: '700',
+                                    fontSize: '22px',
+                                    marginBottom: '4px'
+                                  }}
+                                  className="text-[34px]">
                                   {timeRange}
                                 </div>
                                 <div
