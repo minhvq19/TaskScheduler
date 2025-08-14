@@ -61,7 +61,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   const menuPermissions = getMenuPermissions();
   
   const openPublicDisplay = () => {
-    window.open("/display", "_blank");
+    window.open("/select-display", "_blank");
   };
   
   // Filter menu items based on permissions

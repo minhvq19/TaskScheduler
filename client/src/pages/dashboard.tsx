@@ -112,7 +112,7 @@ export default function Dashboard() {
   };
 
   const openPublicDisplay = () => {
-    window.open("/display", "_blank");
+    window.open("/select-display", "_blank");
   };
 
   const renderContent = () => {
