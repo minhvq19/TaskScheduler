@@ -332,7 +332,6 @@ export default function PublicDisplay4K() {
             );
           })}
         </div>
-
         {/* Body with rows for each staff member */}
         <div className="overflow-auto" style={{ height: 'calc(100% - 120px)' }}>
           {staff
@@ -388,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '18px' }}>
+                                <div className="font-semibold text-[36px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '18px' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
@@ -421,7 +420,6 @@ export default function PublicDisplay4K() {
             </div>
           ))}
         </div>
-        
         {/* Color Legend for 4K - same as standard display */}
         <div className="bg-gray-50 p-4 border-t border-gray-300" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <div className="text-2xl font-bold text-gray-700 mb-3 text-center" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700' }}>GHI CHÚ MÀU SẮC</div>
@@ -611,7 +609,7 @@ export default function PublicDisplay4K() {
             </thead>
             <tbody style={{ height: 'calc(100% - 100px)' }}>
               {rooms.slice(0, 8).map((room: any, roomIndex: number) => ( // Limit to 8 rooms for 4K
-                <tr key={room.id} className="border-b-2 border-gray-200" style={{ 
+                (<tr key={room.id} className="border-b-2 border-gray-200" style={{ 
                   height: `calc((100vh - 300px) / ${Math.min(rooms.length, 8)})`,
                   minHeight: '120px' 
                 }}>
@@ -640,7 +638,6 @@ export default function PublicDisplay4K() {
                       {room.name}
                     </div>
                   </td>
-
                   {/* Meeting columns for each day */}
                   {weekDays.map((day, dayIndex) => {
                     const dayMeetings = getMeetingsForRoomAndDay(room.id, day);
@@ -722,7 +719,7 @@ export default function PublicDisplay4K() {
                       </td>
                     );
                   })}
-                </tr>
+                </tr>)
               ))}
             </tbody>
           </table>
