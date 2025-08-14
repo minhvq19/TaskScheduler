@@ -440,7 +440,7 @@ export default function PublicDisplay4K() {
                       key={dayIndex}
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
-                        backgroundColor: "white",
+                        backgroundColor: isWeekendDay ? "#adacac" : "white",
                         fontFamily: "Roboto, sans-serif",
                       }}
                     >
@@ -884,7 +884,7 @@ export default function PublicDisplay4K() {
                     key={room.id}
                     className="border-b-2 border-gray-200"
                     style={{
-                      height: `calc((100vh - 250px) / ${Math.min(rooms.length, 10)})`,
+                      height: `calc((100vh - 320px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
                       maxHeight: "80px",
                     }}
