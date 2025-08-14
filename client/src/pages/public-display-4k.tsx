@@ -375,7 +375,7 @@ export default function PublicDisplay4K() {
                             className="text-lg p-2 rounded text-white font-medium"
                             style={{
                               backgroundColor: isWorkAtBranch ? "transparent" : getWorkScheduleColor(schedule.workType),
-                              fontSize: "20px",
+                              fontSize: "40pt",
                               lineHeight: "1.4",
                               opacity: isWorkAtBranch ? 0 : 1,
                               fontFamily: 'Roboto, sans-serif',
@@ -387,7 +387,7 @@ export default function PublicDisplay4K() {
                             {!isWorkAtBranch && (
                               <>
                                 {/* Main content with time or full day */}
-                                <div className="font-semibold text-[40px]" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '18px' }}>
+                                <div className="font-semibold" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '700', fontSize: '40pt' }}>
                                   {schedule.workType === "Khác" && schedule.customContent 
                                     ? schedule.customContent 
                                     : schedule.workType === "Đi công tác nước ngoài" 
@@ -396,7 +396,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 {/* Additional content */}
                                 {schedule.workType !== "Khác" && schedule.customContent && (
-                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '16px' }}>
+                                  <div className="opacity-90" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt' }}>
                                     {schedule.customContent}
                                   </div>
                                 )}
@@ -406,7 +406,7 @@ export default function PublicDisplay4K() {
                         );
                       })}
                       {schedules.filter((s: any) => s.workType !== "Làm việc tại CN").length > 6 && (
-                        <div className="text-sm text-gray-300 text-center" style={{ fontFamily: 'Roboto, sans-serif' }}>
+                        <div className="text-center" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '40pt', color: '#d1d5db' }}>
                           +{schedules.filter((s: any) => s.workType !== "Làm việc tại CN").length - 6} more
                         </div>
                       )}
@@ -571,7 +571,7 @@ export default function PublicDisplay4K() {
                 <th 
                   className="text-white font-bold text-center"
                   style={{ 
-                    fontSize: '32px', 
+                    fontSize: '40pt', 
                     fontWeight: '700',
                     padding: '20px',
                     borderRight: '2px solid rgb(194 65 12)',
@@ -591,7 +591,7 @@ export default function PublicDisplay4K() {
                       key={index}
                       className="text-white font-bold text-center"
                       style={{ 
-                        fontSize: '28px', 
+                        fontSize: '40pt', 
                         fontWeight: '700',
                         padding: '20px',
                         borderRight: isLastColumn ? 'none' : '2px solid rgb(194 65 12)',
@@ -599,7 +599,7 @@ export default function PublicDisplay4K() {
                       }}
                     >
                       <div>{dayName}</div>
-                      <div style={{ fontSize: '24px', fontWeight: '400' }}>
+                      <div style={{ fontSize: '40pt', fontWeight: '400' }}>
                         {format(day, 'dd/MM', { locale: vi })}
                       </div>
                     </th>
@@ -630,13 +630,12 @@ export default function PublicDisplay4K() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '28px',
+                        fontSize: '40pt',
                         fontWeight: '700',
                         textAlign: 'center',
                         lineHeight: '1.3',
                         wordWrap: 'break-word'
-                      }}
-                      className="text-[36px]">
+                      }}>
                       {room.name}
                     </div>
                   </td>
@@ -691,7 +690,7 @@ export default function PublicDisplay4K() {
                               }}
                             >
                               <div style={{ 
-                                fontSize: '18px', // Larger for 4K
+                                fontSize: '40pt', // Larger for 4K
                                 fontWeight: '500',
                                 lineHeight: '1.3',
                                 marginBottom: '6px'
@@ -700,22 +699,20 @@ export default function PublicDisplay4K() {
                                   style={{
                                     color: '#9f224e',
                                     fontWeight: '700',
-                                    fontSize: '22px',
+                                    fontSize: '40pt',
                                     marginBottom: '4px'
-                                  }}
-                                  className="text-[34px]">
+                                  }}>
                                   {timeRange}
                                 </div>
                                 <div
                                   style={{
                                     color: '#006B68',
                                     fontWeight: '500',
-                                    fontSize: '20px',
+                                    fontSize: '40pt',
                                     lineHeight: '1.4',
                                     wordWrap: 'break-word',
                                     whiteSpace: 'normal'
-                                  }}
-                                  className="text-[40px]">
+                                  }}>
                                   {meeting.meetingContent}
                                 </div>
                               </div>
