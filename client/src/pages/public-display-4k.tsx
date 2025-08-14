@@ -565,7 +565,8 @@ export default function PublicDisplay4K() {
             style={{
               fontFamily: "Roboto, sans-serif",
               fontWeight: "700",
-              color: "white",
+              color: "#260705",
+              fontSize: "30pt",
             }}
           >
             GHI CHÚ MÀU SẮC
@@ -576,61 +577,61 @@ export default function PublicDisplay4K() {
           >
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{
                   backgroundColor: getWorkScheduleColor("Làm việc tại CN"),
                 }}
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 CN
               </span>
             </div>
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{ backgroundColor: getWorkScheduleColor("Nghỉ phép") }}
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 Nghỉ phép
               </span>
             </div>
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{
                   backgroundColor: getWorkScheduleColor("Trực lãnh đạo"),
                 }}
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 Trực LD
               </span>
             </div>
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{
                   backgroundColor: getWorkScheduleColor("Đi khách hàng"),
                 }}
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 Đi khách hàng
               </span>
             </div>
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{
                   backgroundColor: getWorkScheduleColor(
                     "Đi công tác nước ngoài",
@@ -639,19 +640,19 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 CT NN
               </span>
             </div>
             <div className="flex items-center">
               <div
-                className="w-6 h-6 rounded mr-3"
+                className="w-10 h-10 rounded mr-4"
                 style={{ backgroundColor: getWorkScheduleColor("Khác") }}
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "white" }}
+                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
               >
                 Khác
               </span>
