@@ -6,7 +6,13 @@ import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import React from 'react';
 
 // Event Image with fallback component for error handling
-const EventImageWithFallback = ({ src, alt, event }: { src: string; alt: string; event: any }) => {
+const EventImageWithFallback = ({ src, alt, event, additionalClassName = "", style }: { 
+  src: string; 
+  alt: string; 
+  event: any; 
+  additionalClassName?: string;
+  style?: React.CSSProperties;
+}) => {
   const [hasError, setHasError] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const maxAttempts = 3;
@@ -48,8 +54,8 @@ const EventImageWithFallback = ({ src, alt, event }: { src: string; alt: string;
       key={attempts} // Force re-render on retry
       src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
       alt={alt}
-      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-      style={{ 
+      className={`max-w-full max-h-full object-contain rounded-lg shadow-lg ${additionalClassName}`}
+      style={style || { 
         width: 'auto', 
         height: 'auto',
         maxWidth: '100%',
