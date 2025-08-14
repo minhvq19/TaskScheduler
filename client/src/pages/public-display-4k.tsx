@@ -832,7 +832,7 @@ export default function PublicDisplay4K() {
             <thead style={{ height: "60px" }}>
               {" "}
               {/* Optimized height for 4K */}
-              <tr className="bg-orange-600" style={{ height: "60px" }}>
+              <tr className="bg-orange-600" style={{ height: "50px" }}>
                 <th
                   className="text-white font-bold text-center"
                   style={{
@@ -884,7 +884,7 @@ export default function PublicDisplay4K() {
                     key={room.id}
                     className="border-b-2 border-gray-200"
                     style={{
-                      height: `calc((100vh - 300px) / ${Math.min(rooms.length, 10)})`,
+                      height: `calc((100vh - 280px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
                       maxHeight: "80px",
                     }}
