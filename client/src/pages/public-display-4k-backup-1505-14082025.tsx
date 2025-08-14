@@ -239,10 +239,10 @@ export default function PublicDisplay4K() {
     return new Date(date.setDate(diff));
   };
 
-  // Use current week starting from today (5 days only)
+  // Use current week starting from today (same as standard display)
   const today = new Date();
   const todayStart = startOfDay(today);
-  const endOfWeek = addDays(todayStart, 4); // Show only 5 days
+  const endOfWeek = addDays(todayStart, 6);
   
   const weekDays = eachDayOfInterval({
     start: todayStart, // Start from today, not Monday
@@ -464,8 +464,8 @@ export default function PublicDisplay4K() {
     const today = new Date();
     const todayStart = startOfDay(today);
     
-    // Show 5 days starting from today (reduced from 7 days)
-    const endOfWeek = addDays(todayStart, 4);
+    // Show 7 days starting from today (same as standard display)
+    const endOfWeek = addDays(todayStart, 6);
     
     const weekDays = eachDayOfInterval({
       start: todayStart, // Start from today, not Monday
