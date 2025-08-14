@@ -383,7 +383,7 @@ export default function PublicDisplay4K() {
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
                 style={{ fontFamily: "Roboto, sans-serif" }}
               >
-                <div className="text-xl font-bold">{dayName}</div>
+                <div className="font-bold text-[24px]">{dayName}</div>
                 <div className="text-2xl font-bold">
                   {format(day, "dd/MM", { locale: vi })}
                 </div>
@@ -569,7 +569,7 @@ export default function PublicDisplay4K() {
               fontSize: "30pt",
             }}
           >
-            GHI CHÚ MÀU SẮC
+            GHI CHÚ
           </div>
           <div
             className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-xl"
@@ -584,9 +584,13 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
-                CN
+                Làm việc tại CN
               </span>
             </div>
             <div className="flex items-center">
@@ -596,7 +600,11 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
                 Nghỉ phép
               </span>
@@ -610,9 +618,13 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
-                Trực LD
+                Trực Lãnh đạo
               </span>
             </div>
             <div className="flex items-center">
@@ -624,7 +636,11 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
                 Đi khách hàng
               </span>
@@ -640,9 +656,13 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
-                CT NN
+                Công tác NN
               </span>
             </div>
             <div className="flex items-center">
@@ -652,7 +672,11 @@ export default function PublicDisplay4K() {
               ></div>
               <span
                 className="text-xl"
-                style={{ fontFamily: "Roboto, sans-serif", color: "#260705", fontSize: "26pt" }}
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  color: "#260705",
+                  fontSize: "26pt",
+                }}
               >
                 Khác
               </span>
@@ -886,7 +910,8 @@ export default function PublicDisplay4K() {
                           lineHeight: "1.3",
                           wordWrap: "break-word",
                         }}
-                        className="text-[#791301]">
+                        className="text-[#791301]"
+                      >
                         {room.name}
                       </div>
                     </td>
@@ -1306,10 +1331,7 @@ export default function PublicDisplay4K() {
         </div>
       </div>
       {/* Main content area */}
-      <div
-        className="flex-1"
-        style={{ height: "calc(100vh - 200px)" }}
-      >
+      <div className="flex-1" style={{ height: "calc(100vh - 200px)" }}>
         {currentScreen.id === "work-schedule" && renderWorkScheduleTable4K()}
         {currentScreen.id === "meeting-schedule" &&
           renderMeetingScheduleTable4K()}
