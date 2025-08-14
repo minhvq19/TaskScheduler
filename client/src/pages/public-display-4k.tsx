@@ -874,7 +874,7 @@ export default function PublicDisplay4K() {
                 })}
               </tr>
             </thead>
-            <tbody style={{ height: "calc(100% - 60px)" }}>
+            <tbody style={{ height: "calc(100% - 50px)" }}>
               {rooms.slice(0, 10).map(
                 (
                   room: any,
@@ -907,7 +907,7 @@ export default function PublicDisplay4K() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: "22pt",
+                          fontSize: "26pt",
                           fontWeight: "700",
                           textAlign: "center",
                           lineHeight: "1.2",
