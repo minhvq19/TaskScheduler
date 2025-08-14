@@ -884,9 +884,9 @@ export default function PublicDisplay4K() {
                     key={room.id}
                     className="border-b-2 border-gray-200"
                     style={{
-                      height: `calc((100vh - 250px) / ${Math.min(rooms.length, 10)})`,
-                      minHeight: "60px",
-                      maxHeight: "80px",
+                      height: `calc((100vh - 200px) / ${Math.min(rooms.length, 10)})`,
+                      minHeight: "40px",
+                      maxHeight: "60px",
                     }}
                   >
                     {/* Room Name Column */}
@@ -894,7 +894,7 @@ export default function PublicDisplay4K() {
                       className="text-white font-bold"
                       style={{
                         backgroundColor: "#f5f0dc",
-                        padding: "16px",
+                        padding: "8px",
                         borderRight: "2px solid rgb(209 213 219)",
                         verticalAlign: "middle",
                         height: "100%",
@@ -907,10 +907,10 @@ export default function PublicDisplay4K() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: "26pt",
+                          fontSize: "24pt",
                           fontWeight: "700",
                           textAlign: "center",
-                          lineHeight: "1.2",
+                          lineHeight: "1.1",
                           wordWrap: "break-word",
                         }}
                         className="text-[#791301] text-[24px]"
@@ -931,7 +931,7 @@ export default function PublicDisplay4K() {
                         <td
                           key={dayIndex}
                           style={{
-                            padding: "12px",
+                            padding: "6px",
                             borderRight: isLastColumn
                               ? "none"
                               : "2px solid rgb(209 213 219)",
@@ -978,7 +978,7 @@ export default function PublicDisplay4K() {
                                 >
                                   <div
                                     style={{
-                                      fontSize: "30pt", // Adjusted for 4K
+                                      fontSize: "22pt", // Adjusted for 4K
                                       fontWeight: "500",
                                       lineHeight: "1.3",
                                       marginBottom: "6px",
@@ -988,8 +988,8 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#9f224e",
                                         fontWeight: "700",
-                                        fontSize: "30pt",
-                                        marginBottom: "4px",
+                                        fontSize: "22pt",
+                                        marginBottom: "2px",
                                       }}
                                     >
                                       {timeRange}
@@ -998,7 +998,7 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#006b68",
                                         fontWeight: "500",
-                                        fontSize: "30pt",
+                                        fontSize: "22pt",
                                         lineHeight: "1.1",
                                         wordWrap: "break-word",
                                         whiteSpace: "normal",
