@@ -588,7 +588,7 @@ export default function PublicDisplay4K() {
                 className="text-xl"
                 style={{
                   fontFamily: "Roboto, sans-serif",
-                  color: "#ffffff",
+                  color: "#260705",
                   fontSize: "26pt",
                 }}
               >
