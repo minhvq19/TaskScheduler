@@ -707,7 +707,7 @@ export default function PublicDisplay4K() {
                                 </div>
                                 <div
                                   style={{
-                                    color: '#260705',
+                                    color: '#ffffff',
                                     fontWeight: '500',
                                     fontSize: '40pt',
                                     lineHeight: '1.4',
