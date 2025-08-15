@@ -478,7 +478,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               <Input
                 id="startDate"
                 type="date"
-                min={format(new Date(), "yyyy-MM-dd")}
                 value={watchedStartDate || ""}
                 onChange={(e) => {
                   console.log("Start date onChange triggered:", e.target.value);
@@ -500,7 +499,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               <Input
                 id="endDate"
                 type="date"
-                min={format(new Date(), "yyyy-MM-dd")}
                 value={watchedEndDate || ""}
                 onChange={(e) => {
                   console.log("End date onChange triggered:", e.target.value);
@@ -526,8 +524,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="startTime"
                   type="time"
-                  min={isSameDay(new Date(watchedStartDate || new Date()), new Date()) ? format(new Date(), "HH:mm") : workStartTime}
-                  max={workEndTime}
                   {...form.register("startTime")}
                   data-testid="input-start-time"
                 />
@@ -541,8 +537,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="endTime"
                   type="time"
-                  min={isSameDay(new Date(watchedEndDate || new Date()), new Date()) ? format(new Date(), "HH:mm") : workStartTime}
-                  max={workEndTime}
                   {...form.register("endTime")}
                   data-testid="input-end-time"
                 />
@@ -573,7 +567,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           {/* Work Hours Info */}
           <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
             <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-            <p><strong>Lưu ý:</strong> Không thể chọn ngày/giờ quá khứ{allowWeekendSchedule ? "" : ", ngày cuối tuần (T7, CN)"} hoặc ngày lễ</p>
+            <p><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
             {watchedWorkType === "Đi khách hàng" && (
               <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
             )}
