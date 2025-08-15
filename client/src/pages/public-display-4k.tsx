@@ -20,29 +20,20 @@ const EventImageWithFallback = ({
   style?: React.CSSProperties;
 }) => {
   const [hasError, setHasError] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const maxAttempts = 3;
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const imageUrl = src.startsWith("/")
     ? `${window.location.origin}${src}`
     : src;
 
   const handleError = () => {
-    console.error("Image failed to load:", src);
-    console.error("Attempted URL:", imageUrl);
-    console.error("Current event data:", event);
+    console.error("Không thể tải ảnh:", src);
+    setHasError(true);
+  };
 
-    if (attempts < maxAttempts) {
-      // Thử tải lại ảnh với độ trễ
-      setTimeout(
-        () => {
-          setAttempts((prev) => prev + 1);
-        },
-        1000 * (attempts + 1),
-      ); // Tăng dần thời gian trễ
-    } else {
-      setHasError(true);
-    }
+  const handleLoad = () => {
+    setIsLoaded(true);
+    setHasError(false);
   };
 
   if (hasError) {
@@ -67,29 +58,34 @@ const EventImageWithFallback = ({
   }
 
   return (
-    <img
-      key={attempts} // Buộc render lại khi thử lại
-      src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
-      alt={alt}
-      className={`object-contain rounded-lg shadow-lg ${additionalClassName}`}
-      style={{
-        width: "100%",
-        height: "100%",
-        maxWidth: "100%",
-        maxHeight: "100%",
-        objectFit: "contain",
-        ...style,
-      }}
-      onError={handleError}
-      onLoad={() => {
-        console.log("Image loaded successfully:", src);
-        setHasError(false);
-      }}
-    />
+    <div className="w-full h-full relative">
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+          <div className="text-gray-500 text-2xl" style={{ fontFamily: "Roboto, sans-serif" }}>
+            Đang tải ảnh...
+          </div>
+        </div>
+      )}
+      <img
+        src={imageUrl}
+        alt={alt}
+        className={`object-contain rounded-lg shadow-lg ${additionalClassName} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+        style={{
+          width: "100%",
+          height: "100%",
+          maxWidth: "100%",
+          maxHeight: "100%",
+          objectFit: "contain",
+          ...style,
+        }}
+        onError={handleError}
+        onLoad={handleLoad}
+      />
+    </div>
   );
 };
 
-// 4K Display optimized for 3840x2160 resolution (65" TV)
+// Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
   { id: "work-schedule", name: "Kế hoạch công tác" },
   { id: "meeting-schedule", name: "Lịch sử dụng phòng họp" },
@@ -1034,7 +1030,7 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Flexible Image Layout Component for 4K
+  // Component Bố cục Ảnh Linh hoạt cho 4K
   const FlexibleImageLayout4K = ({
     images,
     eventName,
@@ -1048,9 +1044,9 @@ export default function PublicDisplay4K() {
       className: string = "",
     ) => (
       <EventImageWithFallback
-        key={index}
+        key={`${eventName}-${index}-${src}`}
         src={src}
-        alt={`${eventName} - Image ${index + 1}`}
+        alt={`${eventName} - Ảnh ${index + 1}`}
         event={{ shortName: eventName, content: eventName }}
         additionalClassName={className}
       />

@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let imageUrls: string[] = [];
       
       if (req.files && Array.isArray(req.files)) {
-        // Process multiple files
+        // Xử lý nhiều file
         for (const file of req.files) {
           const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
           const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
