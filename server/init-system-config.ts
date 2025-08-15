@@ -46,7 +46,7 @@ const defaultConfigs = [
   // Work type color configurations
   {
     key: "colors.work_at_branch",
-    value: "#ffffff",
+    value: "#f5f4f0",
     type: "color",
     description: 'Màu cho loại "Làm việc tại CN"',
     category: "colors",

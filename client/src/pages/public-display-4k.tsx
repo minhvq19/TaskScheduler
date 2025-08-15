@@ -470,28 +470,26 @@ export default function PublicDisplay4K() {
                                   key={schedule.id}
                                   className="text-lg p-2 rounded font-medium"
                                   style={{
-                                    backgroundColor: isWorkAtBranch
-                                      ? "transparent"
-                                      : getWorkScheduleColor(schedule.workType),
+                                    backgroundColor: getWorkScheduleColor(schedule.workType),
                                     fontSize: "30pt",
                                     lineHeight: "1.4",
-                                    opacity: isWorkAtBranch ? 0 : 1,
+                                    opacity: 1,
                                     fontFamily: "Roboto, sans-serif",
                                     fontWeight: "600",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
                                   }}
                                 >
-                                  {!isWorkAtBranch && (
+                                  {(
                                     <>
                                       {/* Main content with time or full day */}
                                       <div
-                                        className="font-semibold text-[#ffffff]"
+                                        className="font-semibold"
                                         style={{
                                           fontFamily: "Roboto, sans-serif",
                                           fontWeight: "700",
                                           fontSize: "30pt",
-                                          color: "#ffffff",
+                                          color: isWorkAtBranch ? "#260705" : "#ffffff",
                                         }}
                                       >
                                         {schedule.workType === "Khác" &&
@@ -513,7 +511,7 @@ export default function PublicDisplay4K() {
                                             style={{
                                               fontFamily: "Roboto, sans-serif",
                                               fontSize: "30pt",
-                                              color: "#ffffff",
+                                              color: isWorkAtBranch ? "#260705" : "#ffffff",
                                             }}
                                           >
                                             {schedule.customContent}
@@ -524,9 +522,7 @@ export default function PublicDisplay4K() {
                                 </div>
                               );
                             })}
-                          {schedules.filter(
-                            (s: any) => s.workType !== "Làm việc tại CN",
-                          ).length > 6 && (
+                          {schedules.length > 6 && (
                             <div
                               className="text-center"
                               style={{
@@ -535,11 +531,7 @@ export default function PublicDisplay4K() {
                                 color: "#d1d5db",
                               }}
                             >
-                              +
-                              {schedules.filter(
-                                (s: any) => s.workType !== "Làm việc tại CN",
-                              ).length - 6}{" "}
-                              more
+                              +{schedules.length - 6} more
                             </div>
                           )}
                         </div>
