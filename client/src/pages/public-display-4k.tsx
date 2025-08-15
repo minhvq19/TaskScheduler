@@ -982,7 +982,7 @@ export default function PublicDisplay4K() {
                                 >
                                   <div
                                     style={{
-                                      fontSize: "30pt", // Adjusted for 4K
+                                      fontSize: "32pt", // Adjusted for 4K
                                       fontWeight: "500",
                                       lineHeight: "1.3",
                                       marginBottom: "6px",
@@ -992,7 +992,7 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#9f224e",
                                         fontWeight: "700",
-                                        fontSize: "30pt",
+                                        fontSize: "32pt",
                                         marginBottom: "4px",
                                       }}
                                     >
@@ -1002,7 +1002,7 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#006b68",
                                         fontWeight: "500",
-                                        fontSize: "30pt",
+                                        fontSize: "32pt",
                                         lineHeight: "1.1",
                                         wordWrap: "break-word",
                                         whiteSpace: "normal",
