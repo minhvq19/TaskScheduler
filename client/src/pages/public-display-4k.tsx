@@ -394,7 +394,7 @@ export default function PublicDisplay4K() {
         {/* Body with rows for each staff member */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 200px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 150px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -615,7 +615,7 @@ export default function PublicDisplay4K() {
               <div
                 className="w-10 h-10 rounded mr-4"
                 style={{
-                  backgroundColor: getWorkScheduleColor("Trực lãnh đạo"),
+                  backgroundColor: getWorkScheduleColor("Trực Lãnh đạo"),
                 }}
               ></div>
               <span
@@ -632,9 +632,7 @@ export default function PublicDisplay4K() {
             <div className="flex items-center">
               <div
                 className="w-10 h-10 rounded mr-4"
-                style={{
-                  backgroundColor: getWorkScheduleColor("Đi khách hàng"),
-                }}
+                style={{ backgroundColor: getWorkScheduleColor("Đi khách hàng") }}
               ></div>
               <span
                 className="text-xl"
