@@ -358,7 +358,7 @@ export default function PublicDisplay4K() {
       })
       .join(" ");
 
-    const fullGridTemplate = `400px ${gridTemplate}`; // Increased from 300px to 400px
+    const fullGridTemplate = `500px ${gridTemplate}`; // Increased from 400px to 500px for longer titles and names
 
     return (
       <div
@@ -811,7 +811,7 @@ export default function PublicDisplay4K() {
               height: "100%",
               borderCollapse: "collapse",
               tableLayout: "fixed",
-              border: "3px solid rgb(194 65 12)",
+              border: "3px solid rgb(230 205 168)",
             }}
           >
             <colgroup>
@@ -823,23 +823,34 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "80px" // Fixed very small width for T7,CN
-                        : "calc((100% - 420px - 160px) / 5)", // Equal distribution for 5 weekdays after subtracting weekend columns
+                        ? "400px" // Fix độ rộng 400px cho T7,CN
+                        : "calc((100% - 420px - 800px) / 5)", // Cột ngày thường = (100% - 420px - 800px) / 5 (chia đều sau khi trừ cột cuối tuần)
                     }}
                   />
                 );
               })}
             </colgroup>
-            <thead style={{ height: "45px", borderBottom: "3px solid rgb(194 65 12)" }}>
+            <thead
+              style={{
+                height: "45px",
+                borderBottom: "2px solid rgb(230 205 168)",
+              }}
+            >
               {/* Optimized height for 4K */}
-              <tr className="bg-orange-600" style={{ height: "40px", borderBottom: "3px solid rgb(194 65 12)" }}>
+              <tr
+                className="bg-orange-600"
+                style={{
+                  height: "40px",
+                  borderBottom: "3px solid rgb(230 205 168)",
+                }}
+              >
                 <th
                   className="text-white font-bold text-center"
                   style={{
                     fontSize: "22pt",
                     fontWeight: "700",
                     padding: "6px",
-                    borderRight: "3px solid rgb(194 65 12)",
+                    borderRight: "3px solid rgb(230 205 168)",
                     verticalAlign: "middle",
                   }}
                 >
@@ -861,7 +872,7 @@ export default function PublicDisplay4K() {
                         padding: "6px",
                         borderRight: isLastColumn
                           ? "none"
-                          : "3px solid rgb(194 65 12)",
+                          : "3px solid rgb(230 205 168)",
                         verticalAlign: "middle",
                         backgroundColor: isWeekend ? "#adacac" : "inherit",
                       }}
@@ -884,7 +895,7 @@ export default function PublicDisplay4K() {
                   <tr
                     key={room.id}
                     style={{
-                      borderBottom: "3px solid rgb(194 65 12)",
+                      borderBottom: "3px solid rgb(230 205 168)",
                       height: `calc((100vh - 320px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
                       maxHeight: "80px",
@@ -896,7 +907,7 @@ export default function PublicDisplay4K() {
                       style={{
                         backgroundColor: "#f5f0dc",
                         padding: "16px",
-                        borderRight: "3px solid rgb(194 65 12)",
+                        borderRight: "3px solid rgb(230 205 168)",
                         verticalAlign: "middle",
                         height: "100%",
                         overflow: "hidden",
@@ -935,7 +946,7 @@ export default function PublicDisplay4K() {
                             padding: "12px",
                             borderRight: isLastColumn
                               ? "none"
-                              : "3px solid rgb(194 65 12)",
+                              : "3px solid rgb(230 205 168)",
                             backgroundColor: isWeekend ? "#adacac" : "white",
                             verticalAlign: "top",
                             overflow: "hidden",
