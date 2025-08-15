@@ -823,24 +823,23 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "calc((100% - 420px) * 0.04)" // Further reduced from 0.06 to 0.04
-                        : "calc((100% - 420px) * 0.24)", // Further increased from 0.235 to 0.24
+                        ? "calc((100% - 420px) * 0.025)" // Drastically reduced from 0.04 to 0.025
+                        : "calc((100% - 420px) * 0.195)", // Adjusted from 0.24 to 0.195 to balance
                     }}
                   />
                 );
               })}
             </colgroup>
-            <thead style={{ height: "45px" }}>
-              {" "}
+            <thead style={{ height: "45px", borderBottom: "3px solid rgb(194 65 12)" }}>
               {/* Optimized height for 4K */}
-              <tr className="bg-orange-600" style={{ height: "40px" }}>
+              <tr className="bg-orange-600" style={{ height: "40px", borderBottom: "3px solid rgb(194 65 12)" }}>
                 <th
                   className="text-white font-bold text-center"
                   style={{
                     fontSize: "22pt",
                     fontWeight: "700",
                     padding: "6px",
-                    borderRight: "2px solid rgb(194 65 12)",
+                    borderRight: "3px solid rgb(194 65 12)",
                     verticalAlign: "middle",
                   }}
                 >
@@ -862,7 +861,7 @@ export default function PublicDisplay4K() {
                         padding: "6px",
                         borderRight: isLastColumn
                           ? "none"
-                          : "2px solid rgb(194 65 12)",
+                          : "3px solid rgb(194 65 12)",
                         verticalAlign: "middle",
                         backgroundColor: isWeekend ? "#adacac" : "inherit",
                       }}
