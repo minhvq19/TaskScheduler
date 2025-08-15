@@ -716,11 +716,11 @@ export default function PublicDisplay4K() {
 
     return (
       <div
-        className="h-full overflow-hidden"
+        className="h-full overflow-hidden relative"
         style={{ fontFamily: "Roboto, sans-serif" }}
       >
         {/* Meeting Schedule Table */}
-        <div className="bg-white h-full overflow-hidden">
+        <div className="bg-white h-full overflow-hidden" style={{ paddingBottom: "10px" }}>
           <table
             style={{
               width: "100%",
@@ -948,6 +948,17 @@ export default function PublicDisplay4K() {
             </tbody>
           </table>
         </div>
+        {/* Footer có độ cao cố định 10px */}
+        <div 
+          style={{
+            height: "10px",
+            backgroundColor: "#F5F0DC",
+            width: "100%",
+            position: "absolute",
+            bottom: 0,
+            left: 0
+          }}
+        />
       </div>
     );
   };
