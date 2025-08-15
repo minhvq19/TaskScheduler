@@ -607,6 +607,14 @@ export default function PublicDisplay4K() {
 
   // Meeting Schedule Table for 4K - matching standard display layout
   const renderMeetingScheduleTable4K = () => {
+    // Debug log để kiểm tra dữ liệu
+    console.log("4K Meeting Schedules Debug:", {
+      hasDisplayData: !!displayData,
+      meetingSchedulesCount: displayData?.meetingSchedules?.length || 0,
+      sampleMeeting: displayData?.meetingSchedules?.[0] || null,
+      meetingRoomsCount: meetingRooms?.length || 0
+    });
+
     if (!displayData?.meetingSchedules) {
       return (
         <div className="flex items-center justify-center h-full text-4xl text-white">
