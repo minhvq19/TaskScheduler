@@ -823,8 +823,8 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "calc((100% - 420px) * 0.025)" // Drastically reduced from 0.04 to 0.025
-                        : "calc((100% - 420px) * 0.195)", // Adjusted from 0.24 to 0.195 to balance
+                        ? "60px" // Fixed small width for T7,CN
+                        : "calc((100% - 420px - 120px) / 5)", // Equal width for 5 weekdays, subtract weekend columns
                     }}
                   />
                 );
