@@ -394,7 +394,7 @@ export default function PublicDisplay4K() {
         {/* Body with rows for each staff member */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 150px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 350px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -1338,7 +1338,7 @@ export default function PublicDisplay4K() {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1 overflow-auto" style={{ height: "calc(100vh - 200px)" }}>
+      <div className="flex-1" style={{ height: "calc(100vh - 200px)" }}>
         {currentScreen.id === "work-schedule" && renderWorkScheduleTable4K()}
         {currentScreen.id === "meeting-schedule" &&
           renderMeetingScheduleTable4K()}
