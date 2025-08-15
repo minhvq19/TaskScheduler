@@ -1193,7 +1193,7 @@ export default function PublicDisplay4K() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden"
+      className="min-h-screen relative overflow-hidden flex flex-col"
       style={{
         width: "100vw",
         height: "100vh",
@@ -1311,21 +1311,25 @@ export default function PublicDisplay4K() {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1" style={{ height: currentScreen.id === "meeting-schedule" ? "calc(100vh - 210px)" : "calc(100vh - 200px)" }}>
+      <div className="flex-1" style={{ height: currentScreen.id === "meeting-schedule" ? "calc(100vh - 210px)" : "calc(100vh - 200px)", minHeight: 0 }}>
         {currentScreen.id === "work-schedule" && renderWorkScheduleTable4K()}
         {currentScreen.id === "meeting-schedule" &&
           renderMeetingScheduleTable4K()}
         {currentScreen.id === "other-events" && renderOtherEventsDisplay4K()}
       </div>
       
-      {/* Footer chỉ hiển thị cho meeting schedule */}
+      {/* Footer chỉ hiển thị cho meeting schedule - màu và chiều cao rõ ràng hơn */}
       {currentScreen.id === "meeting-schedule" && (
         <div 
           style={{
             height: "10px",
             backgroundColor: "#F5F0DC",
             width: "100%",
-            flexShrink: 0
+            flexShrink: 0,
+            minHeight: "10px",
+            borderTop: "1px solid #ccc",
+            position: "relative",
+            zIndex: 10
           }}
         />
       )}
