@@ -716,11 +716,11 @@ export default function PublicDisplay4K() {
 
     return (
       <div
-        className="h-full overflow-hidden relative"
+        className="h-full overflow-hidden relative flex flex-col"
         style={{ fontFamily: "Roboto, sans-serif" }}
       >
         {/* Meeting Schedule Table */}
-        <div className="bg-white overflow-hidden" style={{ height: "calc(100% - 10px)" }}>
+        <div className="bg-white overflow-hidden flex-1">
           <table
             style={{
               width: "100%",
@@ -948,12 +948,14 @@ export default function PublicDisplay4K() {
             </tbody>
           </table>
         </div>
-        {/* Footer có độ cao cố định 10px */}
+        {/* Footer có độ cao cố định 10px - đảm bảo hiển thị */}
         <div 
           style={{
             height: "10px",
             backgroundColor: "#F5F0DC",
-            width: "100%"
+            width: "100%",
+            minHeight: "10px",
+            flexShrink: 0
           }}
         />
       </div>
