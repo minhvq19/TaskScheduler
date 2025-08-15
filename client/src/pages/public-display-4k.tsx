@@ -369,18 +369,37 @@ export default function PublicDisplay4K() {
                               const isWorkAtBranch =
                                 schedule.workType === "Làm việc tại CN";
 
-                              // Kiểm tra xem đây có phải lịch cả ngày không sử dụng giờ làm việc hệ thống
-                              const startTime = format(
-                                parseLocalDateTime(schedule.startDateTime),
-                                "HH:mm",
-                              );
-                              const endTime = format(
-                                parseLocalDateTime(schedule.endDateTime),
-                                "HH:mm",
-                              );
-                              const isFullDay =
-                                startTime === workHours.start &&
-                                endTime === workHours.end;
+                              // Tính toán thời gian hiển thị phù hợp cho ngày hiện tại
+                              const scheduleStartDate = parseLocalDateTime(schedule.startDateTime);
+                              const scheduleEndDate = parseLocalDateTime(schedule.endDateTime);
+                              const currentDay = new Date(day);
+                              currentDay.setHours(0, 0, 0, 0);
+                              
+                              const scheduleStartDay = new Date(scheduleStartDate);
+                              scheduleStartDay.setHours(0, 0, 0, 0);
+                              
+                              const scheduleEndDay = new Date(scheduleEndDate);
+                              scheduleEndDay.setHours(0, 0, 0, 0);
+                              
+                              let displayStartTime, displayEndTime;
+                              
+                              // Nếu ngày hiện tại là ngày bắt đầu lịch
+                              if (currentDay.getTime() === scheduleStartDay.getTime()) {
+                                displayStartTime = format(scheduleStartDate, "HH:mm");
+                              } else {
+                                // Ngày giữa hoặc ngày cuối: bắt đầu từ giờ làm việc
+                                displayStartTime = workHours.start;
+                              }
+                              
+                              // Nếu ngày hiện tại là ngày kết thúc lịch
+                              if (currentDay.getTime() === scheduleEndDay.getTime()) {
+                                displayEndTime = format(scheduleEndDate, "HH:mm");
+                              } else {
+                                // Ngày đầu hoặc ngày giữa: kết thúc vào giờ làm việc
+                                displayEndTime = workHours.end;
+                              }
+                              
+                              const isFullDay = displayStartTime === workHours.start && displayEndTime === workHours.end;
 
                               return (
                                 <div
@@ -422,7 +441,7 @@ export default function PublicDisplay4K() {
                                             : schedule.workType}
                                         {isFullDay
                                           ? " - (Cả ngày)"
-                                          : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
+                                          : ` - (${displayStartTime} – ${displayEndTime})`}
                                       </div>
                                       {/* Nội dung bổ sung */}
                                       {schedule.workType !== "Khác" &&
