@@ -1,151 +1,153 @@
-import { storage } from './storage';
+import { storage } from "./storage";
 
 // Default system configurations
 const defaultConfigs = [
   // Display timing configurations
   {
-    key: 'display.screen_rotation_interval',
-    value: '15',
-    type: 'number',
-    description: 'Thời gian hiển thị từng màn hình tại màn hình công cộng (giây)',
-    category: 'timing'
+    key: "display.screen_rotation_interval",
+    value: "15",
+    type: "number",
+    description:
+      "Thời gian hiển thị từng màn hình tại màn hình công cộng (giây)",
+    category: "timing",
   },
   {
-    key: 'display.refresh_interval',
-    value: '30',
-    type: 'number', 
-    description: 'Thời gian cập nhật dữ liệu tự động (giây)',
-    category: 'timing'
+    key: "display.refresh_interval",
+    value: "30",
+    type: "number",
+    description: "Thời gian cập nhật dữ liệu tự động (giây)",
+    category: "timing",
   },
 
   // Branding configurations
   {
-    key: 'organization.name',
-    value: 'Chi nhánh Sở giao dịch 1',
-    type: 'string',
-    description: 'Tên đơn vị hiển thị trên màn hình công cộng',
-    category: 'branding'
+    key: "organization.name",
+    value: "Chi nhánh Sở giao dịch 1",
+    type: "string",
+    description: "Tên đơn vị hiển thị trên màn hình công cộng",
+    category: "branding",
   },
   {
-    key: 'organization.full_name',
-    value: 'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam - Chi nhánh Sở giao dịch 1',
-    type: 'string',
-    description: 'Tên đầy đủ của đơn vị',
-    category: 'branding'
+    key: "organization.full_name",
+    value:
+      "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam - Chi nhánh Sở giao dịch 1",
+    type: "string",
+    description: "Tên đầy đủ của đơn vị",
+    category: "branding",
   },
   {
-    key: 'organization.logo_url',
-    value: '/logo-bidv.png',
-    type: 'string',
-    description: 'Đường dẫn logo đơn vị',
-    category: 'branding'
+    key: "organization.logo_url",
+    value: "/logo-bidv.png",
+    type: "string",
+    description: "Đường dẫn logo đơn vị",
+    category: "branding",
   },
 
   // Work type color configurations
   {
-    key: 'colors.work_at_branch',
-    value: '#4a90a4',
-    type: 'color',
+    key: "colors.work_at_branch",
+    value: "#ffffff",
+    type: "color",
     description: 'Màu cho loại "Làm việc tại CN"',
-    category: 'colors'
+    category: "colors",
   },
   {
-    key: 'colors.leave',
-    value: '#f59e0b',
-    type: 'color',
+    key: "colors.leave",
+    value: "#f59e0b",
+    type: "color",
     description: 'Màu cho loại "Nghỉ phép"',
-    category: 'colors'
+    category: "colors",
   },
   {
-    key: 'colors.leadership_duty',
-    value: '#ef4444',
-    type: 'color',
+    key: "colors.leadership_duty",
+    value: "#ef4444",
+    type: "color",
     description: 'Màu cho loại "Trực lãnh đạo"',
-    category: 'colors'
+    category: "colors",
   },
   {
-    key: 'colors.customer_visit',
-    value: '#0071a6',
-    type: 'color',
+    key: "colors.customer_visit",
+    value: "#0071a6",
+    type: "color",
     description: 'Màu cho loại "Đi khách hàng"',
-    category: 'colors'
+    category: "colors",
   },
   {
-    key: 'colors.international_business_trip',
-    value: '#8b5cf6',
-    type: 'color',
+    key: "colors.international_business_trip",
+    value: "#8b5cf6",
+    type: "color",
     description: 'Màu cho loại "Đi công tác nước ngoài"',
-    category: 'colors'
+    category: "colors",
   },
   {
-    key: 'colors.other',
-    value: '#6b7280',
-    type: 'color',
+    key: "colors.other",
+    value: "#6b7280",
+    type: "color",
     description: 'Màu cho loại "Khác"',
-    category: 'colors'
+    category: "colors",
   },
 
   // Display configuration
   {
-    key: 'display.max_schedules_per_cell',
-    value: '8',
-    type: 'number',
-    description: 'Số lượng lịch tối đa hiển thị trong mỗi ô',
-    category: 'display'
+    key: "display.max_schedules_per_cell",
+    value: "8",
+    type: "number",
+    description: "Số lượng lịch tối đa hiển thị trong mỗi ô",
+    category: "display",
   },
   {
-    key: 'display.show_color_legend',
-    value: 'true',
-    type: 'boolean',
-    description: 'Hiển thị ghi chú màu sắc',
-    category: 'display'
+    key: "display.show_color_legend",
+    value: "true",
+    type: "boolean",
+    description: "Hiển thị ghi chú màu sắc",
+    category: "display",
   },
 
   // Work hours configuration
   {
-    key: 'work_hours.start_time',
-    value: '08:00',
-    type: 'string',
-    description: 'Giờ bắt đầu làm việc hàng ngày',
-    category: 'timing'
+    key: "work_hours.start_time",
+    value: "08:00",
+    type: "string",
+    description: "Giờ bắt đầu làm việc hàng ngày",
+    category: "timing",
   },
   {
-    key: 'work_hours.end_time',
-    value: '17:30',
-    type: 'string',
-    description: 'Giờ kết thúc làm việc hàng ngày',
-    category: 'timing'
+    key: "work_hours.end_time",
+    value: "17:30",
+    type: "string",
+    description: "Giờ kết thúc làm việc hàng ngày",
+    category: "timing",
   },
 
   // Work schedule policies
   {
-    key: 'policies.allow_weekend_schedule',
-    value: 'true',
-    type: 'boolean',
-    description: 'Cho phép nhập lịch công tác vào Thứ 7, Chủ nhật',
-    category: 'policies'
+    key: "policies.allow_weekend_schedule",
+    value: "true",
+    type: "boolean",
+    description: "Cho phép nhập lịch công tác vào Thứ 7, Chủ nhật",
+    category: "policies",
   },
 
   // Meeting display configuration
   {
-    key: 'display.meeting_max_rows',
-    value: '10',
-    type: 'number',
-    description: 'Số dòng tối đa hiển thị lịch họp tại màn hình công cộng',
-    category: 'display'
-  }
+    key: "display.meeting_max_rows",
+    value: "10",
+    type: "number",
+    description: "Số dòng tối đa hiển thị lịch họp tại màn hình công cộng",
+    category: "display",
+  },
 ];
 
 export async function initializeSystemConfig() {
-  console.log('Initializing system configuration...');
-  
+  console.log("Initializing system configuration...");
+
   try {
     // Check if configs already exist
     const existingConfigs = await storage.getSystemConfigs();
-    
+
     for (const config of defaultConfigs) {
-      const existing = existingConfigs.find(c => c.key === config.key);
-      
+      const existing = existingConfigs.find((c) => c.key === config.key);
+
       if (!existing) {
         await storage.createSystemConfig(config);
         console.log(`Created config: ${config.key}`);
@@ -153,15 +155,18 @@ export async function initializeSystemConfig() {
         console.log(`Config already exists: ${config.key}`);
       }
     }
-    
-    console.log('System configuration initialization completed');
+
+    console.log("System configuration initialization completed");
   } catch (error) {
-    console.error('Error initializing system config:', error);
+    console.error("Error initializing system config:", error);
   }
 }
 
 // Helper function to get configuration value with fallback
-export async function getConfigValue(key: string, fallback: string = ''): Promise<string> {
+export async function getConfigValue(
+  key: string,
+  fallback: string = "",
+): Promise<string> {
   try {
     const config = await storage.getSystemConfig(key);
     return config?.value || fallback;
@@ -172,13 +177,19 @@ export async function getConfigValue(key: string, fallback: string = ''): Promis
 }
 
 // Helper function to get configuration as number
-export async function getConfigNumber(key: string, fallback: number = 0): Promise<number> {
+export async function getConfigNumber(
+  key: string,
+  fallback: number = 0,
+): Promise<number> {
   const value = await getConfigValue(key, fallback.toString());
   return parseInt(value, 10) || fallback;
 }
 
 // Helper function to get configuration as boolean
-export async function getConfigBoolean(key: string, fallback: boolean = false): Promise<boolean> {
+export async function getConfigBoolean(
+  key: string,
+  fallback: boolean = false,
+): Promise<boolean> {
   const value = await getConfigValue(key, fallback.toString());
-  return value.toLowerCase() === 'true';
+  return value.toLowerCase() === "true";
 }

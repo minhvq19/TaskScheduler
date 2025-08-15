@@ -92,7 +92,7 @@ const EventImageWithFallback = ({
 // 4K Display optimized for 3840x2160 resolution (65" TV)
 const SCREENS = [
   { id: "work-schedule", name: "Kế hoạch công tác" },
-  { id: "meeting-schedule", name: "Lịch họp" },
+  { id: "meeting-schedule", name: "Lịch sử dụng phòng họp" },
   { id: "other-events", name: "Sự kiện khác" },
 ];
 
@@ -344,21 +344,21 @@ export default function PublicDisplay4K() {
       );
     }
 
-    // Adjust column widths: smaller for weekend columns, larger for weekday columns
+    // Adjust column widths: smaller for weekend columns, larger for weekday columns, wider leadership column
     const weekdayCount = weekDays.filter((day) => !isWeekend(day)).length;
     const weekendCount = weekDays.filter((day) => isWeekend(day)).length;
 
     const gridTemplate = weekDays
       .map((day) => {
         if (isWeekend(day)) {
-          return "0.8fr"; // Smaller for weekend
+          return "0.6fr"; // Smaller for weekend (reduced from 0.8fr)
         } else {
-          return "1.2fr"; // Larger for weekday
+          return "1.4fr"; // Larger for weekday (increased from 1.2fr)
         }
       })
       .join(" ");
 
-    const fullGridTemplate = `300px ${gridTemplate}`;
+    const fullGridTemplate = `400px ${gridTemplate}`; // Increased from 300px to 400px
 
     return (
       <div
@@ -811,6 +811,7 @@ export default function PublicDisplay4K() {
               height: "100%",
               borderCollapse: "collapse",
               tableLayout: "fixed",
+              border: "3px solid rgb(194 65 12)",
             }}
           >
             <colgroup>
@@ -822,8 +823,8 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "calc((100% - 420px) * 0.1)"
-                        : "calc((100% - 420px) * 0.18)",
+                        ? "calc((100% - 420px) * 0.08)" // Reduced from 0.1 to 0.08
+                        : "calc((100% - 420px) * 0.21)", // Increased from 0.18 to 0.21
                     }}
                   />
                 );
@@ -883,7 +884,7 @@ export default function PublicDisplay4K() {
                 ) => (
                   <tr
                     key={room.id}
-                    className="border-b-2 border-gray-200"
+                    className="border-b-3 border-orange-600"
                     style={{
                       height: `calc((100vh - 320px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
@@ -896,7 +897,7 @@ export default function PublicDisplay4K() {
                       style={{
                         backgroundColor: "#f5f0dc",
                         padding: "16px",
-                        borderRight: "2px solid rgb(209 213 219)",
+                        borderRight: "3px solid rgb(194 65 12)",
                         verticalAlign: "middle",
                         height: "100%",
                         overflow: "hidden",
@@ -935,7 +936,7 @@ export default function PublicDisplay4K() {
                             padding: "12px",
                             borderRight: isLastColumn
                               ? "none"
-                              : "2px solid rgb(209 213 219)",
+                              : "3px solid rgb(194 65 12)",
                             backgroundColor: isWeekend ? "#adacac" : "white",
                             verticalAlign: "top",
                             overflow: "hidden",
