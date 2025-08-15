@@ -2,6 +2,16 @@
 
 This system provides a comprehensive work schedule management solution for BIDV, encompassing staff scheduling, meeting room booking, event management, and organizational data display. It supports both administrative operations and public information dissemination with dual display capabilities: standard resolution (1920x1080) and 4K resolution (3840x2160) optimized for large TV displays. The project aims to streamline scheduling processes within the organization, enhance operational efficiency, and provide clear visibility into daily activities through adaptive layouts.
 
+## Recent Changes (August 2025)
+
+- **Display Timing Configuration**: Replaced single screen rotation interval with separate timing controls for each screen type:
+  - `display.work_schedule_display_time`: Work schedule screen display duration
+  - `display.meeting_schedule_display_time`: Meeting schedule screen display duration  
+  - `display.events_display_time`: Other events screen display duration
+- **Past Date Entry**: Removed date/time restrictions in work schedule management to allow past date modifications
+- **Vietnamese Localization**: Converted interface messages and notifications to Vietnamese language
+- **Multi-day Schedule Display**: Enhanced time display logic for multi-day work schedules in both public displays
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

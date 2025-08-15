@@ -24,7 +24,7 @@ const defaultConfigs = [
     value: "15",
     type: "number",
     description:
-      "Thời gian hiển thị màn hình sự kiện (giây)",
+      "Thời gian hiển thị màn hình sự kiện khác (giây)",
     category: "timing",
   },
   {
