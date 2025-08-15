@@ -679,6 +679,15 @@ export default function PublicDisplay4K() {
     });
 
     weekMeetings.forEach((meeting: any) => {
+      // Debug log để kiểm tra từng meeting
+      console.log("Processing meeting:", {
+        id: meeting.id,
+        content: meeting.meetingContent,
+        roomId: meeting.roomId,
+        startDateTime: meeting.startDateTime,
+        endDateTime: meeting.endDateTime
+      });
+
       // Use UTC date for meeting grouping - exact same as standard
       const utcStartTime = new Date(meeting.startDateTime);
       const utcEndTime = new Date(meeting.endDateTime);
@@ -709,6 +718,14 @@ export default function PublicDisplay4K() {
         const isWithinWeek = weekDays.some(
           (day) => format(day, "yyyy-MM-dd") === dateKey,
         );
+
+        console.log("Meeting room assignment:", {
+          meetingId: meeting.id,
+          roomId: meeting.roomId,
+          dateKey,
+          isWithinWeek,
+          hasRoomInMap: !!meetingsByRoomAndDate[meeting.roomId]
+        });
 
         if (isWithinWeek && meetingsByRoomAndDate[meeting.roomId]) {
           meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);

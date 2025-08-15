@@ -489,12 +489,22 @@ export class DatabaseStorage implements IStorage {
   // Meeting schedules operations
   async getMeetingSchedules(startDate?: Date, endDate?: Date, roomId?: string): Promise<MeetingSchedule[]> {
     const conditions = [];
-    if (startDate) {
-      conditions.push(gte(meetingSchedules.startDateTime, startDate));
+    
+    // Fix date range logic: find meetings that overlap with the given period
+    // A meeting overlaps if: meeting.start <= period.end AND meeting.end >= period.start
+    if (startDate && endDate) {
+      conditions.push(
+        and(
+          lte(meetingSchedules.startDateTime, endDate),   // Meeting starts before or during period
+          gte(meetingSchedules.endDateTime, startDate)    // Meeting ends after or during period
+        )
+      );
+    } else if (startDate) {
+      conditions.push(gte(meetingSchedules.endDateTime, startDate));  // Meeting ends after start
+    } else if (endDate) {
+      conditions.push(lte(meetingSchedules.startDateTime, endDate));   // Meeting starts before end
     }
-    if (endDate) {
-      conditions.push(lte(meetingSchedules.endDateTime, endDate));
-    }
+    
     if (roomId) {
       conditions.push(eq(meetingSchedules.roomId, roomId));
     }
