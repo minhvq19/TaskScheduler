@@ -521,11 +521,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/other-events/:id', requireAuth, upload.array('images', 4), async (req, res) => {
     try {
       const { id } = req.params;
-      let imageUrl = req.body.imageUrl; // Keep existing image if no new file uploaded
+      
+      // Lấy thông tin sự kiện hiện tại để có ảnh cũ
+      const existingEvent = await storage.getOtherEvent(id);
+      const oldImageUrls = existingEvent?.imageUrls || (existingEvent?.imageUrl ? [existingEvent.imageUrl] : []);
+      
+      let imageUrl = req.body.imageUrl; // Giữ ảnh hiện có nếu không tải ảnh mới
       let imageUrls = req.body.imageUrls ? JSON.parse(req.body.imageUrls) : [];
       
+      // Xóa ảnh cũ không còn được sử dụng
+      if (oldImageUrls.length > 0) {
+        const imagesToDelete = oldImageUrls.filter((oldUrl: string) => !imageUrls.includes(oldUrl));
+        imagesToDelete.forEach((urlToDelete: string) => {
+          if (urlToDelete && urlToDelete.startsWith('/uploads/')) {
+            const filename = urlToDelete.replace('/uploads/', '');
+            const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+            const backupPath = path.join(process.cwd(), 'uploads', filename);
+            
+            // Xóa file từ cả hai vị trí
+            if (fs.existsSync(publicPath)) {
+              fs.unlinkSync(publicPath);
+            }
+            if (fs.existsSync(backupPath)) {
+              fs.unlinkSync(backupPath);
+            }
+          }
+        });
+      }
+      
       if (req.files && Array.isArray(req.files)) {
-        // Process new files
+        // Xử lý các file mới
         const newImageUrls: string[] = [];
         for (const file of req.files) {
           const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
@@ -551,10 +576,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           newImageUrls.push(fileUrl);
         }
         
-        // Add new images to existing array (up to 4 total)
+        // Thêm ảnh mới vào mảng hiện có (tối đa 4 ảnh)
         imageUrls = [...imageUrls, ...newImageUrls].slice(0, 4);
         
-        // Set first image as primary imageUrl for backward compatibility
+        // Đặt ảnh đầu tiên làm imageUrl chính để tương thích ngược
         if (imageUrls.length > 0) {
           imageUrl = imageUrls[0];
         }

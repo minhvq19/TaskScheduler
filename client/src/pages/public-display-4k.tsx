@@ -5,7 +5,7 @@ import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
 
-// Event Image with fallback component for error handling
+// Component ảnh sự kiện với xử lý lỗi dự phòng
 const EventImageWithFallback = ({
   src,
   alt,
@@ -33,13 +33,13 @@ const EventImageWithFallback = ({
     console.error("Current event data:", event);
 
     if (attempts < maxAttempts) {
-      // Retry loading the image with a delay
+      // Thử tải lại ảnh với độ trễ
       setTimeout(
         () => {
           setAttempts((prev) => prev + 1);
         },
         1000 * (attempts + 1),
-      ); // Increasing delay
+      ); // Tăng dần thời gian trễ
     } else {
       setHasError(true);
     }
@@ -68,7 +68,7 @@ const EventImageWithFallback = ({
 
   return (
     <img
-      key={attempts} // Force re-render on retry
+      key={attempts} // Buộc render lại khi thử lại
       src={`${imageUrl}?v=${Date.now()}&retry=${attempts}`}
       alt={alt}
       className={`object-contain rounded-lg shadow-lg ${additionalClassName}`}
@@ -470,7 +470,9 @@ export default function PublicDisplay4K() {
                                   key={schedule.id}
                                   className="text-lg p-2 rounded font-medium"
                                   style={{
-                                    backgroundColor: getWorkScheduleColor(schedule.workType),
+                                    backgroundColor: getWorkScheduleColor(
+                                      schedule.workType,
+                                    ),
                                     fontSize: "30pt",
                                     lineHeight: "1.4",
                                     opacity: 1,
@@ -480,7 +482,7 @@ export default function PublicDisplay4K() {
                                     wordWrap: "break-word",
                                   }}
                                 >
-                                  {(
+                                  {
                                     <>
                                       {/* Main content with time or full day */}
                                       <div
@@ -489,7 +491,9 @@ export default function PublicDisplay4K() {
                                           fontFamily: "Roboto, sans-serif",
                                           fontWeight: "700",
                                           fontSize: "30pt",
-                                          color: isWorkAtBranch ? "#260705" : "#ffffff",
+                                          color: isWorkAtBranch
+                                            ? "#260705"
+                                            : "#ffffff",
                                         }}
                                       >
                                         {schedule.workType === "Khác" &&
@@ -511,14 +515,16 @@ export default function PublicDisplay4K() {
                                             style={{
                                               fontFamily: "Roboto, sans-serif",
                                               fontSize: "30pt",
-                                              color: isWorkAtBranch ? "#260705" : "#ffffff",
+                                              color: isWorkAtBranch
+                                                ? "#260705"
+                                                : "#ffffff",
                                             }}
                                           >
                                             {schedule.customContent}
                                           </div>
                                         )}
                                     </>
-                                  )}
+                                  }
                                 </div>
                               );
                             })}
@@ -982,7 +988,7 @@ export default function PublicDisplay4K() {
                                 >
                                   <div
                                     style={{
-                                      fontSize: "32pt", // Adjusted for 4K
+                                      fontSize: "26pt", // Adjusted for 4K
                                       fontWeight: "500",
                                       lineHeight: "1.3",
                                       marginBottom: "6px",
@@ -992,7 +998,7 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#9f224e",
                                         fontWeight: "700",
-                                        fontSize: "32pt",
+                                        fontSize: "26pt",
                                         marginBottom: "4px",
                                       }}
                                     >
@@ -1002,7 +1008,7 @@ export default function PublicDisplay4K() {
                                       style={{
                                         color: "#006b68",
                                         fontWeight: "500",
-                                        fontSize: "32pt",
+                                        fontSize: "26pt",
                                         lineHeight: "1.1",
                                         wordWrap: "break-word",
                                         whiteSpace: "normal",
@@ -1052,7 +1058,7 @@ export default function PublicDisplay4K() {
 
     switch (images.length) {
       case 1:
-        // Single image - full size
+        // Một ảnh - kích thước đầy đủ
         return (
           <div className="w-full h-full flex items-center justify-center p-6">
             {renderImage(images[0], 0, "max-w-full max-h-full")}
@@ -1060,7 +1066,7 @@ export default function PublicDisplay4K() {
         );
 
       case 2:
-        // Two images - side by side
+        // Hai ảnh - cạnh nhau
         return (
           <div className="w-full h-full flex gap-4 p-6">
             <div className="flex-1 h-full">{renderImage(images[0], 0)}</div>
@@ -1069,7 +1075,7 @@ export default function PublicDisplay4K() {
         );
 
       case 3:
-        // Three images - 2 top, 1 center bottom
+        // Ba ảnh - 2 trên, 1 giữa dưới
         return (
           <div className="w-full h-full flex flex-col gap-4 p-6">
             <div className="flex gap-4 h-1/2">
@@ -1083,7 +1089,7 @@ export default function PublicDisplay4K() {
         );
 
       case 4:
-        // Four images - 2x2 grid
+        // Bốn ảnh - lưới 2x2
         return (
           <div className="w-full h-full flex flex-col gap-4 p-6">
             <div className="flex gap-4 h-1/2">
@@ -1102,9 +1108,9 @@ export default function PublicDisplay4K() {
     }
   };
 
-  // Other Events Display for 4K - with flexible image layouts
+  // Hiển thị Sự kiện Khác cho 4K - với bố cục ảnh linh hoạt
   const renderOtherEventsDisplay4K = () => {
-    // Filter to show ongoing events OR events starting within the next 30 days (same as standard)
+    // Lọc để hiển thị các sự kiện đang diễn ra HOẶC sự kiện bắt đầu trong vòng 30 ngày tới (giống như tiêu chuẩn)
     const now = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(now.getDate() + 30);
@@ -1123,10 +1129,10 @@ export default function PublicDisplay4K() {
         return startA.getTime() - startB.getTime();
       });
 
-    // Show only the current event based on currentEventIndex (same as standard)
+    // Chỉ hiển thị sự kiện hiện tại dựa trên currentEventIndex (giống như tiêu chuẩn)
     const currentEvent = relevantEvents[currentEventIndex];
 
-    // Debug the event display timing
+    // Debug thời gian hiển thị sự kiện
     console.log("4K Display - Other Events Info:", {
       relevantEventsCount: relevantEvents.length,
       currentEventIndex,
@@ -1149,13 +1155,13 @@ export default function PublicDisplay4K() {
       >
         {currentEvent ? (
           <div className="h-full flex flex-col justify-center">
-            {/* Flexible image display based on number of images */}
+            {/* Hiển thị ảnh linh hoạt dựa trên số lượng ảnh */}
             <div
               className="text-center h-full flex items-center justify-center"
               style={{ fontFamily: "Roboto, sans-serif" }}
             >
               {(() => {
-                // Get all available images (imageUrls array or fallback to single imageUrl)
+                // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
                 const images =
                   currentEvent.imageUrls && currentEvent.imageUrls.length > 0
                     ? currentEvent.imageUrls.filter(Boolean)

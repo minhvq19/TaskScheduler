@@ -30,7 +30,7 @@ import { vi } from "date-fns/locale";
 import { insertOtherEventSchema, type OtherEvent } from "@shared/schema";
 import { z } from "zod";
 
-// Form schema with proper validation
+// Schema form với xác thực đầy đủ
 const formSchema = insertOtherEventSchema.extend({
   startDateTime: z.string().min(1, "Thời gian bắt đầu là bắt buộc"),
   endDateTime: z.string().min(1, "Thời gian kết thúc là bắt buộc"),
@@ -41,13 +41,13 @@ const formSchema = insertOtherEventSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-// Helper function to parse datetime for status checking
+// Hàm hỗ trợ phân tích datetime để kiểm tra trạng thái
 const parseLocalDateTime = (dateTime: string | Date): Date => {
   if (dateTime instanceof Date) {
     return dateTime;
   }
   
-  // For status checking, we need actual Date objects
+  // Để kiểm tra trạng thái, chúng ta cần đối tượng Date thực tế
   const dateTimeString = dateTime.toString();
   const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
   const localDate = new Date(cleanString);
@@ -213,7 +213,7 @@ export default function EventManagement() {
     setSelectedFiles([]);
     setPreviewUrls([]);
     
-    // Set existing images from both imageUrls array and single imageUrl for backward compatibility
+    // Thiết lập ảnh hiện có từ cả mảng imageUrls và imageUrl đơn lẻ để tương thích ngược
     const images = event.imageUrls && event.imageUrls.length > 0 
       ? event.imageUrls.filter(Boolean) 
       : event.imageUrl ? [event.imageUrl] : [];
@@ -240,7 +240,7 @@ export default function EventManagement() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Check if adding these files would exceed the limit
+    // Kiểm tra nếu thêm các file này sẽ vượt quá giới hạn
     const totalImages = existingImages.length + selectedFiles.length + files.length;
     if (totalImages > 4) {
       toast({
@@ -255,7 +255,7 @@ export default function EventManagement() {
     const newPreviewUrls: string[] = [];
     
     for (const file of files) {
-      // Validate file type
+      // Xác thực loại file
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
         toast({
@@ -266,7 +266,7 @@ export default function EventManagement() {
         continue;
       }
 
-      // Validate file size (10MB)
+      // Xác thực kích thước file (10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB in bytes
       if (file.size > maxSize) {
         toast({
@@ -279,7 +279,7 @@ export default function EventManagement() {
 
       validFiles.push(file);
       
-      // Create preview URL
+      // Tạo URL xem trước
       const reader = new FileReader();
       reader.onload = (e) => {
         newPreviewUrls.push(e.target?.result as string);
@@ -336,7 +336,7 @@ export default function EventManagement() {
     }
   };
 
-  // Filter and sort events based on search and sort criteria
+  // Lọc và sắp xếp sự kiện dựa trên tiêu chí tìm kiếm và sắp xếp
   const filteredAndSortedEvents = events
     .filter((event) => {
       const matchesSearch = event.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -354,10 +354,10 @@ export default function EventManagement() {
         case "endTime-desc":
           return new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime();
         case "createdAt-asc":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
         case "createdAt-desc":
         default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
       }
     });
 
