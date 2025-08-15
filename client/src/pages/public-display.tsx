@@ -67,29 +67,42 @@ export default function PublicDisplay() {
     };
   }, [systemConfig]);
 
-  // Lấy thời gian hiển thị màn hình từ cấu hình, mặc định 15 giây
-  const screenDurationMs = React.useMemo(() => {
-    const refreshConfig = systemConfig.find(config => config.key === 'display.refresh_interval');
-    return refreshConfig ? parseInt(refreshConfig.value) * 1000 : 15000;
+  // Lấy thời gian hiển thị cho từng loại màn hình từ cấu hình
+  const screenDurations = React.useMemo(() => {
+    const workScheduleConfig = systemConfig.find(config => config.key === 'display.work_schedule_display_time');
+    const meetingScheduleConfig = systemConfig.find(config => config.key === 'display.meeting_schedule_display_time');
+    const eventsConfig = systemConfig.find(config => config.key === 'display.events_display_time');
+    
+    return {
+      'work-schedule': workScheduleConfig ? parseInt(workScheduleConfig.value) * 1000 : 15000,
+      'meeting-schedule': meetingScheduleConfig ? parseInt(meetingScheduleConfig.value) * 1000 : 15000,
+      'other-events': eventsConfig ? parseInt(eventsConfig.value) * 1000 : 15000,
+    };
   }, [systemConfig]);
+
+  // Lấy thời gian hiển thị cho màn hình hiện tại
+  const getCurrentScreenDuration = () => {
+    const currentScreen = SCREENS[currentScreenIndex];
+    return screenDurations[currentScreen.id as keyof typeof screenDurations] || 15000;
+  };
 
   // Các hàm điều hướng thủ công
   const goToPreviousScreen = () => {
     setCurrentScreenIndex(prev => (prev - 1 + SCREENS.length) % SCREENS.length);
     setCurrentEventIndex(0);
-    setTimeRemaining(screenDurationMs / 1000);
+    setTimeRemaining(getCurrentScreenDuration() / 1000);
   };
 
   const goToNextScreen = () => {
     setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
     setCurrentEventIndex(0);
-    setTimeRemaining(screenDurationMs / 1000);
+    setTimeRemaining(getCurrentScreenDuration() / 1000);
   };
 
   const toggleAutoRotation = () => {
     setIsPaused(prev => !prev);
     if (!isPaused) {
-      setTimeRemaining(screenDurationMs / 1000); // Đặt lại bộ đếm thời gian khi tạm dừng
+      setTimeRemaining(getCurrentScreenDuration() / 1000); // Đặt lại bộ đếm thời gian khi tạm dừng
     }
   };
 
@@ -145,14 +158,14 @@ export default function PublicDisplay() {
             setCurrentEventIndex(0);
           }
           
-          return screenDurationMs / 1000;
+          return getCurrentScreenDuration() / 1000;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentScreenIndex, currentEventIndex, isPaused, screenDurationMs]);
+  }, [currentScreenIndex, currentEventIndex, isPaused, screenDurations]);
 
   // Lấy 7 ngày bắt đầu từ hôm nay
   const today = new Date();

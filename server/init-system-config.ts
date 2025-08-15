@@ -2,13 +2,29 @@ import { storage } from "./storage";
 
 // Default system configurations
 const defaultConfigs = [
-  // Display timing configurations
+  // Display timing configurations for each screen type
   {
-    key: "display.screen_rotation_interval",
+    key: "display.work_schedule_display_time",
     value: "15",
     type: "number",
     description:
-      "Thời gian hiển thị từng màn hình tại màn hình công cộng (giây)",
+      "Thời gian hiển thị màn hình lịch công tác (giây)",
+    category: "timing",
+  },
+  {
+    key: "display.meeting_schedule_display_time",
+    value: "15",
+    type: "number",
+    description:
+      "Thời gian hiển thị màn hình lịch họp (giây)",
+    category: "timing",
+  },
+  {
+    key: "display.events_display_time",
+    value: "15",
+    type: "number",
+    description:
+      "Thời gian hiển thị màn hình sự kiện (giây)",
     category: "timing",
   },
   {
