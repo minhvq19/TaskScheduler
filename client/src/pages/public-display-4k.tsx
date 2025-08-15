@@ -5,8 +5,6 @@ import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
 
-
-
 // Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
   { id: "work-schedule", name: "Kế hoạch công tác" },
@@ -80,6 +78,12 @@ export default function PublicDisplay4K() {
     }
   };
 
+  // Lấy dữ liệu hiển thị
+  const { data: displayData } = useQuery<any>({
+    queryKey: ["/api/public/display-data"],
+    refetchInterval: 4000,
+  });
+
   // Xoay màn hình và đếm ngược
   useEffect(() => {
     if (isPaused) return;
@@ -87,50 +91,51 @@ export default function PublicDisplay4K() {
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
+          // Chuyển sang màn hình tiếp theo và đặt lại đếm ngược
           const currentScreen = SCREENS[currentScreenIndex];
-
-          // Chuyển màn hình - mỗi màn hình hiển thị toàn bộ thời lượng bất kể nội dung
-          setCurrentScreenIndex((prev) => {
-            const nextScreenIndex = (prev + 1) % SCREENS.length;
-            const nextScreen = SCREENS[nextScreenIndex];
-
-            // Khi chuyển đến màn hình 'other-events', đặt sự kiện tiếp theo trong vòng lặp
-            if (
-              nextScreen.id === "other-events" &&
-              displayData &&
-              displayData.otherEvents
-            ) {
-              const now = new Date();
-              const thirtyDaysFromNow = new Date();
-              thirtyDaysFromNow.setDate(now.getDate() + 30);
-
-              const relevantEvents = displayData.otherEvents
-                .filter((event: any) => {
-                  const start = new Date(event.startDateTime);
-                  const end = new Date(event.endDateTime);
-                  const isOngoing = now >= start && now <= end;
-                  const isUpcoming = start >= now && start <= thirtyDaysFromNow;
-                  return isOngoing || isUpcoming;
-                })
-                .sort((a: any, b: any) => {
-                  const startA = new Date(a.startDateTime);
-                  const startB = new Date(b.startDateTime);
-                  return startA.getTime() - startB.getTime();
-                });
-
-              if (relevantEvents.length > 0) {
-                const nextEventIndex =
-                  (currentEventIndex + 1) % relevantEvents.length;
-                setCurrentEventIndex(nextEventIndex);
-              } else {
+          
+          if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
+            // Đối với các sự kiện khác, xoay qua các sự kiện liên quan (đang diễn ra + sắp tới trong vòng 30 ngày)
+            const now = new Date();
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(now.getDate() + 30);
+            
+            const relevantEvents = displayData.otherEvents
+              .filter((event: any) => {
+                const start = new Date(event.startDateTime);
+                const end = new Date(event.endDateTime);
+                const isOngoing = now >= start && now <= end;
+                const isUpcoming = start >= now && start <= thirtyDaysFromNow;
+                return isOngoing || isUpcoming;
+              })
+              .sort((a: any, b: any) => {
+                const startA = new Date(a.startDateTime);
+                const startB = new Date(b.startDateTime);
+                return startA.getTime() - startB.getTime();
+              });
+            
+            if (relevantEvents.length > 1) {
+              // Nếu có nhiều sự kiện, xoay qua chúng
+              const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
+              if (nextEventIndex === 0) {
+                // Hoàn thành tất cả sự kiện, chuyển sang màn hình tiếp theo
+                setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
                 setCurrentEventIndex(0);
+              } else {
+                // Hiển thị sự kiện tiếp theo
+                setCurrentEventIndex(nextEventIndex);
               }
             } else {
+              // Một hoặc không có sự kiện, chuyển sang màn hình tiếp theo
+              setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
               setCurrentEventIndex(0);
             }
-
-            return nextScreenIndex;
-          });
+          } else {
+            // Xoay màn hình thông thường
+            setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+            setCurrentEventIndex(0);
+          }
+          
           return screenDurationMs / 1000;
         }
         return prev - 1;
@@ -138,13 +143,7 @@ export default function PublicDisplay4K() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isPaused, screenDurationMs, currentScreenIndex, currentEventIndex]);
-
-  // Lấy dữ liệu hiển thị
-  const { data: displayData } = useQuery<any>({
-    queryKey: ["/api/public/display-data"],
-    refetchInterval: 4000,
-  });
+  }, [currentScreenIndex, currentEventIndex, isPaused, screenDurationMs, displayData]);
 
   // Lấy dữ liệu nhân viên
   const { data: staff = [] } = useQuery<any[]>({
@@ -269,9 +268,9 @@ export default function PublicDisplay4K() {
     const gridTemplate = weekDays
       .map((day) => {
         if (isWeekend(day)) {
-          return "0.6fr"; // Nhỏ hơn cho cuối tuần (giảm từ 0.8fr)
+          return "0.4fr"; // Nhỏ hơn cho cuối tuần (giảm từ 0.8fr)
         } else {
-          return "1.4fr"; // Lớn hơn cho ngày thường (tăng từ 1.2fr)
+          return "1.6fr"; // Lớn hơn cho ngày thường (tăng từ 1.2fr)
         }
       })
       .join(" ");
@@ -391,11 +390,11 @@ export default function PublicDisplay4K() {
                                     backgroundColor: getWorkScheduleColor(
                                       schedule.workType,
                                     ),
-                                    fontSize: "30pt",
-                                    lineHeight: "1.4",
+                                    fontSize: "26pt",
+                                    lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "Roboto, sans-serif",
-                                    fontWeight: "600",
+                                    fontFamily: "Arial",
+                                    fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
                                   }}
@@ -406,9 +405,9 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "Roboto, sans-serif",
-                                          fontWeight: "700",
-                                          fontSize: "30pt",
+                                          fontFamily: "Arial",
+                                          fontWeight: "400",
+                                          fontSize: "28pt",
                                           color: isWorkAtBranch
                                             ? "#260705"
                                             : "#ffffff",
@@ -432,7 +431,7 @@ export default function PublicDisplay4K() {
                                             className="opacity-90"
                                             style={{
                                               fontFamily: "Roboto, sans-serif",
-                                              fontSize: "30pt",
+                                              fontSize: "28pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
                                                 : "#ffffff",
@@ -612,7 +611,7 @@ export default function PublicDisplay4K() {
       hasDisplayData: !!displayData,
       meetingSchedulesCount: displayData?.meetingSchedules?.length || 0,
       sampleMeeting: displayData?.meetingSchedules?.[0] || null,
-      meetingRoomsCount: meetingRooms?.length || 0
+      meetingRoomsCount: meetingRooms?.length || 0,
     });
 
     if (!displayData?.meetingSchedules) {
@@ -685,7 +684,7 @@ export default function PublicDisplay4K() {
         content: meeting.meetingContent,
         roomId: meeting.roomId,
         startDateTime: meeting.startDateTime,
-        endDateTime: meeting.endDateTime
+        endDateTime: meeting.endDateTime,
       });
 
       // Sử dụng ngày UTC để nhóm cuộc họp - hoàn toàn giống như tiêu chuẩn
@@ -724,7 +723,7 @@ export default function PublicDisplay4K() {
           roomId: meeting.roomId,
           dateKey,
           isWithinWeek,
-          hasRoomInMap: !!meetingsByRoomAndDate[meeting.roomId]
+          hasRoomInMap: !!meetingsByRoomAndDate[meeting.roomId],
         });
 
         if (isWithinWeek && meetingsByRoomAndDate[meeting.roomId]) {
@@ -973,7 +972,6 @@ export default function PublicDisplay4K() {
             </tbody>
           </table>
         </div>
-
       </div>
     );
   };
@@ -985,14 +983,18 @@ export default function PublicDisplay4K() {
       return (
         <div className="w-full h-full flex items-center justify-center p-8">
           <img
-            src={images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0]}
+            src={
+              images[0].startsWith("/")
+                ? `${window.location.origin}${images[0]}`
+                : images[0]
+            }
             alt="Ảnh sự kiện"
             style={{
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
               borderRadius: "12px",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
             }}
           />
         </div>
@@ -1006,14 +1008,16 @@ export default function PublicDisplay4K() {
           {images.map((src, index) => (
             <div key={index} className="flex-1 h-full">
               <img
-                src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                src={
+                  src.startsWith("/") ? `${window.location.origin}${src}` : src
+                }
                 alt={`Ảnh sự kiện ${index + 1}`}
                 style={{
                   width: "100%",
                   height: "100%",
                   objectFit: "contain",
                   borderRadius: "12px",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                 }}
               />
             </div>
@@ -1030,14 +1034,18 @@ export default function PublicDisplay4K() {
             {images.slice(0, 2).map((src, index) => (
               <div key={index} className="flex-1 h-full">
                 <img
-                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  src={
+                    src.startsWith("/")
+                      ? `${window.location.origin}${src}`
+                      : src
+                  }
                   alt={`Ảnh sự kiện ${index + 1}`}
                   style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "contain",
                     borderRadius: "12px",
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                   }}
                 />
               </div>
@@ -1046,14 +1054,18 @@ export default function PublicDisplay4K() {
           <div className="h-1/2 flex justify-center">
             <div className="w-1/2 h-full">
               <img
-                src={images[2].startsWith("/") ? `${window.location.origin}${images[2]}` : images[2]}
+                src={
+                  images[2].startsWith("/")
+                    ? `${window.location.origin}${images[2]}`
+                    : images[2]
+                }
                 alt="Ảnh sự kiện 3"
                 style={{
                   width: "100%",
                   height: "100%",
                   objectFit: "contain",
                   borderRadius: "12px",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                 }}
               />
             </div>
@@ -1070,14 +1082,18 @@ export default function PublicDisplay4K() {
             {images.slice(0, 2).map((src, index) => (
               <div key={index} className="flex-1 h-full">
                 <img
-                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  src={
+                    src.startsWith("/")
+                      ? `${window.location.origin}${src}`
+                      : src
+                  }
                   alt={`Ảnh sự kiện ${index + 1}`}
                   style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "contain",
                     borderRadius: "12px",
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                   }}
                 />
               </div>
@@ -1087,14 +1103,18 @@ export default function PublicDisplay4K() {
             {images.slice(2, 4).map((src, index) => (
               <div key={index + 2} className="flex-1 h-full">
                 <img
-                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  src={
+                    src.startsWith("/")
+                      ? `${window.location.origin}${src}`
+                      : src
+                  }
                   alt={`Ảnh sự kiện ${index + 3}`}
                   style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "contain",
                     borderRadius: "12px",
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                   }}
                 />
               </div>
@@ -1177,42 +1197,44 @@ export default function PublicDisplay4K() {
   };
 
   // Component hiển thị sự kiện riêng biệt để tránh re-render
-  const EventDisplay4K = React.memo(({ currentEvent }: { currentEvent: any }) => {
-    // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
-    const images = React.useMemo(() => {
-      return currentEvent.imageUrls && currentEvent.imageUrls.length > 0
-        ? currentEvent.imageUrls.filter(Boolean)
-        : currentEvent.imageUrl
-          ? [currentEvent.imageUrl]
-          : [];
-    }, [currentEvent.imageUrls, currentEvent.imageUrl]);
+  const EventDisplay4K = React.memo(
+    ({ currentEvent }: { currentEvent: any }) => {
+      // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
+      const images = React.useMemo(() => {
+        return currentEvent.imageUrls && currentEvent.imageUrls.length > 0
+          ? currentEvent.imageUrls.filter(Boolean)
+          : currentEvent.imageUrl
+            ? [currentEvent.imageUrl]
+            : [];
+      }, [currentEvent.imageUrls, currentEvent.imageUrl]);
 
-    if (images.length > 0) {
-      return <SimpleImageLayout4K images={images} />;
-    } else {
-      return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-12">
-          <div className="text-center" style={{ color: "#f5f0dc" }}>
-            <h2
-              className="text-6xl font-bold mb-8"
-              style={{
-                fontFamily: "Roboto, sans-serif",
-                fontWeight: "700",
-              }}
-            >
-              {currentEvent.shortName}
-            </h2>
-            <p
-              className="text-4xl leading-relaxed"
-              style={{ fontFamily: "Roboto, sans-serif" }}
-            >
-              {currentEvent.content || "Không có nội dung"}
-            </p>
+      if (images.length > 0) {
+        return <SimpleImageLayout4K images={images} />;
+      } else {
+        return (
+          <div className="w-full h-full flex flex-col items-center justify-center p-12">
+            <div className="text-center" style={{ color: "#f5f0dc" }}>
+              <h2
+                className="text-6xl font-bold mb-8"
+                style={{
+                  fontFamily: "Roboto, sans-serif",
+                  fontWeight: "700",
+                }}
+              >
+                {currentEvent.shortName}
+              </h2>
+              <p
+                className="text-4xl leading-relaxed"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                {currentEvent.content || "Không có nội dung"}
+              </p>
+            </div>
           </div>
-        </div>
-      );
-    }
-  });
+        );
+      }
+    },
+  );
 
   const currentScreen = SCREENS[currentScreenIndex];
 
@@ -1336,16 +1358,25 @@ export default function PublicDisplay4K() {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1" style={{ height: currentScreen.id === "meeting-schedule" ? "calc(100vh - 210px)" : "calc(100vh - 200px)", minHeight: 0 }}>
+      <div
+        className="flex-1"
+        style={{
+          height:
+            currentScreen.id === "meeting-schedule"
+              ? "calc(100vh - 210px)"
+              : "calc(100vh - 200px)",
+          minHeight: 0,
+        }}
+      >
         {currentScreen.id === "work-schedule" && renderWorkScheduleTable4K()}
         {currentScreen.id === "meeting-schedule" &&
           renderMeetingScheduleTable4K()}
         {currentScreen.id === "other-events" && renderOtherEventsDisplay4K()}
       </div>
-      
+
       {/* Footer chỉ hiển thị cho meeting schedule - màu và chiều cao rõ ràng hơn */}
       {currentScreen.id === "meeting-schedule" && (
-        <div 
+        <div
           style={{
             height: "10px",
             backgroundColor: "#F5F0DC",
@@ -1354,7 +1385,7 @@ export default function PublicDisplay4K() {
             minHeight: "10px",
             borderTop: "1px solid #ccc",
             position: "relative",
-            zIndex: 10
+            zIndex: 10,
           }}
         />
       )}
