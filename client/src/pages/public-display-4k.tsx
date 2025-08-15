@@ -5,91 +5,7 @@ import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
 
-// Component ảnh sự kiện được tối ưu với React.memo để tránh re-render
-const EventImageWithFallback = React.memo(({
-  src,
-  alt,
-  event,
-  additionalClassName = "",
-  style,
-}: {
-  src: string;
-  alt: string;
-  event: any;
-  additionalClassName?: string;
-  style?: React.CSSProperties;
-}) => {
-  const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Sử dụng useMemo để tránh tính toán lại URL
-  const imageUrl = React.useMemo(() => {
-    return src.startsWith("/") ? `${window.location.origin}${src}` : src;
-  }, [src]);
-
-  // Reset state khi src thay đổi
-  React.useEffect(() => {
-    setHasError(false);
-    setIsLoaded(false);
-  }, [src]);
-
-  const handleError = React.useCallback(() => {
-    console.error("Không thể tải ảnh:", src);
-    setHasError(true);
-  }, [src]);
-
-  const handleLoad = React.useCallback(() => {
-    setIsLoaded(true);
-    setHasError(false);
-  }, []);
-
-  if (hasError) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gray-100 rounded-lg">
-        <div className="text-center text-teal-800">
-          <div
-            className="text-red-600 mb-6 text-3xl"
-            style={{ fontFamily: "Roboto, sans-serif" }}
-          >
-            🖼️ Không thể tải ảnh
-          </div>
-          <p
-            className="text-3xl leading-relaxed"
-            style={{ fontFamily: "Roboto, sans-serif" }}
-          >
-            {event.content || event.shortName}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full h-full relative bg-gray-50 rounded-lg overflow-hidden">
-      <img
-        src={imageUrl}
-        alt={alt}
-        className={`w-full h-full object-contain rounded-lg shadow-lg ${additionalClassName}`}
-        style={{
-          objectFit: "contain",
-          transition: "opacity 0.3s ease-in-out",
-          opacity: isLoaded ? 1 : 0,
-          ...style,
-        }}
-        onError={handleError}
-        onLoad={handleLoad}
-        loading="lazy"
-      />
-      {!isLoaded && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-gray-500 text-2xl" style={{ fontFamily: "Roboto, sans-serif" }}>
-            Đang tải ảnh...
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
 
 // Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
@@ -1036,80 +952,134 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Component Bố cục Ảnh Linh hoạt cho 4K được tối ưu
-  const FlexibleImageLayout4K = React.memo(({
-    images,
-    eventName,
-  }: {
-    images: string[];
-    eventName: string;
-  }) => {
-    const renderImage = (
-      src: string,
-      index: number,
-      className: string = "",
-    ) => (
-      <div key={`${eventName}-${index}`} className="w-full h-full">
-        <EventImageWithFallback
-          src={src}
-          alt={`${eventName} - Ảnh ${index + 1}`}
-          event={{ shortName: eventName, content: eventName }}
-          additionalClassName={className}
-        />
-      </div>
-    );
-
-    switch (images.length) {
-      case 1:
-        // Một ảnh - kích thước đầy đủ
-        return (
-          <div className="w-full h-full flex items-center justify-center p-6">
-            {renderImage(images[0], 0, "max-w-full max-h-full")}
-          </div>
-        );
-
-      case 2:
-        // Hai ảnh - cạnh nhau
-        return (
-          <div className="w-full h-full flex gap-4 p-6">
-            <div className="flex-1 h-full">{renderImage(images[0], 0)}</div>
-            <div className="flex-1 h-full">{renderImage(images[1], 1)}</div>
-          </div>
-        );
-
-      case 3:
-        // Ba ảnh - 2 trên, 1 giữa dưới
-        return (
-          <div className="w-full h-full flex flex-col gap-4 p-6">
-            <div className="flex gap-4 h-1/2">
-              <div className="flex-1 h-full">{renderImage(images[0], 0)}</div>
-              <div className="flex-1 h-full">{renderImage(images[1], 1)}</div>
-            </div>
-            <div className="h-1/2 flex justify-center">
-              <div className="w-1/2 h-full">{renderImage(images[2], 2)}</div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        // Bốn ảnh - lưới 2x2
-        return (
-          <div className="w-full h-full flex flex-col gap-4 p-6">
-            <div className="flex gap-4 h-1/2">
-              <div className="flex-1 h-full">{renderImage(images[0], 0)}</div>
-              <div className="flex-1 h-full">{renderImage(images[1], 1)}</div>
-            </div>
-            <div className="flex gap-4 h-1/2">
-              <div className="flex-1 h-full">{renderImage(images[2], 2)}</div>
-              <div className="flex-1 h-full">{renderImage(images[3], 3)}</div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
+  // Component đơn giản để hiển thị ảnh sự kiện
+  const SimpleImageLayout4K = ({ images }: { images: string[] }) => {
+    if (images.length === 1) {
+      // Một ảnh - toàn màn hình
+      return (
+        <div className="w-full h-full flex items-center justify-center p-8">
+          <img
+            src={images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0]}
+            alt="Ảnh sự kiện"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+              borderRadius: "12px",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+            }}
+          />
+        </div>
+      );
     }
-  });
+
+    if (images.length === 2) {
+      // Hai ảnh - cạnh nhau
+      return (
+        <div className="w-full h-full flex gap-8 p-8">
+          {images.map((src, index) => (
+            <div key={index} className="flex-1 h-full">
+              <img
+                src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                alt={`Ảnh sự kiện ${index + 1}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (images.length === 3) {
+      // Ba ảnh - 2 trên, 1 dưới giữa
+      return (
+        <div className="w-full h-full flex flex-col gap-8 p-8">
+          <div className="flex gap-8 h-1/2">
+            {images.slice(0, 2).map((src, index) => (
+              <div key={index} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="h-1/2 flex justify-center">
+            <div className="w-1/2 h-full">
+              <img
+                src={images[2].startsWith("/") ? `${window.location.origin}${images[2]}` : images[2]}
+                alt="Ảnh sự kiện 3"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (images.length === 4) {
+      // Bốn ảnh - lưới 2x2
+      return (
+        <div className="w-full h-full flex flex-col gap-8 p-8">
+          <div className="flex gap-8 h-1/2">
+            {images.slice(0, 2).map((src, index) => (
+              <div key={index} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-8 h-1/2">
+            {images.slice(2, 4).map((src, index) => (
+              <div key={index + 2} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 3}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)"
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   // Hiển thị Sự kiện Khác cho 4K - với bố cục ảnh linh hoạt
   const renderOtherEventsDisplay4K = () => {
@@ -1192,12 +1162,7 @@ export default function PublicDisplay4K() {
     }, [currentEvent.imageUrls, currentEvent.imageUrl]);
 
     if (images.length > 0) {
-      return (
-        <FlexibleImageLayout4K
-          images={images}
-          eventName={currentEvent.shortName}
-        />
-      );
+      return <SimpleImageLayout4K images={images} />;
     } else {
       return (
         <div className="w-full h-full flex flex-col items-center justify-center p-12">
