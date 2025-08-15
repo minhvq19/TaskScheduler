@@ -823,8 +823,8 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "calc((100% - 420px) * 0.06)" // Further reduced from 0.08 to 0.06
-                        : "calc((100% - 420px) * 0.235)", // Further increased from 0.21 to 0.235
+                        ? "calc((100% - 420px) * 0.04)" // Further reduced from 0.06 to 0.04
+                        : "calc((100% - 420px) * 0.24)", // Further increased from 0.235 to 0.24
                     }}
                   />
                 );
