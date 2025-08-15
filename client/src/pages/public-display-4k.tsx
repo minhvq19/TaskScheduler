@@ -358,7 +358,7 @@ export default function PublicDisplay4K() {
       })
       .join(" ");
 
-    const fullGridTemplate = `500px ${gridTemplate}`; // Increased from 400px to 500px for longer titles and names
+    const fullGridTemplate = `500px ${gridTemplate}`; // Cột tên Lãnh đạo rộng 500px để không bị xuống dòng
 
     return (
       <div
@@ -394,7 +394,7 @@ export default function PublicDisplay4K() {
         {/* Body with rows for each staff member */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 350px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 310px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -440,7 +440,7 @@ export default function PublicDisplay4K() {
                       key={dayIndex}
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
-                        backgroundColor: isWeekendDay ? "#adacac" : "white",
+                        backgroundColor: isWeekendDay ? "#adacac" : "#f5f4f0",
                         fontFamily: "Roboto, sans-serif",
                       }}
                     >
@@ -632,7 +632,9 @@ export default function PublicDisplay4K() {
             <div className="flex items-center">
               <div
                 className="w-10 h-10 rounded mr-4"
-                style={{ backgroundColor: getWorkScheduleColor("Đi khách hàng") }}
+                style={{
+                  backgroundColor: getWorkScheduleColor("Đi khách hàng"),
+                }}
               ></div>
               <span
                 className="text-xl"
@@ -945,7 +947,7 @@ export default function PublicDisplay4K() {
                             borderRight: isLastColumn
                               ? "none"
                               : "3px solid rgb(230 205 168)",
-                            backgroundColor: isWeekend ? "#adacac" : "white",
+                            backgroundColor: isWeekend ? "#adacac" : "#f5f4f0",
                             verticalAlign: "top",
                             overflow: "hidden",
                           }}
