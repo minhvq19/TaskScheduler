@@ -720,7 +720,7 @@ export default function PublicDisplay4K() {
         style={{ fontFamily: "Roboto, sans-serif" }}
       >
         {/* Meeting Schedule Table */}
-        <div className="bg-white h-full overflow-hidden" style={{ paddingBottom: "10px" }}>
+        <div className="bg-white overflow-hidden" style={{ height: "calc(100% - 10px)" }}>
           <table
             style={{
               width: "100%",
@@ -953,10 +953,7 @@ export default function PublicDisplay4K() {
           style={{
             height: "10px",
             backgroundColor: "#F5F0DC",
-            width: "100%",
-            position: "absolute",
-            bottom: 0,
-            left: 0
+            width: "100%"
           }}
         />
       </div>
