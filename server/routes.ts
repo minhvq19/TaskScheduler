@@ -130,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
-  // Department routes
+  // Routes phòng ban
   app.get('/api/departments', requireAuth, async (req, res) => {
     try {
       const departments = await storage.getDepartments();
@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Staff routes
+  // Routes nhân viên
   app.get('/api/staff', requireAuth, async (req, res) => {
     try {
       const { departmentId } = req.query;
@@ -449,7 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Other events routes with file upload
+  // Routes sự kiện khác với upload file
   app.get('/api/other-events', async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
@@ -495,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           imageUrls.push(fileUrl);
         }
         
-        // Set first image as primary imageUrl for backward compatibility
+        // Đặt ảnh đầu tiên làm imageUrl chính để tương thích ngược
         if (imageUrls.length > 0) {
           imageUrl = imageUrls[0];
         }

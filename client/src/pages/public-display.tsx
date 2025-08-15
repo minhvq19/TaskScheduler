@@ -482,14 +482,14 @@ export default function PublicDisplay() {
           console.log('===================');
         }
         
-        // Include meeting if it overlaps with current week
-        // Meeting overlaps if: meeting starts before or on week end AND meeting ends after or on week start
+        // Bao gồm cuộc họp nếu nó chồng lấp với tuần hiện tại
+        // Cuộc họp chồng lấp nếu: cuộc họp bắt đầu trước hoặc vào cuối tuần VÀ cuộc họp kết thúc sau hoặc vào đầu tuần
         return meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate;
       });
 
     console.log('Total meetings found:', weekMeetings.length);
 
-    // Group meetings by room and date
+    // Nhóm cuộc họp theo phòng và ngày
     const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
     meetingRooms.forEach(room => {
       meetingsByRoomAndDate[room.id] = {};
@@ -500,11 +500,11 @@ export default function PublicDisplay() {
     });
 
     weekMeetings.forEach((meeting: any) => {
-      // Use UTC date for meeting grouping
+      // Sử dụng ngày UTC để nhóm cuộc họp
       const utcStartTime = new Date(meeting.startDateTime);
       const utcEndTime = new Date(meeting.endDateTime);
       
-      // Get the UTC date by using the UTC components (not local timezone)
+      // Lấy ngày UTC bằng cách sử dụng các thành phần UTC (không phải múi giờ địa phương)
       const startYear = utcStartTime.getUTCFullYear();
       const startMonth = utcStartTime.getUTCMonth();
       const startDay = utcStartTime.getUTCDate();
@@ -515,12 +515,12 @@ export default function PublicDisplay() {
       const endDay = utcEndTime.getUTCDate();
       const meetingEnd = new Date(endYear, endMonth, endDay);
       
-      // Add meeting to all days it spans within the current week
+      // Thêm cuộc họp vào tất cả các ngày mà nó trải dài trong tuần hiện tại
       weekDays.forEach(day => {
         const currentDay = startOfDay(day);
         const dateKey = format(currentDay, 'yyyy-MM-dd');
         
-        // Check if current day falls within meeting duration
+        // Kiểm tra xem ngày hiện tại có nằm trong thời gian cuộc họp không
         if (currentDay >= meetingStart && currentDay <= meetingEnd) {
           if (meetingsByRoomAndDate[meeting.roomId] && meetingsByRoomAndDate[meeting.roomId][dateKey]) {
             meetingsByRoomAndDate[meeting.roomId][dateKey].push(meeting);

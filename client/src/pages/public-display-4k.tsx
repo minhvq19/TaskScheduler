@@ -5,8 +5,8 @@ import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
 
-// Component ảnh sự kiện với xử lý lỗi dự phòng
-const EventImageWithFallback = ({
+// Component ảnh sự kiện được tối ưu với React.memo để tránh re-render
+const EventImageWithFallback = React.memo(({
   src,
   alt,
   event,
@@ -22,19 +22,26 @@ const EventImageWithFallback = ({
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const imageUrl = src.startsWith("/")
-    ? `${window.location.origin}${src}`
-    : src;
+  // Sử dụng useMemo để tránh tính toán lại URL
+  const imageUrl = React.useMemo(() => {
+    return src.startsWith("/") ? `${window.location.origin}${src}` : src;
+  }, [src]);
 
-  const handleError = () => {
+  // Reset state khi src thay đổi
+  React.useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [src]);
+
+  const handleError = React.useCallback(() => {
     console.error("Không thể tải ảnh:", src);
     setHasError(true);
-  };
+  }, [src]);
 
-  const handleLoad = () => {
+  const handleLoad = React.useCallback(() => {
     setIsLoaded(true);
     setHasError(false);
-  };
+  }, []);
 
   if (hasError) {
     return (
@@ -58,32 +65,31 @@ const EventImageWithFallback = ({
   }
 
   return (
-    <div className="w-full h-full relative">
-      {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+    <div className="w-full h-full relative bg-gray-50 rounded-lg overflow-hidden">
+      <img
+        src={imageUrl}
+        alt={alt}
+        className={`w-full h-full object-contain rounded-lg shadow-lg ${additionalClassName}`}
+        style={{
+          objectFit: "contain",
+          transition: "opacity 0.3s ease-in-out",
+          opacity: isLoaded ? 1 : 0,
+          ...style,
+        }}
+        onError={handleError}
+        onLoad={handleLoad}
+        loading="lazy"
+      />
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-gray-500 text-2xl" style={{ fontFamily: "Roboto, sans-serif" }}>
             Đang tải ảnh...
           </div>
         </div>
       )}
-      <img
-        src={imageUrl}
-        alt={alt}
-        className={`object-contain rounded-lg shadow-lg ${additionalClassName} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
-        style={{
-          width: "100%",
-          height: "100%",
-          maxWidth: "100%",
-          maxHeight: "100%",
-          objectFit: "contain",
-          ...style,
-        }}
-        onError={handleError}
-        onLoad={handleLoad}
-      />
     </div>
   );
-};
+});
 
 // Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
@@ -1030,8 +1036,8 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Component Bố cục Ảnh Linh hoạt cho 4K
-  const FlexibleImageLayout4K = ({
+  // Component Bố cục Ảnh Linh hoạt cho 4K được tối ưu
+  const FlexibleImageLayout4K = React.memo(({
     images,
     eventName,
   }: {
@@ -1043,13 +1049,14 @@ export default function PublicDisplay4K() {
       index: number,
       className: string = "",
     ) => (
-      <EventImageWithFallback
-        key={`${eventName}-${index}-${src}`}
-        src={src}
-        alt={`${eventName} - Ảnh ${index + 1}`}
-        event={{ shortName: eventName, content: eventName }}
-        additionalClassName={className}
-      />
+      <div key={`${eventName}-${index}`} className="w-full h-full">
+        <EventImageWithFallback
+          src={src}
+          alt={`${eventName} - Ảnh ${index + 1}`}
+          event={{ shortName: eventName, content: eventName }}
+          additionalClassName={className}
+        />
+      </div>
     );
 
     switch (images.length) {
@@ -1102,7 +1109,7 @@ export default function PublicDisplay4K() {
       default:
         return null;
     }
-  };
+  });
 
   // Hiển thị Sự kiện Khác cho 4K - với bố cục ảnh linh hoạt
   const renderOtherEventsDisplay4K = () => {
@@ -1156,46 +1163,7 @@ export default function PublicDisplay4K() {
               className="text-center h-full flex items-center justify-center"
               style={{ fontFamily: "Roboto, sans-serif" }}
             >
-              {(() => {
-                // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
-                const images =
-                  currentEvent.imageUrls && currentEvent.imageUrls.length > 0
-                    ? currentEvent.imageUrls.filter(Boolean)
-                    : currentEvent.imageUrl
-                      ? [currentEvent.imageUrl]
-                      : [];
-
-                if (images.length > 0) {
-                  return (
-                    <FlexibleImageLayout4K
-                      images={images}
-                      eventName={currentEvent.shortName}
-                    />
-                  );
-                } else {
-                  return (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-12">
-                      <div className="text-center" style={{ color: "#f5f0dc" }}>
-                        <h2
-                          className="text-6xl font-bold mb-8"
-                          style={{
-                            fontFamily: "Roboto, sans-serif",
-                            fontWeight: "700",
-                          }}
-                        >
-                          {currentEvent.shortName}
-                        </h2>
-                        <p
-                          className="text-4xl leading-relaxed"
-                          style={{ fontFamily: "Roboto, sans-serif" }}
-                        >
-                          {currentEvent.content || "Không có nội dung"}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                }
-              })()}
+              <EventDisplay4K currentEvent={currentEvent} />
             </div>
           </div>
         ) : (
@@ -1211,6 +1179,49 @@ export default function PublicDisplay4K() {
       </div>
     );
   };
+
+  // Component hiển thị sự kiện riêng biệt để tránh re-render
+  const EventDisplay4K = React.memo(({ currentEvent }: { currentEvent: any }) => {
+    // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
+    const images = React.useMemo(() => {
+      return currentEvent.imageUrls && currentEvent.imageUrls.length > 0
+        ? currentEvent.imageUrls.filter(Boolean)
+        : currentEvent.imageUrl
+          ? [currentEvent.imageUrl]
+          : [];
+    }, [currentEvent.imageUrls, currentEvent.imageUrl]);
+
+    if (images.length > 0) {
+      return (
+        <FlexibleImageLayout4K
+          images={images}
+          eventName={currentEvent.shortName}
+        />
+      );
+    } else {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-12">
+          <div className="text-center" style={{ color: "#f5f0dc" }}>
+            <h2
+              className="text-6xl font-bold mb-8"
+              style={{
+                fontFamily: "Roboto, sans-serif",
+                fontWeight: "700",
+              }}
+            >
+              {currentEvent.shortName}
+            </h2>
+            <p
+              className="text-4xl leading-relaxed"
+              style={{ fontFamily: "Roboto, sans-serif" }}
+            >
+              {currentEvent.content || "Không có nội dung"}
+            </p>
+          </div>
+        </div>
+      );
+    }
+  });
 
   const currentScreen = SCREENS[currentScreenIndex];
 
