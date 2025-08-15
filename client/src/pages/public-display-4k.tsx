@@ -948,16 +948,7 @@ export default function PublicDisplay4K() {
             </tbody>
           </table>
         </div>
-        {/* Footer có độ cao cố định 10px - đảm bảo hiển thị */}
-        <div 
-          style={{
-            height: "10px",
-            backgroundColor: "#F5F0DC",
-            width: "100%",
-            minHeight: "10px",
-            flexShrink: 0
-          }}
-        />
+
       </div>
     );
   };
@@ -1320,12 +1311,24 @@ export default function PublicDisplay4K() {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1" style={{ height: "calc(100vh - 200px)" }}>
+      <div className="flex-1" style={{ height: currentScreen.id === "meeting-schedule" ? "calc(100vh - 210px)" : "calc(100vh - 200px)" }}>
         {currentScreen.id === "work-schedule" && renderWorkScheduleTable4K()}
         {currentScreen.id === "meeting-schedule" &&
           renderMeetingScheduleTable4K()}
         {currentScreen.id === "other-events" && renderOtherEventsDisplay4K()}
       </div>
+      
+      {/* Footer chỉ hiển thị cho meeting schedule */}
+      {currentScreen.id === "meeting-schedule" && (
+        <div 
+          style={{
+            height: "10px",
+            backgroundColor: "#F5F0DC",
+            width: "100%",
+            flexShrink: 0
+          }}
+        />
+      )}
     </div>
   );
 }
