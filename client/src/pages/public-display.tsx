@@ -28,7 +28,7 @@ interface Staff {
   };
 }
 
-// SCREEN_DURATION will be loaded from system config
+// SCREEN_DURATION sẽ được tải từ cấu hình hệ thống
 const SCREENS = [
   { id: 'work-schedule', name: 'Kế hoạch công tác' },
   { id: 'meeting-schedule', name: 'Lịch họp' },
@@ -39,10 +39,10 @@ export default function PublicDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(15); // Will be updated from config
+  const [timeRemaining, setTimeRemaining] = useState(15); // Sẽ được cập nhật từ cấu hình
   const [isPaused, setIsPaused] = useState(false);
 
-  // Update time every second
+  // Cập nhật thời gian mỗi giây
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
@@ -51,13 +51,13 @@ export default function PublicDisplay() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch system config to get refresh interval and work hours
+  // Lấy cấu hình hệ thống để lấy khoảng thời gian làm mới và giờ làm việc
   const { data: systemConfig = [] } = useQuery<any[]>({
     queryKey: ["/api/system-config"],
     refetchInterval: 60000,
   });
 
-  // Get work hours from system config
+  // Lấy giờ làm việc từ cấu hình hệ thống
   const workHours = React.useMemo(() => {
     const startConfig = systemConfig.find(config => config.key === 'work_hours.start_time');
     const endConfig = systemConfig.find(config => config.key === 'work_hours.end_time');
@@ -67,13 +67,13 @@ export default function PublicDisplay() {
     };
   }, [systemConfig]);
 
-  // Get screen duration from config, default to 15 seconds
+  // Lấy thời gian hiển thị màn hình từ cấu hình, mặc định 15 giây
   const screenDurationMs = React.useMemo(() => {
     const refreshConfig = systemConfig.find(config => config.key === 'display.refresh_interval');
     return refreshConfig ? parseInt(refreshConfig.value) * 1000 : 15000;
   }, [systemConfig]);
 
-  // Manual navigation functions
+  // Các hàm điều hướng thủ công
   const goToPreviousScreen = () => {
     setCurrentScreenIndex(prev => (prev - 1 + SCREENS.length) % SCREENS.length);
     setCurrentEventIndex(0);
@@ -89,22 +89,22 @@ export default function PublicDisplay() {
   const toggleAutoRotation = () => {
     setIsPaused(prev => !prev);
     if (!isPaused) {
-      setTimeRemaining(screenDurationMs / 1000); // Reset timer when pausing
+      setTimeRemaining(screenDurationMs / 1000); // Đặt lại bộ đếm thời gian khi tạm dừng
     }
   };
 
-  // Screen rotation and countdown
+  // Xoay màn hình và đếm ngược
   useEffect(() => {
-    if (isPaused) return; // Don't rotate when paused
+    if (isPaused) return; // Không xoay khi bị tạm dừng
     
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
-          // Switch to next screen and reset countdown
+          // Chuyển sang màn hình tiếp theo và đặt lại đếm ngược
           const currentScreen = SCREENS[currentScreenIndex];
           
           if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
-            // For other events, cycle through relevant events (ongoing + upcoming within 30 days)
+            // Đối với các sự kiện khác, xoay qua các sự kiện liên quan (đang diễn ra + sắp tới trong vòng 30 ngày)
             const now = new Date();
             const thirtyDaysFromNow = new Date();
             thirtyDaysFromNow.setDate(now.getDate() + 30);
@@ -124,23 +124,23 @@ export default function PublicDisplay() {
               });
             
             if (relevantEvents.length > 1) {
-              // If multiple events, cycle through them
+              // Nếu có nhiều sự kiện, xoay qua chúng
               const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
               if (nextEventIndex === 0) {
-                // Completed all events, go to next screen
+                // Hoàn thành tất cả sự kiện, chuyển sang màn hình tiếp theo
                 setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
                 setCurrentEventIndex(0);
               } else {
-                // Show next event
+                // Hiển thị sự kiện tiếp theo
                 setCurrentEventIndex(nextEventIndex);
               }
             } else {
-              // Single or no events, go to next screen
+              // Một hoặc không có sự kiện, chuyển sang màn hình tiếp theo
               setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
               setCurrentEventIndex(0);
             }
           } else {
-            // Regular screen rotation
+            // Xoay màn hình thông thường
             setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
             setCurrentEventIndex(0);
           }
@@ -154,34 +154,34 @@ export default function PublicDisplay() {
     return () => clearInterval(timer);
   }, [currentScreenIndex, currentEventIndex, isPaused, screenDurationMs]);
 
-  // Get 7 days starting from today
+  // Lấy 7 ngày bắt đầu từ hôm nay
   const today = new Date();
   const days = eachDayOfInterval({
     start: today,
     end: addDays(today, 6)
   });
 
-  // Fetch display data when screen changes (every 15 seconds)
+  // Lấy dữ liệu hiển thị khi màn hình thay đổi (mỗi 15 giây)
   const { data: displayData, isLoading, refetch: refetchDisplayData } = useQuery<DisplayData>({
-    queryKey: ["/api/public/display-data"], // Use stable key but force refresh
-    refetchInterval: 3000, // Refresh every 3 seconds for immediate updates
+    queryKey: ["/api/public/display-data"], // Sử dụng key ổn định nhưng buộc làm mới
+    refetchInterval: 3000, // Làm mới mỗi 3 giây để cập nhật ngay lập tức
     refetchIntervalInBackground: true,
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Don't cache data to ensure fresh image URLs
+    staleTime: 0, // Luôn coi dữ liệu là cũ
+    gcTime: 0, // Không cache dữ liệu để đảm bảo URL ảnh mới
   });
 
-  // Refetch data when screen changes
+  // Lấy lại dữ liệu khi màn hình thay đổi
   useEffect(() => {
     refetchDisplayData();
   }, [currentScreenIndex, refetchDisplayData]);
 
-  // Fetch staff data
+  // Lấy dữ liệu nhân viên
   const { data: staff = [] } = useQuery<Staff[]>({
     queryKey: ["/api/public/staff"],
     refetchInterval: 60000,
   });
 
-  // Fetch meeting rooms data - use public endpoint
+  // Lấy dữ liệu phòng họp - sử dụng endpoint công khai
   const { data: rooms = [] } = useQuery<MeetingRoom[]>({
     queryKey: ["/api/public/meeting-rooms"],
     refetchInterval: 60000,
@@ -191,13 +191,13 @@ export default function PublicDisplay() {
 
   const { getWorkScheduleColor } = useSystemColors();
 
-  // Function to check if date is weekend
+  // Hàm kiểm tra xem ngày có phải cuối tuần không
   const isWeekend = (date: Date) => {
-    const day = getDay(date); // 0 = Sunday, 6 = Saturday
-    return day === 0 || day === 6; // Sunday or Saturday
+    const day = getDay(date); // 0 = Chủ nhật, 6 = Thứ bảy
+    return day === 0 || day === 6; // Chủ nhật hoặc Thứ bảy
   };
 
-  // Function to get schedules for a specific staff and day
+  // Hàm lấy lịch cho một nhân viên và ngày cụ thể
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
     if (!displayData?.workSchedules) return [];
     
@@ -208,17 +208,17 @@ export default function PublicDisplay() {
       const scheduleEnd = startOfDay(new Date(schedule.endDateTime));
       const checkDay = startOfDay(day);
       
-      // Check if the day falls within the schedule range (inclusive)
+      // Kiểm tra xem ngày có nằm trong phạm vi lịch trình không (bao gồm)
       return checkDay >= scheduleStart && checkDay <= scheduleEnd;
     });
 
-    // For board directors, if no schedule exists for a weekday, add default "Làm việc tại CN"
+    // Đối với giám đốc, nếu không có lịch cho ngày trong tuần, thêm mặc định "Làm việc tại CN"
     const isWeekend = day.getDay() === 0 || day.getDay() === 6;
     const staffMember = staff.find(s => s.id === staffId);
     const isBoardMember = staffMember && staffMember.department?.name.toLowerCase().includes("giám đốc");
     
     if (!isWeekend && isBoardMember && daySchedules.length === 0) {
-      // Add default work schedule
+      // Thêm lịch làm việc mặc định
       daySchedules.push({
         id: `default-${staffId}-${day.toISOString()}`,
         staffId: staffId,

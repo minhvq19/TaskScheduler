@@ -21,7 +21,7 @@ export default function PublicDisplay4K() {
   const [timeRemaining, setTimeRemaining] = useState(15);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Update time every second
+  // Cập nhật thời gian mỗi giây
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
@@ -30,13 +30,13 @@ export default function PublicDisplay4K() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch system config to get refresh interval and work hours
+  // Lấy cấu hình hệ thống để tính khoảng thời gian làm mới và giờ làm việc
   const { data: systemConfig = [] } = useQuery<any[]>({
     queryKey: ["/api/system-config"],
     refetchInterval: 60000,
   });
 
-  // Get work hours from system config
+  // Lấy giờ làm việc từ cấu hình hệ thống
   const workHours = React.useMemo(() => {
     const startConfig = systemConfig.find(
       (config) => config.key === "work_hours.start_time",
@@ -50,7 +50,7 @@ export default function PublicDisplay4K() {
     };
   }, [systemConfig]);
 
-  // Get screen duration from config, default to 15 seconds
+  // Lấy thời gian hiển thị màn hình từ cấu hình, mặc định 15 giây
   const screenDurationMs = React.useMemo(() => {
     const refreshConfig = systemConfig.find(
       (config) => config.key === "display.refresh_interval",
@@ -58,7 +58,7 @@ export default function PublicDisplay4K() {
     return refreshConfig ? parseInt(refreshConfig.value) * 1000 : 15000;
   }, [systemConfig]);
 
-  // Manual navigation functions
+  // Các hàm điều hướng thủ công
   const goToPreviousScreen = () => {
     setCurrentScreenIndex(
       (prev) => (prev - 1 + SCREENS.length) % SCREENS.length,
@@ -80,7 +80,7 @@ export default function PublicDisplay4K() {
     }
   };
 
-  // Screen rotation and countdown
+  // Xoay màn hình và đếm ngược
   useEffect(() => {
     if (isPaused) return;
 
@@ -89,12 +89,12 @@ export default function PublicDisplay4K() {
         if (prev <= 1) {
           const currentScreen = SCREENS[currentScreenIndex];
 
-          // Change screen - each screen shows for full duration regardless of content
+          // Chuyển màn hình - mỗi màn hình hiển thị toàn bộ thời lượng bất kể nội dung
           setCurrentScreenIndex((prev) => {
             const nextScreenIndex = (prev + 1) % SCREENS.length;
             const nextScreen = SCREENS[nextScreenIndex];
 
-            // When moving to 'other-events' screen, set to next event in rotation
+            // Khi chuyển đến màn hình 'other-events', đặt sự kiện tiếp theo trong vòng lặp
             if (
               nextScreen.id === "other-events" &&
               displayData &&
@@ -140,31 +140,31 @@ export default function PublicDisplay4K() {
     return () => clearInterval(timer);
   }, [isPaused, screenDurationMs, currentScreenIndex, currentEventIndex]);
 
-  // Fetch display data
+  // Lấy dữ liệu hiển thị
   const { data: displayData } = useQuery<any>({
     queryKey: ["/api/public/display-data"],
     refetchInterval: 4000,
   });
 
-  // Fetch staff data
+  // Lấy dữ liệu nhân viên
   const { data: staff = [] } = useQuery<any[]>({
     queryKey: ["/api/public/staff"],
     refetchInterval: 30000,
   });
 
-  // Fetch meeting rooms
+  // Lấy danh sách phòng họp
   const { data: meetingRooms = [] } = useQuery<any[]>({
     queryKey: ["/api/public/meeting-rooms"],
     refetchInterval: 30000,
   });
 
-  // Helper function to parse datetime with proper timezone
+  // Hàm hỗ trợ phân tích datetime với múi giờ phù hợp
   const parseLocalDateTime = (dateTime: string | Date): Date => {
     if (dateTime instanceof Date) {
       return dateTime;
     }
 
-    // The datetime from server is already in UTC, just parse it directly
+    // Datetime từ server đã ở UTC, chỉ cần phân tích trực tiếp
     const parsedDate = new Date(dateTime.toString());
 
     console.log(
@@ -179,7 +179,7 @@ export default function PublicDisplay4K() {
     return parsedDate;
   };
 
-  // Generate week days starting from Monday
+  // Tạo các ngày trong tuần bắt đầu từ thứ Hai
   const getWeekDays = (startDate: Date) => {
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -196,13 +196,13 @@ export default function PublicDisplay4K() {
     return new Date(date.setDate(diff));
   };
 
-  // Use current week starting from today (5 days only)
+  // Sử dụng tuần hiện tại bắt đầu từ hôm nay (chỉ 5 ngày)
   const today = new Date();
   const todayStart = startOfDay(today);
-  const endOfWeek = addDays(todayStart, 4); // Show only 5 days
+  const endOfWeek = addDays(todayStart, 4); // Chỉ hiển thị 5 ngày
 
   const weekDays = eachDayOfInterval({
-    start: todayStart, // Start from today, not Monday
+    start: todayStart, // Bắt đầu từ hôm nay, không phải thứ Hai
     end: endOfWeek,
   });
 
@@ -212,7 +212,7 @@ export default function PublicDisplay4K() {
     return day === 0 || day === 6;
   };
 
-  // Get schedules for a specific staff member and day
+  // Lấy lịch cho một nhân viên cụ thể trong ngày
   const getSchedulesForStaffAndDay = (staffId: string, day: Date) => {
     if (!displayData?.workSchedules) return [];
 
@@ -231,7 +231,7 @@ export default function PublicDisplay4K() {
     });
   };
 
-  // Get work schedule color
+  // Lấy màu cho lịch công tác
   const getWorkScheduleColor = (workType: string) => {
     const colorConfig = systemConfig.find((config) => {
       switch (workType) {
@@ -252,7 +252,7 @@ export default function PublicDisplay4K() {
     return colorConfig ? colorConfig.value : "#9f224e";
   };
 
-  // Work Schedule Table for 4K
+  // Bảng Kế hoạch Công tác cho 4K
   const renderWorkScheduleTable4K = () => {
     if (!displayData || !displayData.workSchedules) {
       return (
@@ -262,16 +262,16 @@ export default function PublicDisplay4K() {
       );
     }
 
-    // Adjust column widths: smaller for weekend columns, larger for weekday columns, wider leadership column
+    // Điều chỉnh độ rộng cột: nhỏ hơn cho cột cuối tuần, lớn hơn cho cột ngày thường, cột lãnh đạo rộng hơn
     const weekdayCount = weekDays.filter((day) => !isWeekend(day)).length;
     const weekendCount = weekDays.filter((day) => isWeekend(day)).length;
 
     const gridTemplate = weekDays
       .map((day) => {
         if (isWeekend(day)) {
-          return "0.6fr"; // Smaller for weekend (reduced from 0.8fr)
+          return "0.6fr"; // Nhỏ hơn cho cuối tuần (giảm từ 0.8fr)
         } else {
-          return "1.4fr"; // Larger for weekday (increased from 1.2fr)
+          return "1.4fr"; // Lớn hơn cho ngày thường (tăng từ 1.2fr)
         }
       })
       .join(" ");
@@ -283,7 +283,7 @@ export default function PublicDisplay4K() {
         className="h-full overflow-hidden"
         style={{ fontFamily: "Roboto, sans-serif", backgroundColor: "#f5f0dc" }}
       >
-        {/* Header */}
+        {/* Tiêu đề */}
         <div
           className="grid border-b-4 border-gray-400 bg-yellow-400"
           style={{ gridTemplateColumns: fullGridTemplate }}
@@ -309,7 +309,7 @@ export default function PublicDisplay4K() {
             );
           })}
         </div>
-        {/* Body with rows for each staff member */}
+        {/* Nội dung với các hàng cho từng nhân viên */}
         <div
           className="overflow-auto"
           style={{ height: "calc(100% - 310px)", backgroundColor: "#f5f0dc" }}
@@ -329,7 +329,7 @@ export default function PublicDisplay4K() {
                   minHeight: "180px",
                 }}
               >
-                {/* Staff Name Column */}
+                {/* Cột Tên Nhân viên */}
                 <div
                   className="p-4 text-white font-bold border-r-2 border-gray-300 flex items-center"
                   style={{ backgroundColor: "#f5f0dc" }}
@@ -345,7 +345,7 @@ export default function PublicDisplay4K() {
                   </div>
                 </div>
 
-                {/* Schedule Columns for each day */}
+                {/* Cột Lịch cho từng ngày */}
                 {weekDays.map((day, dayIndex) => {
                   const schedules = getSchedulesForStaffAndDay(
                     staffMember.id,
@@ -370,7 +370,7 @@ export default function PublicDisplay4K() {
                               const isWorkAtBranch =
                                 schedule.workType === "Làm việc tại CN";
 
-                              // Check if this is a full day schedule using system work hours
+                              // Kiểm tra xem đây có phải lịch cả ngày không sử dụng giờ làm việc hệ thống
                               const startTime = format(
                                 parseLocalDateTime(schedule.startDateTime),
                                 "HH:mm",
@@ -402,7 +402,7 @@ export default function PublicDisplay4K() {
                                 >
                                   {
                                     <>
-                                      {/* Main content with time or full day */}
+                                      {/* Nội dung chính với thời gian hoặc cả ngày */}
                                       <div
                                         className="font-semibold"
                                         style={{
@@ -425,7 +425,7 @@ export default function PublicDisplay4K() {
                                           ? " - (Cả ngày)"
                                           : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
                                       </div>
-                                      {/* Additional content */}
+                                      {/* Nội dung bổ sung */}
                                       {schedule.workType !== "Khác" &&
                                         schedule.customContent && (
                                           <div
@@ -468,7 +468,7 @@ export default function PublicDisplay4K() {
               </div>
             ))}
         </div>
-        {/* Color Legend for 4K - same as standard display */}
+        {/* Chú thích Màu cho 4K - giống như hiển thị tiêu chuẩn */}
         <div
           className="p-8"
           style={{
@@ -605,7 +605,7 @@ export default function PublicDisplay4K() {
     );
   };
 
-  // Meeting Schedule Table for 4K - matching standard display layout
+  // Bảng Lịch Họp cho 4K - khớp với bố cục hiển thị tiêu chuẩn
   const renderMeetingScheduleTable4K = () => {
     // Debug log để kiểm tra dữ liệu
     console.log("4K Meeting Schedules Debug:", {
@@ -623,31 +623,31 @@ export default function PublicDisplay4K() {
       );
     }
 
-    // Generate week days for table headers (exactly same as standard display)
+    // Tạo các ngày trong tuần cho tiêu đề bảng (hoàn toàn giống như hiển thị tiêu chuẩn)
     const today = new Date();
     const todayStart = startOfDay(today);
 
-    // Show 5 days starting from today (reduced from 7 days)
+    // Hiển thị 5 ngày bắt đầu từ hôm nay (giảm từ 7 ngày)
     const endOfWeek = addDays(todayStart, 4);
 
     const weekDays = eachDayOfInterval({
-      start: todayStart, // Start from today, not Monday
+      start: todayStart, // Bắt đầu từ hôm nay, không phải thứ Hai
       end: endOfWeek,
     });
 
     const getDay = (date: Date) => date.getDay();
 
-    // Get all meeting rooms (same as standard display)
+    // Lấy tất cả phòng họp (giống như hiển thị tiêu chuẩn)
     const rooms = meetingRooms || [];
 
-    // Get meetings for current week (include meetings that overlap with current week) - same logic as standard
+    // Lấy các cuộc họp cho tuần hiện tại (bao gồm các cuộc họp chồng lấp với tuần hiện tại) - logic giống như tiêu chuẩn
     const weekMeetings = (displayData?.meetingSchedules || []).filter(
       (meeting: any) => {
-        // Use UTC date for meeting date calculation (not Vietnam time) - exact same as standard
+        // Sử dụng ngày UTC để tính toán ngày họp (không phải thời gian Việt Nam) - hoàn toàn giống như tiêu chuẩn
         const utcStartTime = new Date(meeting.startDateTime);
         const utcEndTime = new Date(meeting.endDateTime);
 
-        // Get the UTC date by using the UTC components (not local timezone) - exact same as standard
+        // Lấy ngày UTC bằng cách sử dụng các thành phần UTC (không phải múi giờ địa phương) - hoàn toàn giống như tiêu chuẩn
         const startYear = utcStartTime.getUTCFullYear();
         const startMonth = utcStartTime.getUTCMonth();
         const startDay = utcStartTime.getUTCDate();
@@ -660,15 +660,15 @@ export default function PublicDisplay4K() {
         const weekStartDate = todayStart;
         const weekEndDate = endOfWeek;
 
-        // Include meeting if it overlaps with current week - exact same as standard
-        // Meeting overlaps if: meeting starts before or on week end AND meeting ends after or on week start
+        // Bao gồm cuộc họp nếu nó chồng lấp với tuần hiện tại - hoàn toàn giống như tiêu chuẩn
+        // Cuộc họp chồng lấp nếu: cuộc họp bắt đầu trước hoặc vào cuối tuần VÀ cuộc họp kết thúc sau hoặc vào đầu tuần
         return (
           meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate
         );
       },
     );
 
-    // Group meetings by room and date - exact same logic as standard
+    // Nhóm các cuộc họp theo phòng và ngày - logic hoàn toàn giống như tiêu chuẩn
     const meetingsByRoomAndDate: Record<string, Record<string, any[]>> = {};
     rooms.forEach((room) => {
       meetingsByRoomAndDate[room.id] = {};
@@ -688,11 +688,11 @@ export default function PublicDisplay4K() {
         endDateTime: meeting.endDateTime
       });
 
-      // Use UTC date for meeting grouping - exact same as standard
+      // Sử dụng ngày UTC để nhóm cuộc họp - hoàn toàn giống như tiêu chuẩn
       const utcStartTime = new Date(meeting.startDateTime);
       const utcEndTime = new Date(meeting.endDateTime);
 
-      // Get the UTC date by using the UTC components (not local timezone) - exact same as standard
+      // Lấy ngày UTC bằng cách sử dụng các thành phần UTC (không phải múi giờ địa phương) - hoàn toàn giống như tiêu chuẩn
       const startYear = utcStartTime.getUTCFullYear();
       const startMonth = utcStartTime.getUTCMonth();
       const startDay = utcStartTime.getUTCDate();
@@ -703,7 +703,7 @@ export default function PublicDisplay4K() {
       const endDay = utcEndTime.getUTCDate();
       const meetingEnd = new Date(endYear, endMonth, endDay);
 
-      // For multi-day meetings, add to each day - exact same as standard
+      // Đối với các cuộc họp nhiều ngày, thêm vào mỗi ngày - hoàn toàn giống như tiêu chuẩn
       const startDate = meetingStart;
       const endDate = meetingEnd;
 
@@ -714,7 +714,7 @@ export default function PublicDisplay4K() {
       ) {
         const dateKey = format(currentDate, "yyyy-MM-dd");
 
-        // Check if this date is within our week display range
+        // Kiểm tra xem ngày này có nằm trong phạm vi hiển thị tuần của chúng ta không
         const isWithinWeek = weekDays.some(
           (day) => format(day, "yyyy-MM-dd") === dateKey,
         );
@@ -733,7 +733,7 @@ export default function PublicDisplay4K() {
       }
     });
 
-    // Get meetings for a specific room and day helper - exact same as standard
+    // Hàm hỗ trợ lấy các cuộc họp cho một phòng và ngày cụ thể - hoàn toàn giống như tiêu chuẩn
     const getMeetingsForRoomAndDay = (roomId: string, day: Date) => {
       const dateKey = format(day, "yyyy-MM-dd");
       return meetingsByRoomAndDate[roomId]?.[dateKey] || [];
@@ -744,7 +744,7 @@ export default function PublicDisplay4K() {
         className="h-full overflow-hidden relative flex flex-col"
         style={{ fontFamily: "Roboto, sans-serif" }}
       >
-        {/* Meeting Schedule Table */}
+        {/* Bảng Lịch Họp */}
         <div className="bg-white overflow-hidden flex-1">
           <table
             style={{
@@ -756,7 +756,7 @@ export default function PublicDisplay4K() {
             }}
           >
             <colgroup>
-              <col style={{ width: "420px" }} /> {/* Wider for 4K */}
+              <col style={{ width: "420px" }} /> {/* Rộng hơn cho 4K */}
               {weekDays.map((day, index) => {
                 const isWeekend = getDay(day) === 0 || getDay(day) === 6;
                 return (
@@ -777,7 +777,7 @@ export default function PublicDisplay4K() {
                 borderBottom: "2px solid rgb(230 205 168)",
               }}
             >
-              {/* Optimized height for 4K */}
+              {/* Chiều cao được tối ưu cho 4K */}
               <tr
                 className="bg-orange-600"
                 style={{
@@ -831,7 +831,7 @@ export default function PublicDisplay4K() {
               {rooms.slice(0, 10).map(
                 (
                   room: any,
-                  roomIndex: number, // Limit to 10 rooms for 4K
+                  roomIndex: number, // Giới hạn 10 phòng cho 4K
                 ) => (
                   <tr
                     key={room.id}
@@ -842,7 +842,7 @@ export default function PublicDisplay4K() {
                       maxHeight: "80px",
                     }}
                   >
-                    {/* Room Name Column */}
+                    {/* Cột Tên Phòng */}
                     <td
                       className="text-white font-bold"
                       style={{
@@ -871,7 +871,7 @@ export default function PublicDisplay4K() {
                         {room.name}
                       </div>
                     </td>
-                    {/* Meeting columns for each day */}
+                    {/* Cột cuộc họp cho mỗi ngày */}
                     {weekDays.map((day, dayIndex) => {
                       const dayMeetings = getMeetingsForRoomAndDay(
                         room.id,
@@ -895,7 +895,7 @@ export default function PublicDisplay4K() {
                         >
                           {dayMeetings.map(
                             (meeting: any, meetingIndex: number) => {
-                              // Calculate time display (same logic as standard)
+                              // Tính toán hiển thị thời gian (logic giống như tiêu chuẩn)
                               const utcStartTime = new Date(
                                 meeting.startDateTime,
                               );
