@@ -67,6 +67,12 @@ export default function PublicDisplay4K() {
     return screenDurations[currentScreen.id as keyof typeof screenDurations] || 15000;
   };
 
+  // Cập nhật timeRemaining khi cấu hình hoặc màn hình thay đổi
+  useEffect(() => {
+    const newDuration = getCurrentScreenDuration() / 1000;
+    setTimeRemaining(newDuration);
+  }, [screenDurations, currentScreenIndex]);
+
   // Các hàm điều hướng thủ công
   const goToPreviousScreen = () => {
     setCurrentScreenIndex(
