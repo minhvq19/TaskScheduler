@@ -823,8 +823,8 @@ export default function PublicDisplay4K() {
                     key={index}
                     style={{
                       width: isWeekend
-                        ? "calc((100% - 420px) * 0.08)" // Reduced from 0.1 to 0.08
-                        : "calc((100% - 420px) * 0.21)", // Increased from 0.18 to 0.21
+                        ? "calc((100% - 420px) * 0.06)" // Further reduced from 0.08 to 0.06
+                        : "calc((100% - 420px) * 0.235)", // Further increased from 0.21 to 0.235
                     }}
                   />
                 );
@@ -884,8 +884,8 @@ export default function PublicDisplay4K() {
                 ) => (
                   <tr
                     key={room.id}
-                    className="border-b-3 border-orange-600"
                     style={{
+                      borderBottom: "3px solid rgb(194 65 12)",
                       height: `calc((100vh - 320px) / ${Math.min(rooms.length, 10)})`,
                       minHeight: "60px",
                       maxHeight: "80px",
