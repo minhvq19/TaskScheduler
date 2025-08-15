@@ -21,16 +21,8 @@ import { format, isBefore, startOfDay, isSameDay } from "date-fns";
 
 const formSchema = z.object({
   staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
-  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu").refine((value) => {
-    const dateTime = new Date(value);
-    const now = new Date();
-    return dateTime >= now;
-  }, "Không thể chọn ngày giờ quá khứ"),
-  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc").refine((value) => {
-    const dateTime = new Date(value);
-    const now = new Date();
-    return dateTime >= now;
-  }, "Không thể chọn ngày giờ quá khứ"),
+  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu"),
+  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc"),
   workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
   customContent: z.string().max(200).optional(),
 });

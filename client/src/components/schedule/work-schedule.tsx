@@ -64,6 +64,17 @@ export default function WorkSchedule() {
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
 
+  // Fetch system configurations
+  const { data: systemConfigs = [] } = useQuery<any[]>({
+    queryKey: ["/api/system-config"],
+    refetchInterval: 300000, // 5 minutes
+  });
+
+  const workHours = {
+    start: systemConfigs.find(c => c.key === 'work_hours.start_time')?.value || '08:00',
+    end: systemConfigs.find(c => c.key === 'work_hours.end_time')?.value || '17:30',
+  };
+
   console.log('Current schedules state:', schedules, 'Loading:', isLoadingSchedules);
   console.log('Week range:', weekStart.toISOString(), 'to', weekEnd.toISOString());
   console.log('Board department:', boardDept);
@@ -282,21 +293,54 @@ export default function WorkSchedule() {
                                 style={getScheduleStyle(schedule.workType)}
                                 data-testid={`schedule-${schedule.id}`}
                               >
-                                {!isWorkAtBranch && (
-                                  <>
-                                    <div className="font-medium">
-                                      {format(new Date(schedule.startDateTime), "HH:mm", { locale: vi })}-
-                                      {format(new Date(schedule.endDateTime), "HH:mm", { locale: vi })}
-                                    </div>
-                                    <div className="truncate">
-                                      {schedule.workType === "Khác" && schedule.customContent 
-                                        ? schedule.customContent 
-                                        : schedule.workType === "Đi công tác nước ngoài" 
-                                          ? "Đi công tác NN" 
-                                          : schedule.workType}
-                                    </div>
-                                  </>
-                                )}
+                                {!isWorkAtBranch && (() => {
+                                  // Tính toán thời gian hiển thị phù hợp cho ngày hiện tại
+                                  const scheduleStartDate = new Date(schedule.startDateTime);
+                                  const scheduleEndDate = new Date(schedule.endDateTime);
+                                  const currentDay = new Date(day);
+                                  currentDay.setHours(0, 0, 0, 0);
+                                  
+                                  const scheduleStartDay = new Date(scheduleStartDate);
+                                  scheduleStartDay.setHours(0, 0, 0, 0);
+                                  
+                                  const scheduleEndDay = new Date(scheduleEndDate);
+                                  scheduleEndDay.setHours(0, 0, 0, 0);
+                                  
+                                  let displayStartTime, displayEndTime;
+                                  
+                                  // Nếu ngày hiện tại là ngày bắt đầu lịch
+                                  if (currentDay.getTime() === scheduleStartDay.getTime()) {
+                                    displayStartTime = format(scheduleStartDate, "HH:mm");
+                                  } else {
+                                    // Ngày giữa hoặc ngày cuối: bắt đầu từ giờ làm việc
+                                    displayStartTime = workHours.start;
+                                  }
+                                  
+                                  // Nếu ngày hiện tại là ngày kết thúc lịch
+                                  if (currentDay.getTime() === scheduleEndDay.getTime()) {
+                                    displayEndTime = format(scheduleEndDate, "HH:mm");
+                                  } else {
+                                    // Ngày đầu hoặc ngày giữa: kết thúc vào giờ làm việc
+                                    displayEndTime = workHours.end;
+                                  }
+                                  
+                                  const isFullDay = displayStartTime === workHours.start && displayEndTime === workHours.end;
+                                  
+                                  return (
+                                    <>
+                                      <div className="font-medium">
+                                        {isFullDay ? "Cả ngày" : `${displayStartTime}-${displayEndTime}`}
+                                      </div>
+                                      <div className="truncate">
+                                        {schedule.workType === "Khác" && schedule.customContent 
+                                          ? schedule.customContent 
+                                          : schedule.workType === "Đi công tác nước ngoài" 
+                                            ? "Đi công tác NN" 
+                                            : schedule.workType}
+                                      </div>
+                                    </>
+                                  );
+                                })()}
                                 
                                 {/* Action buttons - only show for real schedules, not default ones */}
                                 {!isDefaultSchedule && (
