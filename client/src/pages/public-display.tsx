@@ -860,6 +860,35 @@ export default function PublicDisplay() {
     );
   };
 
+  // Utility function để tạo URL ảnh đúng cách cho production và development
+  const createImageUrl = (path: string) => {
+    if (!path) return '';
+    
+    // Nếu đã là URL đầy đủ, return ngay
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    
+    // Đảm bảo path bắt đầu với /
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    
+    // Encode các ký tự đặc biệt nhưng giữ nguyên /
+    const encodedPath = normalizedPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    
+    // Tạo full URL
+    const fullUrl = `${window.location.origin}${encodedPath}`;
+    
+    console.log('Standard createImageUrl:', { 
+      originalPath: path, 
+      normalizedPath, 
+      encodedPath, 
+      fullUrl,
+      environment: process.env.NODE_ENV 
+    });
+    
+    return fullUrl;
+  };
+
   // Simple Image Layout Component for Standard Display - sử dụng thẻ img trực tiếp
   const SimpleImageLayout = ({ images }: { images: string[] }) => {
     console.log("SimpleImageLayout render:", { 
@@ -869,8 +898,7 @@ export default function PublicDisplay() {
 
     if (images.length === 1) {
       // Một ảnh - toàn màn hình
-      const imgSrc = images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0];
-      console.log("Single image render:", { originalSrc: images[0], finalSrc: imgSrc });
+      const imgSrc = createImageUrl(images[0]);
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           <img
@@ -883,14 +911,10 @@ export default function PublicDisplay() {
               borderRadius: "8px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
             }}
-            onLoad={() => console.log("Single image loaded successfully:", imgSrc)}
+            onLoad={() => console.log("Standard Single image loaded successfully:", imgSrc)}
             onError={(e) => {
-              console.error("Single image failed to load:", imgSrc);
-              console.error("Error details:", e);
-              // Thử với URL encoding cho khoảng trắng
-              const encodedSrc = imgSrc.replace(/ /g, '%20');
-              console.log("Trying encoded URL:", encodedSrc);
-              e.currentTarget.src = encodedSrc;
+              console.error("Standard Single image failed to load:", imgSrc);
+              console.error("Standard Error details:", e);
             }}
           />
         </div>

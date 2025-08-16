@@ -1012,18 +1012,44 @@ export default function PublicDisplay4K() {
     );
   };
 
+  // Utility function để tạo URL ảnh đúng cách cho production và development
+  const createImageUrl = (path: string) => {
+    if (!path) return '';
+    
+    // Nếu đã là URL đầy đủ, return ngay
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    
+    // Đảm bảo path bắt đầu với /
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    
+    // Encode các ký tự đặc biệt nhưng giữ nguyên /
+    const encodedPath = normalizedPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    
+    // Tạo full URL
+    const fullUrl = `${window.location.origin}${encodedPath}`;
+    
+    console.log('createImageUrl:', { 
+      originalPath: path, 
+      normalizedPath, 
+      encodedPath, 
+      fullUrl,
+      environment: process.env.NODE_ENV 
+    });
+    
+    return fullUrl;
+  };
+
   // Component đơn giản để hiển thị ảnh sự kiện
   const SimpleImageLayout4K = ({ images }: { images: string[] }) => {
     if (images.length === 1) {
       // Một ảnh - toàn màn hình
+      const imgSrc = createImageUrl(images[0]);
       return (
         <div className="w-full h-full flex items-center justify-center p-8">
           <img
-            src={
-              images[0].startsWith("/")
-                ? `${window.location.origin}${images[0]}`
-                : images[0]
-            }
+            src={imgSrc}
             alt="Ảnh sự kiện"
             style={{
               maxWidth: "100%",
@@ -1031,6 +1057,11 @@ export default function PublicDisplay4K() {
               objectFit: "contain",
               borderRadius: "12px",
               boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+            }}
+            onLoad={() => console.log("4K Single image loaded successfully:", imgSrc)}
+            onError={(e) => {
+              console.error("4K Single image failed to load:", imgSrc);
+              console.error("4K Error details:", e);
             }}
           />
         </div>
@@ -1042,8 +1073,7 @@ export default function PublicDisplay4K() {
       return (
         <div className="w-full h-full flex gap-8 p-8">
           {images.map((src, index) => {
-            const imageUrl = src.startsWith("/") ? `${window.location.origin}${src}` : src;
-            console.log(`Image ${index + 1} URL:`, imageUrl);
+            const imageUrl = createImageUrl(src);
             
             return (
               <div key={index} className="flex-1 h-full">
@@ -1057,11 +1087,9 @@ export default function PublicDisplay4K() {
                     borderRadius: "12px",
                     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                   }}
-                  onLoad={() => console.log(`Image loaded successfully: ${imageUrl}`)}
+                  onLoad={() => console.log(`4K Image ${index + 1} loaded successfully: ${imageUrl}`)}
                   onError={(e) => {
-                    console.error(`Failed to load image: ${imageUrl}`, e);
-                    console.log('Original src:', src);
-                    console.log('window.location.origin:', window.location.origin);
+                    console.error(`4K Failed to load image ${index + 1}: ${imageUrl}`, e);
                   }}
                 />
               </div>
