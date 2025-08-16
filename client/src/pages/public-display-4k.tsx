@@ -297,14 +297,14 @@ export default function PublicDisplay4K() {
     return (
       <div
         className="h-full overflow-hidden"
-        style={{ fontFamily: "'Roboto', sans-serif !important", backgroundColor: "#f5f0dc" }}
+        style={{ fontFamily: "Roboto, sans-serif", backgroundColor: "#f5f0dc" }}
       >
         {/* Tiêu đề */}
         <div
           className="grid border-b-4 border-gray-400 bg-yellow-400"
           style={{ gridTemplateColumns: fullGridTemplate }}
         >
-          <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400" style={{fontFamily: "'Roboto', sans-serif !important", fontSize: "32pt"}}>
+          <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400">
             LÃNH ĐẠO
           </div>
           {weekDays.map((day, index) => {
@@ -315,10 +315,10 @@ export default function PublicDisplay4K() {
               <div
                 key={index}
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
-                style={{ fontFamily: "'Roboto', sans-serif !important" }}
+                style={{ fontFamily: "Roboto, sans-serif" }}
               >
-                <div className="font-bold text-[24px]" style={{fontFamily: "'Roboto', sans-serif !important", fontSize: "28pt"}}>{dayName}</div>
-                <div className="text-2xl font-bold" style={{fontFamily: "'Roboto', sans-serif !important", fontSize: "24pt"}}>
+                <div className="font-bold text-[24px]">{dayName}</div>
+                <div className="text-2xl font-bold">
                   {format(day, "dd/MM", { locale: vi })}
                 </div>
               </div>
@@ -353,9 +353,8 @@ export default function PublicDisplay4K() {
                   <div
                     className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[36px] text-[#791301]"
                     style={{
-                      fontFamily: "'Roboto', sans-serif !important",
+                      fontFamily: "Roboto, sans-serif",
                       fontWeight: "700",
-                      fontSize: "36pt",
                     }}
                   >
                     {(staffMember as any).positionShort}. {staffMember.fullName}
@@ -376,7 +375,7 @@ export default function PublicDisplay4K() {
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
                         backgroundColor: isWeekendDay ? "#adacac" : "#f5f4f0",
-                        fontFamily: "'Roboto', sans-serif !important",
+                        fontFamily: "Roboto, sans-serif",
                       }}
                     >
                       {schedules.length > 0 ? (
@@ -430,7 +429,7 @@ export default function PublicDisplay4K() {
                                     fontSize: "26pt",
                                     lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "'Roboto', sans-serif !important",
+                                    fontFamily: "Roboto, sans-serif",
                                     fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
@@ -442,7 +441,7 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "'Roboto', sans-serif !important",
+                                          fontFamily: "Roboto, sans-serif",
                                           fontWeight: "400",
                                           fontSize: "28pt",
                                           color: isWorkAtBranch
@@ -467,7 +466,7 @@ export default function PublicDisplay4K() {
                                           <div
                                             className="opacity-90"
                                             style={{
-                                              fontFamily: "'Roboto', sans-serif !important",
+                                              fontFamily: "Roboto, sans-serif",
                                               fontSize: "28pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
@@ -486,7 +485,7 @@ export default function PublicDisplay4K() {
                             <div
                               className="text-center"
                               style={{
-                                fontFamily: "'Roboto', sans-serif !important",
+                                fontFamily: "Roboto, sans-serif",
                                 fontSize: "30pt",
                                 color: "#d1d5db",
                               }}
@@ -508,7 +507,7 @@ export default function PublicDisplay4K() {
         <div
           className="p-8"
           style={{
-            fontFamily: "'Roboto', sans-serif !important",
+            fontFamily: "Roboto, sans-serif",
             backgroundColor: "#f5f0dc",
             marginTop: "20px",
             marginBottom: "20px",
@@ -517,7 +516,7 @@ export default function PublicDisplay4K() {
           <div
             className="text-2xl font-bold mb-3 text-center"
             style={{
-              fontFamily: "'Roboto', sans-serif !important",
+              fontFamily: "Roboto, sans-serif",
               fontWeight: "700",
               color: "#260705",
               fontSize: "30pt",
@@ -527,7 +526,7 @@ export default function PublicDisplay4K() {
           </div>
           <div
             className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-xl"
-            style={{ fontFamily: "'Roboto', sans-serif !important" }}
+            style={{ fontFamily: "Roboto, sans-serif" }}
           >
             <div className="flex items-center">
               <div
@@ -539,7 +538,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -555,7 +554,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -573,7 +572,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -591,7 +590,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -611,7 +610,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -627,7 +626,7 @@ export default function PublicDisplay4K() {
               <span
                 className="text-xl"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   color: "#260705",
                   fontSize: "26pt",
                 }}
@@ -1275,7 +1274,7 @@ export default function PublicDisplay4K() {
               <h2
                 className="text-6xl font-bold mb-8"
                 style={{
-                  fontFamily: "'Roboto', sans-serif !important",
+                  fontFamily: "Roboto, sans-serif",
                   fontWeight: "700",
                 }}
               >
@@ -1283,7 +1282,7 @@ export default function PublicDisplay4K() {
               </h2>
               <p
                 className="text-4xl leading-relaxed"
-                style={{ fontFamily: "'Roboto', sans-serif !important" }}
+                style={{ fontFamily: "Roboto, sans-serif" }}
               >
                 {currentEvent.content || "Không có nội dung"}
               </p>
@@ -1303,30 +1302,28 @@ export default function PublicDisplay4K() {
         width: "100vw",
         height: "100vh",
         background: `linear-gradient(to bottom right, #f5f0dc, #1a0504)`,
-        fontFamily: "'Roboto', sans-serif !important",
       }}
-      data-display-mode="4k"
     >
       {/* Header with BIDV branding - matching standard display colors */}
       <div
         className="public-display-header text-center py-6 relative"
-        style={{ fontFamily: "'Roboto', sans-serif !important", backgroundColor: "#f5f0dc" }}
+        style={{ fontFamily: "Roboto, sans-serif", backgroundColor: "#f5f0dc" }}
       >
         <div
           className="font-bold text-[42px] text-[#791301]"
-          style={{ fontFamily: "'Roboto', sans-serif !important", fontWeight: "700" }}
+          style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
         >
           NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
         </div>
         <div
           className="text-center font-bold text-[42px] text-[#791301]"
-          style={{ fontFamily: "'Roboto', sans-serif !important", fontWeight: "600" }}
+          style={{ fontFamily: "Roboto, sans-serif", fontWeight: "600" }}
         >
           CHI NHÁNH SỞ GIAO DỊCH 1
         </div>
         <div
           className="font-bold mt-4 text-6xl text-[#421001]"
-          style={{ fontFamily: "'Roboto', sans-serif !important", fontWeight: "700" }}
+          style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
         >
           {(() => {
             if (
