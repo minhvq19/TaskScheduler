@@ -862,12 +862,19 @@ export default function PublicDisplay() {
 
   // Simple Image Layout Component for Standard Display - sử dụng thẻ img trực tiếp
   const SimpleImageLayout = ({ images }: { images: string[] }) => {
+    console.log("SimpleImageLayout render:", { 
+      imagesLength: images.length, 
+      images: images.map(img => ({ url: img, isAbsolute: !img.startsWith("/") }))
+    });
+
     if (images.length === 1) {
       // Một ảnh - toàn màn hình
+      const imgSrc = images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0];
+      console.log("Single image render:", { originalSrc: images[0], finalSrc: imgSrc });
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           <img
-            src={images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0]}
+            src={imgSrc}
             alt="Ảnh sự kiện"
             style={{
               maxWidth: "100%",
@@ -875,6 +882,15 @@ export default function PublicDisplay() {
               objectFit: "contain",
               borderRadius: "8px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            }}
+            onLoad={() => console.log("Single image loaded successfully:", imgSrc)}
+            onError={(e) => {
+              console.error("Single image failed to load:", imgSrc);
+              console.error("Error details:", e);
+              // Thử với URL encoding cho khoảng trắng
+              const encodedSrc = imgSrc.replace(/ /g, '%20');
+              console.log("Trying encoded URL:", encodedSrc);
+              e.currentTarget.src = encodedSrc;
             }}
           />
         </div>
@@ -1031,7 +1047,12 @@ export default function PublicDisplay() {
                     ? currentEvent.imageUrls.filter(Boolean) 
                     : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
 
-
+                  console.log("Standard Display - Before render:", {
+                    eventId: currentEvent.id,
+                    shortName: currentEvent.shortName?.substring(0, 30) + "...",
+                    imagesLength: images.length,
+                    willRenderSimpleLayout: images.length > 0
+                  });
 
                   if (images.length > 0) {
                     return <SimpleImageLayout images={images} />;
