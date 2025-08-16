@@ -1041,23 +1041,32 @@ export default function PublicDisplay4K() {
       // Hai ảnh - cạnh nhau
       return (
         <div className="w-full h-full flex gap-8 p-8">
-          {images.map((src, index) => (
-            <div key={index} className="flex-1 h-full">
-              <img
-                src={
-                  src.startsWith("/") ? `${window.location.origin}${src}` : src
-                }
-                alt={`Ảnh sự kiện ${index + 1}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  borderRadius: "12px",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
-                }}
-              />
-            </div>
-          ))}
+          {images.map((src, index) => {
+            const imageUrl = src.startsWith("/") ? `${window.location.origin}${src}` : src;
+            console.log(`Image ${index + 1} URL:`, imageUrl);
+            
+            return (
+              <div key={index} className="flex-1 h-full">
+                <img
+                  src={imageUrl}
+                  alt={`Ảnh sự kiện ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+                  }}
+                  onLoad={() => console.log(`Image loaded successfully: ${imageUrl}`)}
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${imageUrl}`, e);
+                    console.log('Original src:', src);
+                    console.log('window.location.origin:', window.location.origin);
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       );
     }
