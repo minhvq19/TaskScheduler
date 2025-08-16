@@ -860,97 +860,133 @@ export default function PublicDisplay() {
     );
   };
 
-  // Flexible Image Layout Component for Standard Display
-  const FlexibleImageLayout = ({ images, eventName }: { images: string[], eventName: string }) => {
-    const renderImage = (src: string, index: number, className: string = "") => (
-      <img 
-        key={index}
-        src={src.startsWith('/') ? `${window.location.origin}${src}?v=${Date.now()}` : src} 
-        alt={`${eventName} - Image ${index + 1}`}
-        className={`object-cover rounded-lg shadow-lg ${className}`}
-        style={{ 
-          width: '100%', 
-          height: '100%'
-        }}
-        onError={(e) => {
-          console.error('Image failed to load:', src);
-          console.error('Attempted URL:', e.currentTarget.src);
-          e.currentTarget.style.display = 'none';
-        }}
-        onLoad={() => {
-          console.log('Image loaded successfully:', src);
-        }}
-      />
-    );
-
-    switch (images.length) {
-      case 1:
-        // Single image - full size
-        return (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            {renderImage(images[0], 0, "max-w-full max-h-full object-contain")}
-          </div>
-        );
-        
-      case 2:
-        // Two images - side by side
-        return (
-          <div className="w-full h-full flex gap-3 p-4">
-            <div className="flex-1 h-full">
-              {renderImage(images[0], 0)}
-            </div>
-            <div className="flex-1 h-full">
-              {renderImage(images[1], 1)}
-            </div>
-          </div>
-        );
-        
-      case 3:
-        // Three images - 2 top, 1 center bottom
-        return (
-          <div className="w-full h-full flex flex-col gap-3 p-4">
-            <div className="flex gap-3 h-1/2">
-              <div className="flex-1 h-full">
-                {renderImage(images[0], 0)}
-              </div>
-              <div className="flex-1 h-full">
-                {renderImage(images[1], 1)}
-              </div>
-            </div>
-            <div className="h-1/2 flex justify-center">
-              <div className="w-1/2 h-full">
-                {renderImage(images[2], 2)}
-              </div>
-            </div>
-          </div>
-        );
-        
-      case 4:
-        // Four images - 2x2 grid
-        return (
-          <div className="w-full h-full flex flex-col gap-3 p-4">
-            <div className="flex gap-3 h-1/2">
-              <div className="flex-1 h-full">
-                {renderImage(images[0], 0)}
-              </div>
-              <div className="flex-1 h-full">
-                {renderImage(images[1], 1)}
-              </div>
-            </div>
-            <div className="flex gap-3 h-1/2">
-              <div className="flex-1 h-full">
-                {renderImage(images[2], 2)}
-              </div>
-              <div className="flex-1 h-full">
-                {renderImage(images[3], 3)}
-              </div>
-            </div>
-          </div>
-        );
-        
-      default:
-        return null;
+  // Simple Image Layout Component for Standard Display - sử dụng thẻ img trực tiếp
+  const SimpleImageLayout = ({ images }: { images: string[] }) => {
+    if (images.length === 1) {
+      // Một ảnh - toàn màn hình
+      return (
+        <div className="w-full h-full flex items-center justify-center p-4">
+          <img
+            src={images[0].startsWith("/") ? `${window.location.origin}${images[0]}` : images[0]}
+            alt="Ảnh sự kiện"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+              borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            }}
+          />
+        </div>
+      );
     }
+
+    if (images.length === 2) {
+      // Hai ảnh - cạnh nhau
+      return (
+        <div className="w-full h-full flex gap-4 p-4">
+          {images.map((src, index) => (
+            <div key={index} className="flex-1 h-full">
+              <img
+                src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                alt={`Ảnh sự kiện ${index + 1}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (images.length === 3) {
+      // Ba ảnh - 2 trên, 1 dưới giữa
+      return (
+        <div className="w-full h-full flex flex-col gap-4 p-4">
+          <div className="flex gap-4 h-1/2">
+            {images.slice(0, 2).map((src, index) => (
+              <div key={index} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="h-1/2 flex justify-center">
+            <div className="w-1/2 h-full">
+              <img
+                src={images[2].startsWith("/") ? `${window.location.origin}${images[2]}` : images[2]}
+                alt="Ảnh sự kiện 3"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (images.length === 4) {
+      // Bốn ảnh - lưới 2x2
+      return (
+        <div className="w-full h-full flex flex-col gap-4 p-4">
+          <div className="flex gap-4 h-1/2">
+            {images.slice(0, 2).map((src, index) => (
+              <div key={index} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4 h-1/2">
+            {images.slice(2, 4).map((src, index) => (
+              <div key={index + 2} className="flex-1 h-full">
+                <img
+                  src={src.startsWith("/") ? `${window.location.origin}${src}` : src}
+                  alt={`Ảnh sự kiện ${index + 3}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   const renderOtherEventsTable = () => {
@@ -994,7 +1030,7 @@ export default function PublicDisplay() {
                     : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
 
                   if (images.length > 0) {
-                    return <FlexibleImageLayout images={images} eventName={currentEvent.shortName} />;
+                    return <SimpleImageLayout images={images} />;
                   } else {
                     return (
                       <div className="w-full h-full flex flex-col items-center justify-center p-8">
