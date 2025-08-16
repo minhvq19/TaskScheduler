@@ -429,7 +429,7 @@ export default function PublicDisplay4K() {
                                     fontSize: "26pt",
                                     lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "Arial",
+                                    fontFamily: "Roboto, sans-serif",
                                     fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
@@ -441,7 +441,7 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "Arial",
+                                          fontFamily: "Roboto, sans-serif",
                                           fontWeight: "400",
                                           fontSize: "28pt",
                                           color: isWorkAtBranch
@@ -1246,11 +1246,23 @@ export default function PublicDisplay4K() {
     ({ currentEvent }: { currentEvent: any }) => {
       // Lấy tất cả ảnh có sẵn (mảng imageUrls hoặc dự phòng imageUrl đơn lẻ)
       const images = React.useMemo(() => {
-        return currentEvent.imageUrls && currentEvent.imageUrls.length > 0
+        console.log("4K EventDisplay - Processing event:", {
+          eventId: currentEvent.id,
+          shortName: currentEvent.shortName?.substring(0, 50) + "...",
+          imageUrls: currentEvent.imageUrls,
+          imageUrl: currentEvent.imageUrl,
+          hasImageUrls: !!currentEvent.imageUrls,
+          imageUrlsLength: currentEvent.imageUrls?.length || 0
+        });
+
+        const finalImages = currentEvent.imageUrls && currentEvent.imageUrls.length > 0
           ? currentEvent.imageUrls.filter(Boolean)
           : currentEvent.imageUrl
             ? [currentEvent.imageUrl]
             : [];
+
+        console.log("4K EventDisplay - Final images array:", finalImages);
+        return finalImages;
       }, [currentEvent.imageUrls, currentEvent.imageUrl]);
 
       if (images.length > 0) {
