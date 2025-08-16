@@ -1017,28 +1017,7 @@ export default function PublicDisplay() {
     // Show only the current event based on currentEventIndex
     const currentEvent = relevantEvents[currentEventIndex];
 
-    // Debug thông tin sự kiện cho màn hình tiêu chuẩn
-    console.log("Standard Display - Other Events Info:", {
-      relevantEventsCount: relevantEvents.length,
-      currentEventIndex,
-      currentEvent: currentEvent
-        ? {
-            id: currentEvent.id,
-            shortName: currentEvent.shortName?.substring(0, 50) + "...",
-            startTime: currentEvent.startDateTime,
-            endTime: currentEvent.endDateTime,
-            imageUrls: currentEvent.imageUrls,
-            imageUrl: currentEvent.imageUrl,
-            hasImageUrls: !!currentEvent.imageUrls,
-            imageUrlsLength: currentEvent.imageUrls?.length || 0
-          }
-        : null,
-      allEvents: relevantEvents.map(event => ({
-        id: event.id,
-        shortName: event.shortName?.substring(0, 30) + "...",
-        hasImages: !!(event.imageUrls?.length || event.imageUrl)
-      }))
-    });
+
 
     return (
       <div className="public-display-table bg-white rounded-lg overflow-hidden shadow-lg h-full" style={{ fontFamily: 'Roboto, sans-serif' }}>
@@ -1052,14 +1031,7 @@ export default function PublicDisplay() {
                     ? currentEvent.imageUrls.filter(Boolean) 
                     : currentEvent.imageUrl ? [currentEvent.imageUrl] : [];
 
-                  console.log("Standard Display - Processing images:", {
-                    eventId: currentEvent.id,
-                    shortName: currentEvent.shortName?.substring(0, 30) + "...",
-                    imageUrls: currentEvent.imageUrls,
-                    imageUrl: currentEvent.imageUrl,
-                    finalImages: images,
-                    imagesCount: images.length
-                  });
+
 
                   if (images.length > 0) {
                     return <SimpleImageLayout images={images} />;
