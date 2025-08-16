@@ -204,20 +204,23 @@ export default function PublicDisplay() {
     return () => clearInterval(timer);
   }, [currentScreenIndex, currentEventIndex, isPaused, screenDurations]);
 
-  // Lấy 5 ngày làm việc bắt đầu từ hôm nay (chỉ T2-T6)
+  // Lấy 7 ngày bắt đầu từ hôm nay
   const today = new Date();
-  const allDays = eachDayOfInterval({
+  const days = eachDayOfInterval({
     start: today,
     end: addDays(today, 6),
   });
-  
-  // Lọc chỉ lấy ngày làm việc (T2-T6, không bao gồm T7 và CN)
-  const days = allDays.filter(day => {
-    const dayOfWeek = getDay(day); // 0 = CN, 1 = T2, ..., 6 = T7
-    return dayOfWeek >= 1 && dayOfWeek <= 5; // Chỉ T2-T6
-  }).slice(0, 5); // Đảm bảo chỉ lấy tối đa 5 ngày
 
-
+  // Debug: Log số ngày để kiểm tra
+  console.log("Standard Display Days Debug:", {
+    todayDate: today.toISOString(),
+    daysCount: days.length,
+    daysInfo: days.map((day, idx) => ({
+      index: idx,
+      date: format(day, "dd/MM"),
+      dayName: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][day.getDay()]
+    }))
+  });
 
   // Lấy dữ liệu hiển thị khi màn hình thay đổi (mỗi 15 giây)
   const {
@@ -326,10 +329,21 @@ export default function PublicDisplay() {
   };
 
   const renderWorkScheduleTable = () => {
-    // Với 5 ngày làm việc, tất cả các cột có độ rộng bằng nhau
-    const gridTemplate = `minmax(160px, 1fr) repeat(5, 1fr)`;
-    
+    // Calculate dynamic grid template based on actual day positions
+    const getColumnWidth = (index: number) => {
+      const day = days[index];
+      const dayOfWeek = getDay(day); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      return dayOfWeek === 0 || dayOfWeek === 6 ? "0.5fr" : "1fr"; // Weekend smaller
+    };
 
+    const gridTemplate = `minmax(160px, 1fr) ${days.map((_, index) => getColumnWidth(index)).join(" ")}`;
+    
+    // Debug grid template
+    console.log("Work Schedule Grid Debug:", {
+      daysLength: days.length,
+      gridTemplate: gridTemplate,
+      columnWidths: days.map((_, index) => getColumnWidth(index))
+    });
 
     return (
       <div
@@ -402,13 +416,14 @@ export default function PublicDisplay() {
                     staffMember.id,
                     day,
                   );
+                  const isWeekendDay = isWeekend(day);
 
                   return (
                     <div
                       key={dayIndex}
                       className="public-display-cell border-r border-gray-300 relative"
                       style={{
-                        backgroundColor: "#006b68",
+                        backgroundColor: isWeekendDay ? "#9ca3af" : "#006b68",
                         fontFamily: "Roboto, sans-serif",
                       }}
                     >
@@ -645,26 +660,37 @@ export default function PublicDisplay() {
   };
 
   const renderMeetingScheduleTable = () => {
-    // Get current week dates - chỉ lấy 5 ngày làm việc
+    // Get current week dates - from today to end of week (not past days)
     const today = new Date();
     const todayStart = startOfDay(today);
 
-    // Lấy 7 ngày từ hôm nay để sau đó lọc
+    // Show 7 days starting from today (13/08 - 19/08)
     const endOfWeek = addDays(todayStart, 6);
-    const allWeekDays = eachDayOfInterval({
-      start: todayStart,
+
+    const weekDays = eachDayOfInterval({
+      start: todayStart, // Start from today, not Monday
       end: endOfWeek,
     });
 
-    // Lọc chỉ lấy ngày làm việc (T2-T6)
-    const weekDays = allWeekDays.filter(day => {
-      const dayOfWeek = getDay(day); // 0 = CN, 1 = T2, ..., 6 = T7
-      return dayOfWeek >= 1 && dayOfWeek <= 5; // Chỉ T2-T6
-    }).slice(0, 5); // Đảm bảo chỉ lấy tối đa 5 ngày
+    // Debug: Log số ngày cho meeting schedule
+    console.log("Meeting Schedule Days Debug:", {
+      todayDate: today.toISOString(),
+      daysCount: weekDays.length,
+      daysInfo: weekDays.map((day, idx) => ({
+        index: idx,
+        date: format(day, "dd/MM"),
+        dayName: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][day.getDay()]
+      }))
+    });
 
-
-
-
+    // Debug log
+    console.log("Today:", format(today, "yyyy-MM-dd HH:mm:ss"));
+    console.log("Week start (today):", format(todayStart, "yyyy-MM-dd"));
+    console.log("Week end (Sunday):", format(endOfWeek, "yyyy-MM-dd"));
+    console.log(
+      "Week days:",
+      weekDays.map((d) => format(d, "yyyy-MM-dd")),
+    );
 
     // Get all meeting rooms
     const meetingRooms = rooms || [];
@@ -955,10 +981,18 @@ export default function PublicDisplay() {
             <colgroup>
               <col style={{ width: "280px" }} />
               {weekDays.map((day, index) => {
-                // Với 5 ngày làm việc, mỗi cột chiếm 20% của không gian còn lại
-                const columnWidth = "calc((100% - 280px) / 5)";
+                const isWeekend = getDay(day) === 0 || getDay(day) === 6; // Sunday or Saturday
+                const columnWidth = isWeekend
+                  ? "calc((100% - 280px) * 0.1)"
+                  : "calc((100% - 280px) * 0.18)";
                 
-
+                // Debug column widths
+                console.log("Meeting Schedule Column Debug:", {
+                  dayIndex: index,
+                  dayName: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][getDay(day)],
+                  isWeekend: isWeekend,
+                  columnWidth: columnWidth
+                });
                 
                 return (
                   <col
@@ -985,6 +1019,7 @@ export default function PublicDisplay() {
                 {weekDays.map((day, index) => {
                   const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
                   const dayName = dayNames[getDay(day)];
+                  const isWeekend = getDay(day) === 0 || getDay(day) === 6; // Sunday or Saturday
                   const isLastColumn = index === weekDays.length - 1;
 
                   return (
@@ -1079,13 +1114,14 @@ export default function PublicDisplay() {
                     const dateKey = format(day, "yyyy-MM-dd");
                     const dayMeetings =
                       meetingsByRoomAndDate[room.id][dateKey] || [];
+                    const isWeekend = getDay(day) === 0 || getDay(day) === 6;
 
                     const isLastColumn = dayIndex === weekDays.length - 1;
 
                     return (
                       <td
                         key={dayIndex}
-                        className="bg-white"
+                        className={isWeekend ? "bg-gray-100" : "bg-white"}
                         style={{
                           height: "100%",
                           padding: "8px",

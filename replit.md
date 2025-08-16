@@ -4,7 +4,6 @@ This system provides a comprehensive work schedule management solution for BIDV,
 
 ## Recent Changes (August 2025)
 
-- **5-Day Work Week Display**: Modified public display to show only 5 working days (Monday-Friday) instead of 7 days, removing weekend columns for better space utilization
 - **Display Timing Configuration**: Replaced single screen rotation interval with separate timing controls for each screen type:
   - `display.work_schedule_display_time`: Work schedule screen display duration
   - `display.meeting_schedule_display_time`: Meeting schedule screen display duration  
