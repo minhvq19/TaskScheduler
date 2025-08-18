@@ -1030,12 +1030,14 @@ export default function PublicDisplay4K() {
     // Tạo full URL
     const fullUrl = `${window.location.origin}${encodedPath}`;
     
-    console.log('createImageUrl:', { 
+    console.log('4K createImageUrl:', { 
       originalPath: path, 
       normalizedPath, 
       encodedPath, 
       fullUrl,
-      environment: process.env.NODE_ENV 
+      environment: process.env.NODE_ENV,
+      hasSpaces: path.includes(' '),
+      hasUnderscores: path.includes('_')
     });
     
     return fullUrl;
@@ -1063,8 +1065,16 @@ export default function PublicDisplay4K() {
               console.error("4K Single image failed to load:", imgSrc);
               console.error("4K Error details:", e);
               
-              // Thử fallback: sử dụng ảnh placeholder hoặc ẩn ảnh
+              // Thử fallback: nếu file có dấu cách, thử version có dấu gạch dưới
               const target = e.currentTarget as HTMLImageElement;
+              if (images[0].includes(' ') && !target.src.includes('_fallback_tried')) {
+                const fallbackUrl = createImageUrl(images[0].replace(/\s+/g, '_')) + '?_fallback_tried=true';
+                console.log('4K Trying fallback URL with underscores:', fallbackUrl);
+                target.src = fallbackUrl;
+                return;
+              }
+              
+              // Nếu fallback cũng thất bại, ẩn ảnh
               target.style.display = 'none';
               
               // Hiển thị thông báo lỗi thay thế

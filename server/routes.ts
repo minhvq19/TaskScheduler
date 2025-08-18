@@ -23,19 +23,19 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Utility function để tạo tên file an toàn
+// Utility function để tạo tên file an toàn - thay dấu cách bằng dấu gạch dưới
 function sanitizeFilename(filename: string): string {
   // Tách tên và extension
   const lastDotIndex = filename.lastIndexOf('.');
   const name = lastDotIndex !== -1 ? filename.substring(0, lastDotIndex) : filename;
   const ext = lastDotIndex !== -1 ? filename.substring(lastDotIndex) : '';
   
-  // Sanitize tên file nhưng giữ extension gốc
+  // Sanitize tên file: thay dấu cách bằng _ và loại bỏ ký tự đặc biệt khác
   const sanitizedName = name
-    .replace(/[^a-zA-Z0-9.\-_]/g, '-') // Thay thế ký tự đặc biệt bằng -
-    .replace(/\s+/g, '-') // Thay thế khoảng trắng bằng -
-    .replace(/-+/g, '-') // Loại bỏ nhiều dấu - liên tiếp
-    .replace(/^-|-$/g, ''); // Loại bỏ - ở đầu và cuối
+    .replace(/\s+/g, '_') // Thay thế khoảng trắng bằng _
+    .replace(/[^a-zA-Z0-9._\-]/g, '_') // Thay thế ký tự đặc biệt bằng _
+    .replace(/_+/g, '_') // Loại bỏ nhiều dấu _ liên tiếp
+    .replace(/^_|_$/g, ''); // Loại bỏ _ ở đầu và cuối
   
   return (sanitizedName + ext).toLowerCase();
 }
@@ -63,12 +63,15 @@ const upload = multer({
       const randomString = Math.random().toString(36).substring(2, 8);
       const sanitizedName = sanitizeFilename(file.originalname);
       const filename = `${timestamp}-${randomString}-${sanitizedName}`;
+      
       console.log('File upload naming:', {
         original: file.originalname,
         sanitized: sanitizedName,
         final: filename,
-        timestamp: new Date(timestamp).toISOString()
+        timestamp: new Date(timestamp).toISOString(),
+        willReplace: 'spaces with underscores'
       });
+      
       cb(null, filename);
     }
   }),
@@ -516,7 +519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let imageUrls: string[] = [];
       
       if (req.files && Array.isArray(req.files)) {
-        // Xử lý nhiều file với tên đã được sanitize từ multer
+        // Xử lý nhiều file với tên đã được sanitize từ multer (dấu cách -> _)
         for (const file of req.files) {
           // file.filename đã được sanitize bởi multer storage configuration
           const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', file.filename);
@@ -531,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             if (fs.existsSync(file.path)) {
               fs.copyFileSync(file.path, publicPath);
-              console.log('File copied to public directory:', publicPath);
+              console.log('File copied to public directory with sanitized name:', publicPath);
             } else {
               console.error('Source file does not exist:', file.path);
             }
@@ -539,15 +542,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error('Error copying file to public directory:', error);
           }
           
+          // Sử dụng tên file đã sanitize (có _ thay vì dấu cách) cho database
           const fileUrl = `/uploads/${file.filename}`;
           
-          console.log('File uploaded successfully:', {
+          console.log('File processed with space->underscore replacement:', {
             original: file.originalname,
-            sanitized: file.filename,
-            path: file.path,
+            sanitizedFilename: file.filename,
+            sourcePath: file.path,
             publicPath,
-            exists: fs.existsSync(file.path),
-            actualFileUrl: fileUrl
+            sourceExists: fs.existsSync(file.path),
+            publicExists: fs.existsSync(publicPath),
+            databaseUrl: fileUrl
           });
           
           imageUrls.push(fileUrl);
@@ -608,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (req.files && Array.isArray(req.files)) {
-        // Xử lý các file mới với tên đã được sanitize từ multer
+        // Xử lý các file mới với tên đã được sanitize từ multer (dấu cách -> _)
         const newImageUrls: string[] = [];
         for (const file of req.files) {
           // file.filename đã được sanitize bởi multer storage configuration
@@ -624,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             if (fs.existsSync(file.path)) {
               fs.copyFileSync(file.path, publicPath);
-              console.log('File copied to public directory:', publicPath);
+              console.log('File copied to public directory with sanitized name:', publicPath);
             } else {
               console.error('Source file does not exist:', file.path);
             }
@@ -632,13 +637,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error('Error copying file to public directory:', error);
           }
           
-          console.log('File updated successfully:', {
+          console.log('File update processed with space->underscore replacement:', {
             original: file.originalname,
-            sanitized: file.filename,
-            path: file.path,
+            sanitizedFilename: file.filename,
+            sourcePath: file.path,
             publicPath,
-            exists: fs.existsSync(file.path),
-            publicExists: fs.existsSync(publicPath)
+            sourceExists: fs.existsSync(file.path),
+            publicExists: fs.existsSync(publicPath),
+            databaseUrl: `/uploads/${file.filename}`
           });
           
           const fileUrl = `/uploads/${file.filename}`;
