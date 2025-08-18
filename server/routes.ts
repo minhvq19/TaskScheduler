@@ -548,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           } catch (error) {
             console.error('✗ CRITICAL COPY ERROR:', error);
-            return res.status(500).json({ message: 'File upload failed - copy error', error: error.message });
+            return res.status(500).json({ message: 'File upload failed - copy error', error: String(error) });
           }
           
           // Sử dụng tên file đã sanitize (có _ thay vì dấu cách) cho database

@@ -1061,23 +1061,58 @@ export default function PublicDisplay4K() {
               boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
             }}
             onLoad={() => console.log("4K Single image loaded successfully:", imgSrc)}
-            onError={(e) => {
-              console.error("4K Single image failed to load:", imgSrc);
+            onError={async (e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              const originalSrc = target.src;
+              
+              console.error("4K Single image failed to load:", originalSrc);
               console.error("4K Error details:", e);
               
-              // Thử fallback: nếu file có dấu cách, thử version có dấu gạch dưới
-              const target = e.currentTarget as HTMLImageElement;
-              if (images[0].includes(' ') && !target.src.includes('_fallback_tried')) {
-                const fallbackUrl = createImageUrl(images[0].replace(/\s+/g, '_')) + '?_fallback_tried=true';
-                console.log('4K Trying fallback URL with underscores:', fallbackUrl);
-                target.src = fallbackUrl;
-                return;
+              // Thử fallback strategies theo thứ tự ưu tiên
+              const fallbackUrls = [];
+              
+              // Strategy 1: Thay dấu cách bằng dấu gạch dưới
+              if (images[0].includes(' ')) {
+                fallbackUrls.push(createImageUrl(images[0].replace(/\s+/g, '_')));
               }
               
-              // Nếu fallback cũng thất bại, ẩn ảnh
+              // Strategy 2: Thử với encoding khác
+              if (images[0].includes('%')) {
+                fallbackUrls.push(createImageUrl(decodeURIComponent(images[0])));
+              }
+              
+              // Strategy 3: Thử direct path từ uploads
+              const pathMatch = images[0].match(/\/uploads\/(.+)$/);
+              if (pathMatch) {
+                fallbackUrls.push(`${window.location.origin}/uploads/${pathMatch[1]}`);
+                fallbackUrls.push(`${window.location.origin}/uploads/${pathMatch[1].replace(/\s+/g, '_')}`);
+              }
+              
+              // Thử từng fallback URL
+              for (let i = 0; i < fallbackUrls.length; i++) {
+                const fallbackUrl = fallbackUrls[i];
+                if (fallbackUrl === originalSrc) continue; // Bỏ qua URL đã thử
+                
+                console.log(`4K Trying fallback strategy ${i+1}:`, fallbackUrl);
+                
+                try {
+                  const response = await fetch(fallbackUrl, { method: 'HEAD' });
+                  if (response.ok) {
+                    console.log(`4K Fallback strategy ${i+1} SUCCESS:`, fallbackUrl);
+                    target.src = fallbackUrl;
+                    return;
+                  }
+                } catch (fallbackError) {
+                  console.log(`4K Fallback strategy ${i+1} failed:`, fallbackError);
+                  continue;
+                }
+              }
+              
+              // Tất cả fallback thất bại - ẩn ảnh
+              console.error('4K All fallback strategies failed for:', images[0]);
               target.style.display = 'none';
               
-              // Hiển thị thông báo lỗi thay thế
+              // Hiển thị thông báo lỗi
               const errorDiv = document.createElement('div');
               errorDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-xl';
               errorDiv.textContent = 'Không thể tải ảnh';
