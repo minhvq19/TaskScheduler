@@ -234,6 +234,15 @@ export default function PublicDisplayMobile() {
                     const sortedStaffEntries = Object.entries(schedulesByStaff).sort(([staffIdA], [staffIdB]) => {
                       const staffA = staff.find(s => s.id === staffIdA) as any;
                       const staffB = staff.find(s => s.id === staffIdB) as any;
+                      
+                      // Debug log để kiểm tra
+                      // console.log('Sorting staff:', {
+                      //   staffA: staffA?.fullName,
+                      //   displayOrderA: staffA?.displayOrder,
+                      //   staffB: staffB?.fullName, 
+                      //   displayOrderB: staffB?.displayOrder
+                      // });
+                      
                       return (staffA?.displayOrder || 999) - (staffB?.displayOrder || 999);
                     });
 
