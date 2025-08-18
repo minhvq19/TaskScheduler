@@ -160,9 +160,7 @@ export default function PublicDisplayMobile() {
     });
 
     // Lọc chỉ cán bộ thuộc Ban giám đốc
-    const managementStaff = Array.isArray(staff) ? staff.filter(s => s.department?.name === 'Ban giám đốc') : [];
-    
-
+    const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
 
     // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
@@ -171,15 +169,11 @@ export default function PublicDisplayMobile() {
       const staffInManagement = managementStaff.some(s => s.id === schedule.staffId);
       
       if (selectedStaff === 'all') {
-        return isInCurrentWeek; // Hiển thị tất cả
-      } else if (selectedStaff === 'management') {
-        return isInCurrentWeek && staffInManagement; // Chỉ Ban GĐ
+        return isInCurrentWeek && staffInManagement;
       } else {
-        return isInCurrentWeek && schedule.staffId === selectedStaff; // Cá nhân cụ thể
+        return isInCurrentWeek && schedule.staffId === selectedStaff;
       }
     });
-    
-
 
     // Hiển thị theo layout mới như hình mẫu
     const renderScheduleView = () => {
@@ -274,53 +268,21 @@ export default function PublicDisplayMobile() {
             </button>
           </div>
 
-          {/* Bộ lọc cán bộ - Simple tab-based filter */}
-          <div className="space-y-3">
+          {/* Bộ lọc cán bộ */}
+          <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedStaff('all')}
-                className={`p-3 rounded-lg text-sm font-medium transition-colors ${
-                  selectedStaff === 'all' 
-                    ? 'bg-[#006b68] text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Tất cả
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedStaff('management')}
-                className={`p-3 rounded-lg text-sm font-medium transition-colors ${
-                  selectedStaff === 'management' 
-                    ? 'bg-[#006b68] text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Ban GĐ
-              </button>
-            </div>
-            
-            {/* Hiển thị danh sách cán bộ nếu chọn "Ban GĐ" */}
-            {selectedStaff === 'management' && (
-              <div className="grid grid-cols-1 gap-1 max-h-40 overflow-y-auto">
-                {managementStaff.map((staffMember) => (
-                  <button
-                    key={staffMember.id}
-                    type="button"
-                    onClick={() => setSelectedStaff(staffMember.id)}
-                    className={`p-2 text-left rounded text-sm transition-colors ${
-                      selectedStaff === staffMember.id 
-                        ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    {staffMember.positionShort}. {staffMember.fullName}
-                  </button>
-                ))}
-              </div>
-            )}
+            <select
+              value={selectedStaff}
+              onChange={(e) => setSelectedStaff(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent"
+            >
+              <option value="all">Tất cả cán bộ</option>
+              {managementStaff.map((staffMember) => (
+                <option key={staffMember.id} value={staffMember.id}>
+                  {staffMember.positionShort}. {staffMember.fullName}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -353,10 +315,10 @@ export default function PublicDisplayMobile() {
         <div className="space-y-2">
           {weekDays.map((day) => {
             const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-            const dayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules.filter((meeting: any) => {
+            const dayMeetings = (meetingSchedules || []).filter((meeting: any) => {
               const meetingDate = new Date(meeting.startDateTime);
               return format(meetingDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            }) : [];
+            });
 
             return (
               <div 
@@ -437,11 +399,11 @@ export default function PublicDisplayMobile() {
 
     // Lọc sự kiện active và trong khoảng thời gian hiện tại
     const now = new Date();
-    const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
+    const currentEvents = (otherEvents || []).filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
       return startDate <= now && now <= endDate;
-    }) : [];
+    });
     
     if (currentEvents.length === 0) {
       return (
