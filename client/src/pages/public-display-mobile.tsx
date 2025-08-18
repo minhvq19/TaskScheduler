@@ -337,15 +337,15 @@ export default function PublicDisplayMobile() {
       end: endOfWeek(today, { weekStartsOn: 1 })
     });
 
-    // Hàm kiểm tra xem phòng có đang được sử dụng không
+    // Hàm kiểm tra xem phòng có đang được sử dụng không (sử dụng UTC như 4K display)
     const isRoomBusy = (roomId: string, checkTime: Date) => {
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
         // Sử dụng roomId thay vì meetingRoomId
         return meeting.roomId === roomId && 
-               checkTime >= meetingStart && 
-               checkTime < meetingEnd;
+               checkTime.getTime() >= meetingStart.getTime() && 
+               checkTime.getTime() < meetingEnd.getTime();
       }) : false;
     };
 
@@ -357,7 +357,7 @@ export default function PublicDisplayMobile() {
       const upcomingMeetings = meetingSchedules
         .filter((meeting: any) => {
           const meetingStart = new Date(meeting.startDateTime);
-          return meeting.roomId === roomId && meetingStart > now;
+          return meeting.roomId === roomId && meetingStart.getTime() > now.getTime();
         })
         .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
       
@@ -373,8 +373,8 @@ export default function PublicDisplayMobile() {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
         return meeting.roomId === roomId && 
-               now >= meetingStart && 
-               now < meetingEnd;
+               now.getTime() >= meetingStart.getTime() && 
+               now.getTime() < meetingEnd.getTime();
       }) || null;
     };
 
@@ -435,7 +435,13 @@ export default function PublicDisplayMobile() {
                       {currentMeeting.meetingContent || currentMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {format(new Date(currentMeeting.startDateTime), 'HH:mm')} - {format(new Date(currentMeeting.endDateTime), 'HH:mm')}
+                      {(() => {
+                        const startTime = new Date(currentMeeting.startDateTime);
+                        const endTime = new Date(currentMeeting.endDateTime);
+                        const startDisplay = `${String(startTime.getUTCHours()).padStart(2, '0')}:${String(startTime.getUTCMinutes()).padStart(2, '0')}`;
+                        const endDisplay = `${String(endTime.getUTCHours()).padStart(2, '0')}:${String(endTime.getUTCMinutes()).padStart(2, '0')}`;
+                        return `${startDisplay} - ${endDisplay}`;
+                      })()}
                       {currentMeeting.contactPerson && ` • Người liên hệ: ${currentMeeting.contactPerson}`}
                     </div>
                   </div>
@@ -451,7 +457,13 @@ export default function PublicDisplayMobile() {
                       {nextMeeting.meetingContent || nextMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {format(new Date(nextMeeting.startDateTime), 'dd/MM HH:mm')} - {format(new Date(nextMeeting.endDateTime), 'HH:mm')}
+                      {(() => {
+                        const startTime = new Date(nextMeeting.startDateTime);
+                        const endTime = new Date(nextMeeting.endDateTime);
+                        const startDisplay = `${String(startTime.getUTCDate()).padStart(2, '0')}/${String(startTime.getUTCMonth() + 1).padStart(2, '0')} ${String(startTime.getUTCHours()).padStart(2, '0')}:${String(startTime.getUTCMinutes()).padStart(2, '0')}`;
+                        const endDisplay = `${String(endTime.getUTCHours()).padStart(2, '0')}:${String(endTime.getUTCMinutes()).padStart(2, '0')}`;
+                        return `${startDisplay} - ${endDisplay}`;
+                      })()}
                       {nextMeeting.contactPerson && ` • Người liên hệ: ${nextMeeting.contactPerson}`}
                     </div>
                   </div>
