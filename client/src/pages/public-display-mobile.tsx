@@ -342,6 +342,21 @@ export default function PublicDisplayMobile() {
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
+        
+        // Debug log để kiểm tra thời gian
+        if (meeting.meetingContent?.includes('BIDV direct')) {
+          console.log('Debug room busy check:', {
+            roomId,
+            meetingRoomId: meeting.roomId,
+            meetingContent: meeting.meetingContent,
+            checkTime: checkTime.toISOString(),
+            meetingStart: meetingStart.toISOString(),
+            meetingEnd: meetingEnd.toISOString(),
+            roomMatch: meeting.roomId === roomId,
+            timeInRange: checkTime.getTime() >= meetingStart.getTime() && checkTime.getTime() < meetingEnd.getTime()
+          });
+        }
+        
         // Sử dụng roomId thay vì meetingRoomId
         return meeting.roomId === roomId && 
                checkTime.getTime() >= meetingStart.getTime() && 
