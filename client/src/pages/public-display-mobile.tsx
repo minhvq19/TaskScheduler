@@ -162,12 +162,6 @@ export default function PublicDisplayMobile() {
     // Lọc chỉ cán bộ thuộc Ban giám đốc
     const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
 
-    // Debug information
-    console.log('Current week:', format(currentWeekStart, 'dd/MM/yyyy'), '-', format(currentWeekEnd, 'dd/MM/yyyy'));
-    console.log('Management staff:', managementStaff.map(s => s.fullName));
-    console.log('Selected staff:', selectedStaff);
-    console.log('Total work schedules:', displayData.workSchedules.length);
-
     // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
       const scheduleDate = startOfDay(new Date(schedule.startDateTime));
@@ -186,8 +180,6 @@ export default function PublicDisplayMobile() {
         return isInCurrentWeek && schedule.staffId === selectedStaff && staffInManagement;
       }
     });
-
-    console.log('Filtered schedules:', filteredSchedules.length);
 
     // Hiển thị theo layout mới như hình mẫu
     const renderScheduleView = () => {
@@ -276,6 +268,9 @@ export default function PublicDisplayMobile() {
           {filteredSchedules.length === 0 && (
             <div className="text-center py-8">
               <div className="text-gray-400 text-lg">Không có lịch công tác trong tuần này</div>
+              <div className="text-gray-300 text-sm mt-2">
+                Tuần: {format(currentWeekStart, 'dd/MM')} - {format(currentWeekEnd, 'dd/MM')}
+              </div>
             </div>
           )}
         </div>
@@ -358,10 +353,10 @@ export default function PublicDisplayMobile() {
         <div className="space-y-2">
           {weekDays.map((day) => {
             const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-            const dayMeetings = (meetingSchedules || []).filter((meeting: any) => {
+            const dayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules.filter((meeting: any) => {
               const meetingDate = new Date(meeting.startDateTime);
               return format(meetingDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            });
+            }) : [];
 
             return (
               <div 
@@ -442,11 +437,11 @@ export default function PublicDisplayMobile() {
 
     // Lọc sự kiện active và trong khoảng thời gian hiện tại
     const now = new Date();
-    const currentEvents = (otherEvents || []).filter((event: any) => {
+    const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
       return startDate <= now && now <= endDate;
-    });
+    }) : [];
     
     if (currentEvents.length === 0) {
       return (
