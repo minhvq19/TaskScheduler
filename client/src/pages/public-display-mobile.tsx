@@ -162,18 +162,32 @@ export default function PublicDisplayMobile() {
     // Lọc chỉ cán bộ thuộc Ban giám đốc
     const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
 
+    // Debug information
+    console.log('Current week:', format(currentWeekStart, 'dd/MM/yyyy'), '-', format(currentWeekEnd, 'dd/MM/yyyy'));
+    console.log('Management staff:', managementStaff.map(s => s.fullName));
+    console.log('Selected staff:', selectedStaff);
+    console.log('Total work schedules:', displayData.workSchedules.length);
+
     // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
-      const scheduleDate = new Date(schedule.startDateTime);
-      const isInCurrentWeek = scheduleDate >= currentWeekStart && scheduleDate <= addDays(currentWeekEnd, 1);
+      const scheduleDate = startOfDay(new Date(schedule.startDateTime));
+      const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
+      
+      // Kiểm tra xem lịch có nằm trong tuần hiện tại không
+      const isInCurrentWeek = (scheduleDate >= currentWeekStart && scheduleDate <= currentWeekEnd) ||
+                            (scheduleEndDate >= currentWeekStart && scheduleEndDate <= currentWeekEnd) ||
+                            (scheduleDate <= currentWeekStart && scheduleEndDate >= currentWeekEnd);
+      
       const staffInManagement = managementStaff.some(s => s.id === schedule.staffId);
       
       if (selectedStaff === 'all') {
         return isInCurrentWeek && staffInManagement;
       } else {
-        return isInCurrentWeek && schedule.staffId === selectedStaff;
+        return isInCurrentWeek && schedule.staffId === selectedStaff && staffInManagement;
       }
     });
+
+    console.log('Filtered schedules:', filteredSchedules.length);
 
     // Hiển thị theo layout mới như hình mẫu
     const renderScheduleView = () => {
@@ -181,9 +195,15 @@ export default function PublicDisplayMobile() {
         <div className="space-y-3">
           {weekDays.map((day) => {
             const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+            
+            // Lọc lịch cho ngày cụ thể, bao gồm cả lịch kéo dài nhiều ngày
             const daySchedules = filteredSchedules.filter(schedule => {
-              const scheduleDate = new Date(schedule.startDateTime);
-              return format(scheduleDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
+              const scheduleStartDate = startOfDay(new Date(schedule.startDateTime));
+              const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
+              const currentDay = startOfDay(day);
+              
+              // Kiểm tra xem ngày hiện tại có nằm trong khoảng thời gian của lịch không
+              return currentDay >= scheduleStartDate && currentDay <= scheduleEndDate;
             });
 
             if (daySchedules.length === 0) return null;
@@ -203,6 +223,29 @@ export default function PublicDisplayMobile() {
                     const staffMember = staff.find(s => s.id === schedule.staffId);
                     const startTime = new Date(schedule.startDateTime);
                     const endTime = new Date(schedule.endDateTime);
+                    const scheduleStartDate = startOfDay(new Date(schedule.startDateTime));
+                    const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
+                    const currentDay = startOfDay(day);
+                    
+                    // Hiển thị thời gian khác nhau tùy theo lịch một ngày hay nhiều ngày
+                    const isMultiDay = format(scheduleStartDate, 'yyyy-MM-dd') !== format(scheduleEndDate, 'yyyy-MM-dd');
+                    let timeDisplay = '';
+                    
+                    if (isMultiDay) {
+                      if (format(currentDay, 'yyyy-MM-dd') === format(scheduleStartDate, 'yyyy-MM-dd')) {
+                        // Ngày đầu
+                        timeDisplay = `${format(startTime, 'HH:mm')} - 12:00`;
+                      } else if (format(currentDay, 'yyyy-MM-dd') === format(scheduleEndDate, 'yyyy-MM-dd')) {
+                        // Ngày cuối
+                        timeDisplay = `08:00 - ${format(endTime, 'HH:mm')}`;
+                      } else {
+                        // Ngày giữa
+                        timeDisplay = '08:00 - 12:00';
+                      }
+                    } else {
+                      // Lịch trong ngày
+                      timeDisplay = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
+                    }
                     
                     return (
                       <div key={`${schedule.id}-${index}`} className="p-3 border-l-4 border-gray-400">
@@ -214,7 +257,7 @@ export default function PublicDisplayMobile() {
                           
                           {/* Thời gian */}
                           <div className="text-xs text-gray-600">
-                            {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
+                            {timeDisplay}
                           </div>
                           
                           {/* Nội dung công việc */}
