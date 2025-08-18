@@ -62,6 +62,9 @@ export default function PublicDisplayMobile() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(15);
   const [isPaused, setIsPaused] = useState(false);
+  
+  // State để quản lý ngày hiện tại cho meeting schedule - di chuyển lên parent để persist
+  const [meetingDateOffset, setMeetingDateOffset] = useState(0);
 
   // Cập nhật thời gian hiện tại mỗi giây
   useEffect(() => {
@@ -125,6 +128,7 @@ export default function PublicDisplayMobile() {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           setCurrentScreenIndex((prevIndex) => (prevIndex + 1) % SCREENS.length);
+          setMeetingDateOffset(0); // Reset meeting date offset khi auto rotation
           return duration;
         }
         return prev - 1;
@@ -137,6 +141,7 @@ export default function PublicDisplayMobile() {
   // Reset time remaining khi chuyển màn hình thủ công
   const handleScreenChange = (index: number) => {
     setCurrentScreenIndex(index);
+    setMeetingDateOffset(0); // Reset meeting date offset khi chuyển screen thủ công
     const newScreen = SCREENS[index];
     const duration = screenDurations[newScreen.id];
     setTimeRemaining(duration);
@@ -312,8 +317,12 @@ export default function PublicDisplayMobile() {
 
   // Component hiển thị lịch phòng họp cho mobile
   const MeetingScheduleDisplayMobile = () => {
-    // State để quản lý ngày hiện tại
-    const [currentDateOffset, setCurrentDateOffset] = useState(0);
+    // Sử dụng state từ parent component
+    const currentDateOffset = meetingDateOffset;
+    const setCurrentDateOffset = setMeetingDateOffset;
+    
+    // Debug log để kiểm tra state
+    console.log('MeetingScheduleDisplayMobile render - currentDateOffset:', currentDateOffset);
     
     // Lấy dữ liệu từ API public display data
     const { data: displayData, isLoading: displayLoading } = useQuery({
