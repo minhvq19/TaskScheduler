@@ -505,8 +505,24 @@ export default function PublicDisplayMobile() {
                     const todayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules
                       .filter((meeting: any) => {
                         const meetingDate = startOfDay(new Date(meeting.startDateTime));
-                        return meeting.roomId === room.id && 
-                               format(meetingDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+                        const dateMatch = format(meetingDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+                        const roomMatch = meeting.roomId === room.id;
+                        
+                        // Debug cho từng phòng
+                        if (room.name.includes('9.1') || dateMatch) {
+                          console.log(`Mobile Meeting Display - Room ${room.name} filter check:`, {
+                            roomId: room.id,
+                            meetingRoomId: meeting.roomId,
+                            roomMatch,
+                            meetingDate: format(meetingDate, 'yyyy-MM-dd'),
+                            todayDate: format(today, 'yyyy-MM-dd'),
+                            dateMatch,
+                            meetingContent: meeting.meetingContent,
+                            passesFilter: roomMatch && dateMatch
+                          });
+                        }
+                        
+                        return roomMatch && dateMatch;
                       })
                       .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()) : [];
 
