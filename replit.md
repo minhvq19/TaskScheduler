@@ -1,91 +1,91 @@
-# Overview
+# Tổng quan
 
-This system provides a comprehensive work schedule management solution for BIDV, encompassing staff scheduling, meeting room booking, event management, and organizational data display. It supports both administrative operations and public information dissemination with dual display capabilities: standard resolution (1920x1080) and 4K resolution (3840x2160) optimized for large TV displays. The project aims to streamline scheduling processes within the organization, enhance operational efficiency, and provide clear visibility into daily activities through adaptive layouts.
+Hệ thống này cung cấp giải pháp quản lý lịch làm việc toàn diện cho CN Sở Giao Dịch 1, bao gồm sắp xếp lịch cho nhân viên, đặt phòng họp, quản lý sự kiện và hiển thị dữ liệu nội bộ. Nó hỗ trợ cả các hoạt động hành chính và phổ biến thông tin công cộng với khả năng hiển thị kép: độ phân giải tiêu chuẩn (1920x1080) và độ phân giải 4K (3840x2160) được tối ưu hóa cho màn hình TV lớn. Dự án nhằm mục đích hợp lý hóa các quy trình lập lịch trong tổ chức, nâng cao hiệu quả hoạt động và cung cấp cái nhìn rõ ràng về các hoạt động hàng ngày thông qua các bố cục thích ứng.
 
-## Recent Changes (August 2025)
+## Những thay đổi gần đây (Tháng 8 năm 2025)
 
-- **Mobile Public Display System**: Xây dựng hoàn chỉnh hệ thống hiển thị công cộng cho mobile
-  - Tạo component `PublicDisplayMobile` với thiết kế responsive tối ưu cho điện thoại
-  - Hỗ trợ các độ phân giải phổ biến: iPhone (2868x1320, 2622x1206), Samsung (3120x1440, 2340x1080)
-  - Layout dọc tối ưu với header cố định, tabs điều hướng touch-friendly
-  - CSS responsive riêng biệt với media queries cho từng loại device
-  - Routing mới: `/display-mobile`, `/public-display-mobile`, `/public-mobile`, `/mobile`
-  - Cập nhật Display Selection để bao gồm option cho mobile với icon Smartphone
-- **Past Date Entry**: Removed date/time restrictions in work schedule management to allow past date modifications
-  - Xóa `min` attribute trong datetime inputs và validation logic cho ngày giờ quá khứ
-  - Sửa `isValidWorkTime` function để cho phép chọn giờ quá khứ
-  - Cập nhật cả `add-schedule-modal.tsx` và `enhanced-schedule-modal.tsx`
-- **Image Upload & URL Encoding Fix**: Resolved production image loading issues for Other Events
-  - Enhanced multer configuration with filename sanitization to prevent spaces and special characters
-  - Created `createImageUrl` utility function for proper URL encoding in both 4K and standard displays
-  - Added comprehensive debugging for image loading in production environments
-  - Fixed database file paths for events with spaces in filenames
-- **Display Timing Configuration**: Replaced single screen rotation interval with separate timing controls for each screen type:
-  - `display.work_schedule_display_time`: Work schedule screen display duration
-  - `display.meeting_schedule_display_time`: Meeting schedule screen display duration  
-  - `display.events_display_time`: Other events screen display duration
-- **Vietnamese Localization**: Converted interface messages and notifications to Vietnamese language
-- **Multi-day Schedule Display**: Enhanced time display logic for multi-day work schedules in both public displays
+- **Hệ thống hiển thị công cộng trên di động**: Xây dựng hoàn chỉnh hệ thống hiển thị công cộng cho mobile
+- Tạo component `PublicDisplayMobile` với thiết kế responsive tối ưu cho điện thoại
+- Hỗ trợ các độ phân giải phổ biến: iPhone (2868x1320, 2622x1206), Samsung (3120x1440, 2340x1080)
+- Layout dọc tối ưu với header cố định, tabs điều hướng touch-friendly
+- CSS responsive riêng biệt với media queries cho từng loại device
+- Routing mới: `/display-mobile`, `/public-display-mobile`, `/public-mobile`, `/mobile`
+- Cập nhật Display Selection để bao gồm option cho mobile với icon Smartphone
+- **Nhập dữ liệu quá khứ**: Đã gỡ bỏ các hạn chế về ngày/giờ trong quản lý lịch làm việc để cho phép sửa đổi các ngày đã qua
+- Xóa `min` attribute trong datetime inputs và validation logic cho ngày giờ quá khứ
+- Sửa `isValidWorkTime` function để cho phép chọn giờ quá khứ
+- Cập nhật cả `add-schedule-modal.tsx` và `enhanced-schedule-modal.tsx`
+- **Sửa lỗi tải ảnh và mã hóa URL**: Đã khắc phục các vấn đề tải ảnh trong môi trường sản xuất cho mục Sự kiện khác
+- Nâng cấp cấu hình multer với tính năng làm sạch tên tệp để ngăn chặn các khoảng trống và ký tự đặc biệt
+- Tạo hàm tiện ích `createImageUrl` để mã hóa URL đúng cách cho cả màn hình 4K và màn hình tiêu chuẩn
+- Bổ sung chức năng gỡ lỗi toàn diện để xử lý các vấn đề tải ảnh trong môi trường sản xuất
+- Sửa các đường dẫn tệp trong cơ sở dữ liệu cho các sự kiện có tên tệp chứa khoảng trắng
+- **Cấu hình thời gian hiển thị**: Thay thế một khoảng thời gian xoay màn hình duy nhất bằng các tùy chọn thời gian riêng biệt cho từng loại màn hình:
+- `display.work_schedule_display_time`: Thời gian hiển thị cho màn hình lịch làm việc
+- `display.meeting_schedule_display_time`: Thời gian hiển thị cho màn hình lịch họp
+- `display.events_display_time`: Thời gian hiển thị cho màn hình sự kiện khác
+- **Nội địa hóa tiếng Việt**: Đã chuyển đổi các tin nhắn và thông báo giao diện sang tiếng Việt
+- **Hiển thị lịch làm việc nhiều ngày**: Đã cải tiến logic hiển thị thời gian cho các lịch làm việc nhiều ngày trên cả hai chế độ hiển thị công cộng
 
-# User Preferences
+---
 
-Preferred communication style: Simple, everyday language.
+# Kiến trúc hệ thống
 
-# System Architecture
+## Kiến trúc giao diện người dùng (Frontend Architecture)
 
-## Frontend Architecture
+Ứng dụng phía người dùng được xây dựng với React 18 và TypeScript, tận dụng kiến trúc dựa trên component với `shadcn/ui` để có thiết kế nhất quán. Nó sử dụng Wouter cho việc định tuyến nhẹ và TanStack Query để quản lý và lưu trữ dữ liệu từ máy chủ. Hệ thống có ba chế độ hiển thị:
 
-The client-side application is built with React 18 and TypeScript, leveraging a component-based architecture with `shadcn/ui` for consistent design. It uses Wouter for lightweight routing and TanStack Query for server state management and caching. The system features triple display modes:
+- **Màn hình tiêu chuẩn (1920x1080)**: Tối ưu cho màn hình máy tính thông thường và laptop
+- **Màn hình 4K (3840x2160)**: Được thiết kế đặc biệt cho màn hình TV 65-inch với phông chữ lớn hơn, khoảng cách tăng và bố cục tối ưu
+- **Màn hình di động (Responsive)**: Tối ưu cho điện thoại với layout dọc, touch-friendly controls và responsive design
 
-- **Standard Display (1920x1080)**: Optimized for regular monitors and laptops
-- **4K Display (3840x2160)**: Specially designed for 65-inch TV displays with larger fonts, increased spacing, and optimized layouts
-- **Mobile Display (Responsive)**: Tối ưu cho điện thoại với layout dọc, touch-friendly controls và responsive design
+Các đường dẫn hiển thị công cộng bao gồm:
+- `/select-display`: Giao diện chọn chế độ hiển thị
+- `/public-display`: Hiển thị độ phân giải tiêu chuẩn
+- `/public-display-4k`: Hiển thị độ phân giải 4K
+- `/public-display-mobile`: Hiển thị tối ưu cho di động (responsive)
+- `/mobile`: Đường dẫn thay thế cho di động
 
-Public display routes include:
-- `/select-display`: Display selection interface
-- `/public-display`: Standard resolution display
-- `/public-display-4k`: 4K resolution display
-- `/public-display-mobile`: Mobile optimized display (responsive)
-- `/mobile`: Alternative mobile route
+Phong cách được quản lý với Tailwind CSS, sử dụng các thuộc tính tùy chỉnh cho màu sắc thương hiệu ngân hàng B.... Vite được dùng để phát triển nhanh và tối ưu hóa bản dựng sản phẩm.
 
-Styling is managed with Tailwind CSS, utilizing custom properties for BIDV brand colors. Vite is used for fast development and optimized production builds.
+## Kiến trúc máy chủ (Backend Architecture)
 
-## Backend Architecture
+Máy chủ sử dụng kiến trúc Express.js nhiều lớp, phân tách các mối quan tâm qua định tuyến, logic nghiệp vụ và truy cập dữ liệu. Nó có các API RESTful, tích hợp OpenID Connect với xác thực của Replit, quản lý phiên bằng PostgreSQL và Multer để tải tệp. Logic nghiệp vụ được sắp xếp với một lớp trừu tượng hóa lưu trữ (`server/storage.ts`) cho tất cả các hoạt động cơ sở dữ liệu, đảm bảo sự phân công rõ ràng từ các trình xử lý định tuyến. Quản lý lỗi và ghi nhật ký được thực hiện nhất quán trên toàn hệ thống.
 
-The server employs a layered Express.js architecture, separating concerns across routing, business logic, and data access. It features RESTful APIs, OpenID Connect integration with Replit authentication, PostgreSQL-backed session management, and Multer for file uploads. The business logic is organized with a storage abstraction layer (`server/storage.ts`) for all database operations, ensuring clear delegation from route handlers. Consistent error handling and logging are implemented throughout.
+## Kiến trúc cơ sở dữ liệu (Database Architecture)
 
-## Database Architecture
+Hệ thống sử dụng PostgreSQL với Drizzle ORM cho các hoạt động và di chuyển dữ liệu an toàn về kiểu. Sơ đồ bao gồm các đối tượng cốt lõi như Users, Staff, Departments, Meeting Rooms và Event Categories. Nó hỗ trợ Lịch làm việc, Lịch họp và các Sự kiện khác với các khoảng thời gian, và triển khai một hệ thống phân quyền linh hoạt liên kết người dùng với nhân viên. Các tính năng chính bao gồm khóa chính UUID, các mối quan hệ khóa ngoại với xóa theo chuỗi, và các trường theo dõi thay đổi.
 
-The system uses PostgreSQL with Drizzle ORM for type-safe operations and migrations. The schema includes core entities like Users, Staff, Departments, Meeting Rooms, and Event Categories. It supports Work Schedules, Meeting Schedules, and Other Events with datetime ranges, and implements a flexible permission system linking users to staff members. Key features include UUID primary keys, foreign key relationships with cascading deletes, and audit fields.
+## Xác thực và ủy quyền (Authentication and Authorization)
 
-## Authentication and Authorization
+Một phương pháp bảo mật nhiều lớp được triển khai bằng cách tích hợp OpenID Connect với dịch vụ xác thực của Replit và quản lý phiên bằng cơ sở dữ liệu. Ủy quyền được dựa trên các vai trò (`SystemUser` và `Staff`) và các quyền chi tiết hơn để quản lý lịch. Bảo vệ ở cấp độ đường dẫn được thực thi bằng phần mềm trung gian xác thực, trong khi các đường dẫn hiển thị công cộng có thể truy cập mà không cần xác thực.
 
-A multi-layered security approach is implemented using OpenID Connect integration with Replit's authentication service and database-backed session management. Authorization is based on roles (`SystemUser` and `Staff` relationships) and granular permissions for schedule management. Route-level protection is enforced with authentication middleware, while public display routes are accessible without authentication.
+---
 
-# External Dependencies
+# Các dịch vụ và thư viện bên ngoài
 
-## Database Services
-- **Neon Database**: Serverless PostgreSQL hosting.
-- **Drizzle ORM**: Type-safe database toolkit.
+## Dịch vụ cơ sở dữ liệu
+- **Neon Database**: Dịch vụ lưu trữ PostgreSQL không máy chủ.
+- **Drizzle ORM**: Bộ công cụ cơ sở dữ liệu an toàn về kiểu.
 
-## Authentication Services
-- **Replit Authentication**: OpenID Connect provider.
-- **Passport.js**: Authentication middleware.
+## Dịch vụ xác thực
+- **Replit Authentication**: Nhà cung cấp OpenID Connect.
+- **Passport.js**: Phần mềm trung gian xác thực.
 
-## Frontend Libraries
-- **React Query (@tanstack/react-query)**: Server state management.
-- **shadcn/ui**: Component library.
-- **Tailwind CSS**: Styling.
-- **Wouter**: Client-side routing.
-- **React Hook Form**: Form state management.
+## Các thư viện giao diện người dùng
+- **React Query (@tanstack/react-query)**: Quản lý trạng thái máy chủ.
+- **shadcn/ui**: Thư viện component.
+- **Tailwind CSS**: Tạo kiểu giao diện.
+- **Wouter**: Định tuyến phía người dùng.
+- **React Hook Form**: Quản lý trạng thái biểu mẫu.
 
-## Backend Dependencies
-- **Express.js**: Web application framework.
-- **Multer**: File upload handling.
-- **bcrypt**: Password hashing.
-- **connect-pg-simple**: PostgreSQL session store.
-- **memoizee**: Function memoization.
+## Các thư viện phía máy chủ
+- **Express.js**: Khung ứng dụng web.
+- **Multer**: Xử lý tải tệp.
+- **bcrypt**: Băm mật khẩu.
+- **connect-pg-simple**: Kho lưu trữ phiên PostgreSQL.
+- **memoizee**: Ghi nhớ chức năng.
 
-## Cloud Services
-- **Replit**: Development and hosting platform.
-- **Neon**: Managed PostgreSQL database service.
+## Dịch vụ đám mây
+- **Replit**: Nền tảng phát triển và lưu trữ.
+- **Neon**: Dịch vụ cơ sở dữ liệu PostgreSQL được quản lý.

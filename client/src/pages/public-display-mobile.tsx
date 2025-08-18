@@ -154,11 +154,6 @@ export default function PublicDisplayMobile() {
 
     return (
       <div className="space-y-3">
-        {/* Header cho mobile */}
-        <div className="bg-gradient-to-r from-[#006b68] to-[#008b7a] p-3 rounded-lg">
-          <h2 className="text-white text-lg font-bold text-center">KẾ HOẠCH CÔNG TÁC TUẦN</h2>
-        </div>
-
         {/* Danh sách ngày trong tuần - layout dọc cho mobile */}
         <div className="space-y-2">
           {weekDays.map((day) => {
@@ -177,15 +172,10 @@ export default function PublicDisplayMobile() {
                     : 'border-gray-200 bg-white'
                 }`}
               >
-                {/* Ngày và thứ */}
+                {/* Ngày đơn giản hóa */}
                 <div className={`text-center mb-2 pb-2 border-b ${
                   isToday ? 'border-orange-300' : 'border-gray-200'
                 }`}>
-                  <div className={`text-sm font-bold ${
-                    isToday ? 'text-orange-600' : 'text-gray-700'
-                  }`}>
-                    {format(day, 'EEEE', { locale: vi }).toUpperCase()}
-                  </div>
                   <div className={`text-lg font-bold ${
                     isToday ? 'text-orange-700' : 'text-gray-800'
                   }`}>
@@ -246,11 +236,6 @@ export default function PublicDisplayMobile() {
 
     return (
       <div className="space-y-3">
-        {/* Header cho mobile */}
-        <div className="bg-gradient-to-r from-[#006b68] to-[#008b7a] p-3 rounded-lg">
-          <h2 className="text-white text-lg font-bold text-center">LỊCH SỬ DỤNG PHÒNG HỌP</h2>
-        </div>
-
         {/* Danh sách phòng họp theo ngày */}
         <div className="space-y-2">
           {weekDays.map((day) => {
@@ -269,15 +254,10 @@ export default function PublicDisplayMobile() {
                     : 'border-gray-200 bg-white'
                 }`}
               >
-                {/* Ngày và thứ */}
+                {/* Ngày đơn giản hóa */}
                 <div className={`text-center mb-2 pb-2 border-b ${
                   isToday ? 'border-blue-300' : 'border-gray-200'
                 }`}>
-                  <div className={`text-sm font-bold ${
-                    isToday ? 'text-blue-600' : 'text-gray-700'
-                  }`}>
-                    {format(day, 'EEEE', { locale: vi }).toUpperCase()}
-                  </div>
                   <div className={`text-lg font-bold ${
                     isToday ? 'text-blue-700' : 'text-gray-800'
                   }`}>
@@ -348,16 +328,14 @@ export default function PublicDisplayMobile() {
     const currentEvent = currentEvents[currentEventIndex % currentEvents.length];
 
     return (
-      <div className="space-y-4">
-        {/* Header cho mobile */}
-        <div className="bg-gradient-to-r from-[#006b68] to-[#008b7a] p-3 rounded-lg">
-          <h2 className="text-white text-lg font-bold text-center">SỰ KIỆN KHÁC</h2>
-          {currentEvents.length > 1 && (
-            <div className="text-white text-center text-sm mt-1">
+      <div className="space-y-4">{/* Hiển thị indicator số sự kiện nếu có nhiều sự kiện */}
+        {currentEvents.length > 1 && (
+          <div className="text-center">
+            <div className="bg-[#006b68] text-white px-4 py-2 rounded-full inline-block text-sm font-medium">
               {currentEventIndex + 1} / {currentEvents.length}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Nội dung sự kiện */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -366,11 +344,6 @@ export default function PublicDisplayMobile() {
             <h3 className="text-xl font-bold text-gray-800 text-center">
               {currentEvent.title}
             </h3>
-            {currentEvent.startDate && currentEvent.endDate && (
-              <div className="text-sm text-gray-600 text-center mt-2">
-                📅 {format(new Date(currentEvent.startDate), 'dd/MM/yyyy')} - {format(new Date(currentEvent.endDate), 'dd/MM/yyyy')}
-              </div>
-            )}
           </div>
 
           {/* Mô tả sự kiện */}
@@ -445,9 +418,9 @@ export default function PublicDisplayMobile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 flex flex-col mobile-container mobile-safe-area">
-      {/* Header cố định cho mobile */}
+      {/* Header tối giản cho mobile - chỉ thông tin tổ chức và tabs */}
       <div className="bg-white shadow-md sticky top-0 z-10">
-        {/* Thông tin thời gian và tổ chức */}
+        {/* Thông tin tổ chức */}
         <div className="bg-[#260705] text-white mobile-header">
           <div className="text-center">
             <div className="mobile-org-title font-bold mobile-text-lg">
@@ -459,72 +432,36 @@ export default function PublicDisplayMobile() {
           </div>
         </div>
 
-        {/* Thời gian hiện tại */}
-        <div className="bg-[#006b68] text-white p-3 text-center">
-          <div className="mobile-time-display font-bold">
-            {format(currentTime, 'HH:mm:ss')}
-          </div>
-          <div className="mobile-text-sm">
-            {format(currentTime, 'EEEE, dd/MM/yyyy', { locale: vi })}
-          </div>
-        </div>
-
-        {/* Thanh điều hướng màn hình cho mobile */}
+        {/* Thanh điều hướng màn hình cho mobile - đơn giản hóa */}
         <div className="bg-gray-50 p-2">
-          <div className="flex justify-between items-center">
-            {/* Tabs điều hướng */}
-            <div className="flex mobile-screen-tabs flex-1">
-              {SCREENS.map((screen, index) => {
-                const Icon = screen.icon;
-                return (
-                  <button
-                    key={screen.id}
-                    onClick={() => handleScreenChange(index)}
-                    className={`flex-1 mobile-screen-tab mobile-touch-target rounded mobile-text-sm font-medium mobile-transition ${
-                      index === currentScreenIndex
-                        ? 'bg-[#006b68] text-white shadow-md'
-                        : 'bg-white text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center space-y-1">
-                      <Icon size={16} />
-                      <span className="text-xs leading-tight text-center">
-                        {screen.name}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Nút pause/play */}
-            <button
-              onClick={() => setIsPaused(!isPaused)}
-              className="ml-2 mobile-touch-target bg-gray-200 hover:bg-gray-300 rounded mobile-transition"
-            >
-              {isPaused ? <Play size={16} /> : <Pause size={16} />}
-            </button>
-          </div>
-
-          {/* Thanh tiến trình thời gian */}
-          <div className="mt-2">
-            <div className="bg-gray-200 rounded-full h-1">
-              <div 
-                className="bg-[#006b68] h-1 rounded-full transition-all duration-1000"
-                style={{ 
-                  width: `${((screenDurations[SCREENS[currentScreenIndex].id] - timeRemaining) / screenDurations[SCREENS[currentScreenIndex].id]) * 100}%` 
-                }}
-              />
-            </div>
-            <div className="text-center text-xs text-gray-500 mt-1">
-              {timeRemaining}s
-            </div>
+          <div className="flex mobile-screen-tabs">
+            {SCREENS.map((screen, index) => {
+              const Icon = screen.icon;
+              return (
+                <button
+                  key={screen.id}
+                  onClick={() => handleScreenChange(index)}
+                  className={`flex-1 mobile-screen-tab mobile-touch-target rounded mobile-text-sm font-medium mobile-transition ${
+                    index === currentScreenIndex
+                      ? 'bg-[#006b68] text-white shadow-md'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex flex-col items-center space-y-1">
+                    <Icon size={16} />
+                    <span className="text-xs leading-tight text-center">
+                      {screen.name}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Nội dung chính - scrollable */}
-      <div className="flex-1 mobile-content overflow-y-auto pb-6 mobile-scrollbar-hidden">
+      {/* Nội dung chính - tối ưu diện tích hiển thị */}
+      <div className="flex-1 p-4 overflow-y-auto mobile-scrollbar-hidden">
         {renderCurrentScreen()}
       </div>
     </div>

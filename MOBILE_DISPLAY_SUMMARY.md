@@ -1,7 +1,16 @@
-# Tóm tắt xây dựng Màn hình công cộng Mobile cho BIDV
+# Tóm tắt xây dựng Màn hình công cộng Mobile cho CN SỞ GIAO DỊCH 1
 
 ## Tổng quan dự án
 Đã xây dựng hoàn chỉnh hệ thống màn hình công cộng tối ưu cho thiết bị di động (điện thoại) với 3 màn hình chính: Kế hoạch công tác, Lịch sử dụng phòng họp, và Sự kiện khác.
+
+## Tối ưu hóa UI (Tháng 8/2025)
+**Thay đổi để tăng diện tích hiển thị nội dung:**
+- ✅ Xóa hiển thị thời gian thực (giờ:phút:giây) và ngày tháng từ header
+- ✅ Xóa countdown timer và thanh tiến trình thời gian chuyển màn hình  
+- ✅ Xóa nút play/pause để đơn giản hóa giao diện
+- ✅ Xóa tiêu đề "Kế hoạch công tác tuần" và "Lịch sử dụng phòng họp"
+- ✅ Đơn giản hóa hiển thị ngày: chỉ dd/MM thay vì thứ + ngày
+- ✅ Xóa thông tin ngày tháng trong sự kiện khác
 
 ## Các thành phần đã xây dựng
 
@@ -165,4 +174,4 @@ client/src/
 MOBILE_DISPLAY_SUMMARY.md             # This documentation
 ```
 
-Dự án mobile display đã hoàn thành với thiết kế responsive cao cấp, user experience tối ưu và code quality cao theo standards của BIDV.
+Dự án mobile display đã hoàn thành với thiết kế responsive cao cấp, user experience tối ưu và code quality cao theo tiêu chuẩn từ URD của Ngân hàng.
