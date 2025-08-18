@@ -28,6 +28,7 @@ interface Staff {
   fullName: string;
   position: string;
   positionShort: string;
+  displayOrder?: number;
   department: {
     name: string;
   };
@@ -229,7 +230,14 @@ export default function PublicDisplayMobile() {
                       return acc;
                     }, {} as Record<string, any[]>);
 
-                    return Object.entries(schedulesByStaff).map(([staffId, staffSchedules]) => {
+                    // Sắp xếp staff theo displayOrder 
+                    const sortedStaffEntries = Object.entries(schedulesByStaff).sort(([staffIdA], [staffIdB]) => {
+                      const staffA = staff.find(s => s.id === staffIdA) as any;
+                      const staffB = staff.find(s => s.id === staffIdB) as any;
+                      return (staffA?.displayOrder || 999) - (staffB?.displayOrder || 999);
+                    });
+
+                    return sortedStaffEntries.map(([staffId, staffSchedules]: [string, any[]]) => {
                       const staffMember = staff.find(s => s.id === staffId);
                       
                       return (
@@ -243,7 +251,7 @@ export default function PublicDisplayMobile() {
                           
                           {/* Danh sách lịch của staff này */}
                           <div className="divide-y divide-gray-200">
-                            {staffSchedules.map((schedule, scheduleIndex) => {
+                            {staffSchedules.map((schedule: any, scheduleIndex: number) => {
                               const startTime = new Date(schedule.startDateTime);
                               const endTime = new Date(schedule.endDateTime);
                               const scheduleStartDate = startOfDay(new Date(schedule.startDateTime));
