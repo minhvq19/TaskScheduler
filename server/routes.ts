@@ -25,19 +25,38 @@ import fs from "fs";
 
 // Utility function để tạo tên file an toàn
 function sanitizeFilename(filename: string): string {
-  // Loại bỏ các ký tự đặc biệt và thay thế bằng dấu gạch ngang
-  return filename
+  // Tách tên và extension
+  const lastDotIndex = filename.lastIndexOf('.');
+  const name = lastDotIndex !== -1 ? filename.substring(0, lastDotIndex) : filename;
+  const ext = lastDotIndex !== -1 ? filename.substring(lastDotIndex) : '';
+  
+  // Sanitize tên file nhưng giữ extension gốc
+  const sanitizedName = name
     .replace(/[^a-zA-Z0-9.\-_]/g, '-') // Thay thế ký tự đặc biệt bằng -
     .replace(/\s+/g, '-') // Thay thế khoảng trắng bằng -
     .replace(/-+/g, '-') // Loại bỏ nhiều dấu - liên tiếp
-    .replace(/^-|-$/g, '') // Loại bỏ - ở đầu và cuối
-    .toLowerCase();
+    .replace(/^-|-$/g, ''); // Loại bỏ - ở đầu và cuối
+  
+  return (sanitizedName + ext).toLowerCase();
 }
 
 // Configure multer for file uploads với custom filename handling
 const upload = multer({
   storage: multer.diskStorage({
-    destination: 'uploads/',
+    destination: (req, file, cb) => {
+      // Ensure both directories exist
+      const uploadsDir = 'uploads/';
+      const publicUploadsDir = path.join(process.cwd(), 'dist', 'public', 'uploads');
+      
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      if (!fs.existsSync(publicUploadsDir)) {
+        fs.mkdirSync(publicUploadsDir, { recursive: true });
+      }
+      
+      cb(null, uploadsDir);
+    },
     filename: (req, file, cb) => {
       // Tạo tên file duy nhất với timestamp và random string
       const timestamp = Date.now();
@@ -47,7 +66,8 @@ const upload = multer({
       console.log('File upload naming:', {
         original: file.originalname,
         sanitized: sanitizedName,
-        final: filename
+        final: filename,
+        timestamp: new Date(timestamp).toISOString()
       });
       cb(null, filename);
     }
@@ -507,11 +527,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
           
-          // Move file từ temp location đến public uploads (file đã ở đúng vị trí từ multer)
-          // Chỉ copy đến dist/public/uploads nếu cần
-          if (!fs.existsSync(publicPath) && fs.existsSync(file.path)) {
-            fs.copyFileSync(file.path, publicPath);
+          // Copy file to public uploads directory for serving
+          try {
+            if (fs.existsSync(file.path)) {
+              fs.copyFileSync(file.path, publicPath);
+              console.log('File copied to public directory:', publicPath);
+            } else {
+              console.error('Source file does not exist:', file.path);
+            }
+          } catch (error) {
+            console.error('Error copying file to public directory:', error);
           }
+          
+          const fileUrl = `/uploads/${file.filename}`;
           
           console.log('File uploaded successfully:', {
             original: file.originalname,
@@ -522,7 +550,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             actualFileUrl: fileUrl
           });
           
-          const fileUrl = `/uploads/${file.filename}`;
           imageUrls.push(fileUrl);
         }
         
@@ -593,10 +620,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
           
-          // Move file từ temp location đến public uploads (file đã ở đúng vị trí từ multer)
-          // Chỉ copy đến dist/public/uploads nếu cần
-          if (!fs.existsSync(publicPath) && fs.existsSync(file.path)) {
-            fs.copyFileSync(file.path, publicPath);
+          // Copy file to public uploads directory for serving
+          try {
+            if (fs.existsSync(file.path)) {
+              fs.copyFileSync(file.path, publicPath);
+              console.log('File copied to public directory:', publicPath);
+            } else {
+              console.error('Source file does not exist:', file.path);
+            }
+          } catch (error) {
+            console.error('Error copying file to public directory:', error);
           }
           
           console.log('File updated successfully:', {
@@ -604,7 +637,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sanitized: file.filename,
             path: file.path,
             publicPath,
-            exists: fs.existsSync(file.path)
+            exists: fs.existsSync(file.path),
+            publicExists: fs.existsSync(publicPath)
           });
           
           const fileUrl = `/uploads/${file.filename}`;
