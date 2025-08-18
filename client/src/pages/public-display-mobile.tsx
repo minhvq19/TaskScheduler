@@ -144,7 +144,6 @@ export default function PublicDisplayMobile() {
 
   // Component hiển thị kế hoạch công tác cho mobile
   const WorkScheduleDisplayMobile = () => {
-    const [selectedStaff, setSelectedStaff] = useState<string>('all');
     const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
     
     if (!displayData?.workSchedules) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
@@ -162,7 +161,7 @@ export default function PublicDisplayMobile() {
     // Lọc chỉ cán bộ thuộc Ban giám đốc
     const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
 
-    // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
+    // Lọc lịch theo tuần hiện tại và chỉ hiển thị cán bộ Ban giám đốc
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
       const scheduleDate = startOfDay(new Date(schedule.startDateTime));
       const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
@@ -174,11 +173,7 @@ export default function PublicDisplayMobile() {
       
       const staffInManagement = managementStaff.some(s => s.id === schedule.staffId);
       
-      if (selectedStaff === 'all') {
-        return isInCurrentWeek && staffInManagement;
-      } else {
-        return isInCurrentWeek && schedule.staffId === selectedStaff && staffInManagement;
-      }
+      return isInCurrentWeek && staffInManagement;
     });
 
     // Hiển thị theo layout mới như hình mẫu
@@ -306,22 +301,7 @@ export default function PublicDisplayMobile() {
             </button>
           </div>
 
-          {/* Bộ lọc cán bộ */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
-            <select
-              value={selectedStaff}
-              onChange={(e) => setSelectedStaff(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent"
-            >
-              <option value="all">Tất cả cán bộ</option>
-              {managementStaff.map((staffMember) => (
-                <option key={staffMember.id} value={staffMember.id}>
-                  {staffMember.positionShort}. {staffMember.fullName}
-                </option>
-              ))}
-            </select>
-          </div>
+
         </div>
 
         {/* Nội dung hiển thị */}
@@ -351,26 +331,32 @@ export default function PublicDisplayMobile() {
     if (!meetingSchedules) return <div className="text-center text-gray-500">Không có dữ liệu lịch họp</div>;
     if (!meetingRooms) return <div className="text-center text-gray-500">Không có dữ liệu phòng họp</div>;
 
-    // Debug logs
-    console.log('Display Data:', displayData);
-    console.log('Meeting Schedules:', meetingSchedules);
-    console.log('Meeting Rooms:', meetingRooms);
-    console.log('Current time:', new Date());
+    // Debug logs để tìm lỗi
+    console.log('Mobile Meeting Display - Display Data:', displayData);
+    console.log('Mobile Meeting Display - Meeting Schedules:', meetingSchedules);
+    console.log('Mobile Meeting Display - Meeting Rooms:', meetingRooms);
+    console.log('Mobile Meeting Display - Current time:', new Date());
     
     const today = startOfDay(new Date());
     
     // Debug: Kiểm tra lịch hôm nay (18/08)
     const todayString = format(today, 'yyyy-MM-dd');
-    console.log('Today string:', todayString);
+    console.log('Mobile Meeting Display - Today string:', todayString);
     
     if (Array.isArray(meetingSchedules)) {
       const todayMeetings = meetingSchedules.filter((meeting: any) => {
         const meetingDate = startOfDay(new Date(meeting.startDateTime));
         const meetingDateString = format(meetingDate, 'yyyy-MM-dd');
-        console.log('Meeting date:', meetingDateString, 'Meeting:', meeting.meetingContent, 'Room ID:', meeting.roomId);
+        console.log('Mobile Meeting Display - Meeting assignment:', {
+          meetingId: meeting.id,
+          roomId: meeting.roomId,
+          dateKey: meetingDateString,
+          isWithinWeek: meetingDateString === todayString,
+          hasRoomInMap: meetingRooms?.some((room: any) => room.id === meeting.roomId)
+        });
         return meetingDateString === todayString;
       });
-      console.log('Today meetings found:', todayMeetings.length, todayMeetings);
+      console.log('Mobile Meeting Display - Today meetings found:', todayMeetings.length, todayMeetings);
       
     }
     const currentWeek = eachDayOfInterval({
