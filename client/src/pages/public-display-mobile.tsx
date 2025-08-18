@@ -312,6 +312,9 @@ export default function PublicDisplayMobile() {
 
   // Component hiển thị lịch phòng họp cho mobile
   const MeetingScheduleDisplayMobile = () => {
+    // State để quản lý ngày hiện tại
+    const [currentDateOffset, setCurrentDateOffset] = useState(0);
+    
     // Lấy dữ liệu từ API public display data
     const { data: displayData, isLoading: displayLoading } = useQuery({
       queryKey: ['/api/public/display-data'],
@@ -331,14 +334,33 @@ export default function PublicDisplayMobile() {
     if (!meetingSchedules) return <div className="text-center text-gray-500">Không có dữ liệu lịch họp</div>;
     if (!meetingRooms) return <div className="text-center text-gray-500">Không có dữ liệu phòng họp</div>;
 
+    // Tính toán ngày hiện tại dựa trên offset
     const today = startOfDay(new Date());
+    const currentDate = addDays(today, currentDateOffset);
     const currentWeek = eachDayOfInterval({
       start: startOfWeek(today, { weekStartsOn: 1 }),
       end: endOfWeek(today, { weekStartsOn: 1 })
     });
 
-    // Hàm kiểm tra xem phòng có đang được sử dụng không 
+    // Lấy meetings cho ngày hiện tại
+    const getMeetingsForDate = (date: Date) => {
+      const dateKey = format(date, 'yyyy-MM-dd');
+      return Array.isArray(meetingSchedules) ? meetingSchedules.filter((meeting: any) => {
+        const meetingStart = new Date(meeting.startDateTime);
+        const meetingEnd = new Date(meeting.endDateTime);
+        
+        const meetingStartDate = format(meetingStart, 'yyyy-MM-dd');
+        const meetingEndDate = format(meetingEnd, 'yyyy-MM-dd');
+        
+        // Meeting overlaps with the selected date
+        return meetingStartDate <= dateKey && meetingEndDate >= dateKey;
+      }) : [];
+    };
+
+    // Hàm kiểm tra xem phòng có đang được sử dụng không (chỉ cho ngày hôm nay)
     const isRoomBusy = (roomId: string, checkTime: Date) => {
+      // Chỉ kiểm tra trạng thái thời gian thực cho ngày hôm nay
+      if (currentDateOffset !== 0) return false;
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
@@ -359,9 +381,9 @@ export default function PublicDisplayMobile() {
       }) : false;
     };
 
-    // Hàm lấy cuộc họp tiếp theo của phòng
+    // Hàm lấy cuộc họp tiếp theo của phòng (chỉ cho ngày hôm nay)
     const getNextMeeting = (roomId: string) => {
-      if (!Array.isArray(meetingSchedules)) return null;
+      if (!Array.isArray(meetingSchedules) || currentDateOffset !== 0) return null;
       
       const now = new Date();
       const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
@@ -375,9 +397,9 @@ export default function PublicDisplayMobile() {
       return upcomingMeetings[0] || null;
     };
 
-    // Hàm lấy cuộc họp hiện tại của phòng
+    // Hàm lấy cuộc họp hiện tại của phòng (chỉ cho ngày hôm nay)
     const getCurrentMeeting = (roomId: string) => {
-      if (!Array.isArray(meetingSchedules)) return null;
+      if (!Array.isArray(meetingSchedules) || currentDateOffset !== 0) return null;
       
       const now = new Date();
       const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
@@ -390,55 +412,122 @@ export default function PublicDisplayMobile() {
       }) || null;
     };
 
+    // Hàm lấy tất cả meetings cho phòng trong ngày được chọn
+    const getMeetingsForRoom = (roomId: string) => {
+      const dayMeetings = getMeetingsForDate(currentDate);
+      return dayMeetings.filter((meeting: any) => meeting.roomId === roomId)
+        .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+    };
+
 
 
     return (
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="text-center bg-[#006b68] text-white p-3 rounded-lg">
-          <h2 className="text-lg font-bold">Tình trạng phòng họp hôm nay</h2>
-          <div className="text-sm">
-            {format(today, 'dd/MM/yyyy')} - {format(new Date(), 'HH:mm')}
+      <div className="space-y-3">
+        {/* Header điều hướng ngày */}
+        <div className="bg-white p-3 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={() => setCurrentDateOffset(currentDateOffset - 1)}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            
+            <div className="text-center flex-1">
+              <div className="font-bold text-lg text-gray-800">
+                {currentDateOffset === 0 ? 'Hôm nay' : format(currentDate, 'dd/MM/yyyy', { locale: vi })}
+              </div>
+              <div className="text-sm text-gray-600">
+                {format(currentDate, 'EEEE', { locale: vi })}
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setCurrentDateOffset(currentDateOffset + 1)}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+          
+          {/* Quick navigation */}
+          <div className="flex justify-center space-x-2 mt-2">
+            <button
+              onClick={() => setCurrentDateOffset(-1)}
+              className={`px-3 py-1 rounded text-xs ${
+                currentDateOffset === -1 
+                  ? 'bg-blue-100 text-blue-800' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Hôm qua
+            </button>
+            <button
+              onClick={() => setCurrentDateOffset(0)}
+              className={`px-3 py-1 rounded text-xs ${
+                currentDateOffset === 0 
+                  ? 'bg-blue-100 text-blue-800' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Hôm nay
+            </button>
+            <button
+              onClick={() => setCurrentDateOffset(1)}
+              className={`px-3 py-1 rounded text-xs ${
+                currentDateOffset === 1 
+                  ? 'bg-blue-100 text-blue-800' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Ngày mai
+            </button>
           </div>
         </div>
 
         {/* Danh sách phòng họp */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-3">
           {Array.isArray(meetingRooms) && meetingRooms.map((room: any) => {
             const currentMeeting = getCurrentMeeting(room.id);
             const nextMeeting = getNextMeeting(room.id);
+            const dayMeetings = getMeetingsForRoom(room.id);
             const isBusy = isRoomBusy(room.id, new Date());
 
             return (
               <div 
-                key={room.id}
+                key={room.id} 
                 className={`p-4 rounded-lg border-2 ${
-                  isBusy 
-                    ? 'border-red-400 bg-red-50' 
-                    : 'border-green-400 bg-green-50'
+                  // Chỉ hiển thị trạng thái thời gian thực cho hôm nay
+                  currentDateOffset === 0 && isBusy 
+                    ? 'bg-red-50 border-red-200' 
+                    : 'bg-green-50 border-green-200'
                 }`}
               >
-                {/* Header phòng */}
+                {/* Header phòng với trạng thái */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${
-                      isBusy ? 'bg-red-500' : 'bg-green-500'
-                    }`}></div>
+                    {currentDateOffset === 0 && (
+                      <div className={`w-3 h-3 rounded-full ${
+                        isBusy ? 'bg-red-500' : 'bg-green-500'
+                      }`}></div>
+                    )}
                     <h3 className="font-bold text-lg text-gray-800">
                       {room.name}
                     </h3>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    isBusy 
-                      ? 'bg-red-200 text-red-800' 
-                      : 'bg-green-200 text-green-800'
-                  }`}>
-                    {isBusy ? 'Đang sử dụng' : 'Trống'}
-                  </div>
+                  {currentDateOffset === 0 && (
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      isBusy 
+                        ? 'bg-red-200 text-red-800' 
+                        : 'bg-green-200 text-green-800'
+                    }`}>
+                      {isBusy ? 'Đang sử dụng' : 'Trống'}
+                    </span>
+                  )}
                 </div>
 
-                {/* Thông tin hiện tại */}
-                {currentMeeting && (
+                {/* Thông tin meeting hiện tại (chỉ cho hôm nay) */}
+                {currentDateOffset === 0 && currentMeeting && (
                   <div className="mb-3 p-3 bg-white rounded border border-red-200">
                     <div className="text-sm font-medium text-red-700 mb-1">
                       Đang diễn ra:
@@ -477,8 +566,8 @@ export default function PublicDisplayMobile() {
                   </div>
                 )}
 
-                {/* Cuộc họp tiếp theo */}
-                {nextMeeting && (
+                {/* Cuộc họp tiếp theo (chỉ cho hôm nay) */}
+                {currentDateOffset === 0 && nextMeeting && (
                   <div className="mb-3 p-3 bg-white rounded border border-blue-200">
                     <div className="text-sm font-medium text-blue-700 mb-1">
                       Cuộc họp tiếp theo:
@@ -501,6 +590,73 @@ export default function PublicDisplayMobile() {
                   </div>
                 )}
 
+                {/* Danh sách tất cả meetings trong ngày */}
+                {dayMeetings.length > 0 && (
+                  <div className="mt-3">
+                    <div className="text-sm font-medium text-gray-700 mb-2">
+                      Lịch {currentDateOffset === 0 ? 'hôm nay' : format(currentDate, 'dd/MM', { locale: vi })}:
+                    </div>
+                    <div className="space-y-2">
+                      {dayMeetings.map((meeting: any, index: number) => {
+                        const utcStartTime = new Date(meeting.startDateTime);
+                        const utcEndTime = new Date(meeting.endDateTime);
+                        const selectedDateKey = format(currentDate, 'yyyy-MM-dd');
+                        
+                        // Logic hiển thị thời gian giống 4K display
+                        const meetingStartDate = format(utcStartTime, 'yyyy-MM-dd');
+                        const meetingEndDate = format(utcEndTime, 'yyyy-MM-dd');
+                        
+                        let displayStartTime, displayEndTime;
+                        if (meetingStartDate === selectedDateKey) {
+                          displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, "0")}:${String(utcStartTime.getUTCMinutes()).padStart(2, "0")}`;
+                        } else {
+                          displayStartTime = "00:00";
+                        }
+                        
+                        if (meetingEndDate === selectedDateKey) {
+                          displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, "0")}:${String(utcEndTime.getUTCMinutes()).padStart(2, "0")}`;
+                        } else {
+                          displayEndTime = "23:59";
+                        }
+
+                        const isCurrentMeeting = currentDateOffset === 0 && currentMeeting && currentMeeting.id === meeting.id;
+                        
+                        return (
+                          <div 
+                            key={`${meeting.id}-${index}`}
+                            className={`p-2 rounded border ${
+                              isCurrentMeeting 
+                                ? 'bg-red-50 border-red-200' 
+                                : 'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <div className="text-sm font-medium text-gray-800">
+                              {meeting.meetingContent || meeting.title || 'Cuộc họp'}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              {displayStartTime} - {displayEndTime}
+                              {meeting.contactPerson && ` • ${meeting.contactPerson}`}
+                            </div>
+                            {isCurrentMeeting && (
+                              <div className="text-xs text-red-600 font-medium mt-1">
+                                Đang diễn ra
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Hiển thị thông báo nếu không có meetings */}
+                {dayMeetings.length === 0 && (
+                  <div className="mt-3 text-center py-4">
+                    <div className="text-gray-400 text-sm">
+                      Không có cuộc họp {currentDateOffset === 0 ? 'hôm nay' : format(currentDate, 'dd/MM/yyyy', { locale: vi })}
+                    </div>
+                  </div>
+                )}
 
               </div>
             );
