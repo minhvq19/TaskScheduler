@@ -739,6 +739,16 @@ export default function PublicDisplayMobile() {
     const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
+      
+      // Debug để kiểm tra thời gian
+      console.log('Event filter check:', {
+        eventName: event.shortName,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        now: now.toISOString(),
+        isActive: startDate <= now && now <= endDate
+      });
+      
       return startDate <= now && now <= endDate;
     }) : [];
     
