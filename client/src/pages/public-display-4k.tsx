@@ -342,7 +342,7 @@ export default function PublicDisplay4K() {
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
                 style={{ fontFamily: "Arial, sans-serif" }}
               >
-                <div className="font-bold text-[24px]">{dayName}</div>
+                <div className="font-bold text-[30px]">{dayName}</div>
                 <div className="text-2xl font-bold">
                   {format(day, "dd/MM", { locale: vi })}
                 </div>
