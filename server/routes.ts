@@ -518,7 +518,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sanitized: file.filename,
             path: file.path,
             publicPath,
-            exists: fs.existsSync(file.path)
+            exists: fs.existsSync(file.path),
+            actualFileUrl: fileUrl
           });
           
           const fileUrl = `/uploads/${file.filename}`;
@@ -580,11 +581,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (req.files && Array.isArray(req.files)) {
-        // Xử lý các file mới
+        // Xử lý các file mới với tên đã được sanitize từ multer
         const newImageUrls: string[] = [];
         for (const file of req.files) {
-          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
-          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+          // file.filename đã được sanitize bởi multer storage configuration
+          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', file.filename);
           
           // Ensure uploads directory exists
           const uploadsDir = path.dirname(publicPath);
@@ -592,17 +593,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
           
-          fs.renameSync(file.path, publicPath);
-          
-          // Also copy to the backup uploads directory for compatibility
-          const backupPath = path.join(process.cwd(), 'uploads', filename);
-          const backupDir = path.dirname(backupPath);
-          if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
+          // Move file từ temp location đến public uploads (file đã ở đúng vị trí từ multer)
+          // Chỉ copy đến dist/public/uploads nếu cần
+          if (!fs.existsSync(publicPath) && fs.existsSync(file.path)) {
+            fs.copyFileSync(file.path, publicPath);
           }
-          fs.copyFileSync(publicPath, backupPath);
           
-          const fileUrl = `/uploads/${filename}`;
+          console.log('File updated successfully:', {
+            original: file.originalname,
+            sanitized: file.filename,
+            path: file.path,
+            publicPath,
+            exists: fs.existsSync(file.path)
+          });
+          
+          const fileUrl = `/uploads/${file.filename}`;
           newImageUrls.push(fileUrl);
         }
         
