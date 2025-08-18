@@ -1355,9 +1355,7 @@ export default function PublicDisplay4K() {
         <div
           className="font-bold text-[42px] text-[#791301]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
-        >
-          NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
-        </div>
+        >NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM - CHI NHÁNH SỞ GIAO DỊCH 1</div>
         
         <div
           className="font-bold mt-4 text-6xl text-[#421001]"
@@ -1468,7 +1466,6 @@ export default function PublicDisplay4K() {
           renderMeetingScheduleTable4K()}
         {currentScreen.id === "other-events" && renderOtherEventsDisplay4K()}
       </div>
-
       {/* Footer chỉ hiển thị cho meeting schedule - màu và chiều cao rõ ràng hơn */}
       {currentScreen.id === "meeting-schedule" && (
         <div
