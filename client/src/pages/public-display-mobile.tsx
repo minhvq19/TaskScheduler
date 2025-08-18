@@ -405,16 +405,21 @@ export default function PublicDisplayMobile() {
       }) || null;
     };
 
-    // Debug: Kiểm tra tình trạng từng phòng (sau khi functions được define)
+    // Debug: Kiểm tra tình trạng từng phòng và roomId mapping
     if (Array.isArray(meetingRooms)) {
       meetingRooms.forEach((room: any) => {
         const currentMeeting = getCurrentMeeting(room.id);
         const nextMeeting = getNextMeeting(room.id);
         const isBusy = isRoomBusy(room.id, new Date());
-        console.log(`Room ${room.name} (${room.id}):`, {
+        
+        // Debug: Kiểm tra mapping roomId
+        const roomMeetings = meetingSchedules.filter((meeting: any) => meeting.roomId === room.id);
+        console.log(`Mobile Meeting Display - Room ${room.name} (${room.id}) mapping:`, {
           isBusy,
           currentMeeting: currentMeeting?.meetingContent || currentMeeting?.title || 'None',
-          nextMeeting: nextMeeting?.meetingContent || nextMeeting?.title || 'None'
+          nextMeeting: nextMeeting?.meetingContent || nextMeeting?.title || 'None',
+          totalMeetingsForRoom: roomMeetings.length,
+          meetingIds: roomMeetings.map(m => ({ id: m.id, content: m.meetingContent, date: format(new Date(m.startDateTime), 'yyyy-MM-dd') }))
         });
       });
     }
