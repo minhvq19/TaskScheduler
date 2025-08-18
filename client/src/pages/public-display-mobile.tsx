@@ -271,18 +271,29 @@ export default function PublicDisplayMobile() {
           {/* Bộ lọc cán bộ */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
-            <select
-              value={selectedStaff}
-              onChange={(e) => setSelectedStaff(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent"
-            >
-              <option value="all">Tất cả cán bộ</option>
-              {managementStaff.map((staffMember) => (
-                <option key={staffMember.id} value={staffMember.id}>
-                  {staffMember.positionShort}. {staffMember.fullName}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={selectedStaff}
+                onChange={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedStaff(e.target.value);
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent appearance-none bg-white"
+                style={{ minHeight: '44px' }} // Tăng chiều cao để dễ touch trên mobile
+              >
+                <option value="all">Tất cả cán bộ</option>
+                {managementStaff.map((staffMember) => (
+                  <option key={staffMember.id} value={staffMember.id}>
+                    {staffMember.positionShort}. {staffMember.fullName}
+                  </option>
+                ))}
+              </select>
+              {/* Custom dropdown arrow */}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <ChevronRight className="w-4 h-4 text-gray-400 transform rotate-90" />
+              </div>
+            </div>
           </div>
         </div>
 
