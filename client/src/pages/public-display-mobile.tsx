@@ -735,21 +735,24 @@ export default function PublicDisplayMobile() {
     if (!otherEvents) return <div className="text-center text-gray-500">Không có dữ liệu sự kiện</div>;
 
     // Lọc sự kiện active và trong khoảng thời gian hiện tại
+    // Sử dụng thời gian địa phương UTC+7 (giống logic meeting rooms)
     const now = new Date();
+    const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+    
     const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
       
-      // Debug để kiểm tra thời gian
-      console.log('Event filter check:', {
-        eventName: event.shortName,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        now: now.toISOString(),
-        isActive: startDate <= now && now <= endDate
-      });
+      // Debug để kiểm tra thời gian với timezone
+      // console.log('Event filter check (UTC+7):', {
+      //   eventName: event.shortName,
+      //   startDate: startDate.toISOString(),
+      //   endDate: endDate.toISOString(),
+      //   localNow: localNow.toISOString(),
+      //   isActive: startDate <= localNow && localNow <= endDate
+      // });
       
-      return startDate <= now && now <= endDate;
+      return startDate <= localNow && localNow <= endDate;
     }) : [];
     
     if (currentEvents.length === 0) {

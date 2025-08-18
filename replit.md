@@ -26,6 +26,7 @@ Hệ thống này cung cấp giải pháp quản lý lịch làm việc toàn di
 - **Thêm điều hướng ngày cho mobile meeting rooms**: Tạo tính năng xem lịch họp các ngày khác với navigation buttons và quick access (Hôm qua/Hôm nay/Ngày mai), hiển thị danh sách meetings theo ngày được chọn với thời gian chính xác
 - **Sửa lỗi state reset cho navigation**: Di chuyển state navigation (meetingDateOffset, workWeekOffset) lên parent component để persist qua re-renders, tránh reset về ngày hiện tại khi user điều hướng
 - **Gom nhóm lịch công tác mobile**: Cải thiện hiển thị work schedule bằng cách gom nhóm các lịch của cùng một cán bộ lại với nhau, tách biệt tên cán bộ và danh sách công việc
+- **Sửa timezone cho mobile other events**: Áp dụng logic UTC+7 giống meeting rooms để hiển thị đúng sự kiện đang diễn ra
 - **Sửa lỗi tải ảnh và mã hóa URL**: Đã khắc phục các vấn đề tải ảnh trong môi trường sản xuất cho mục Sự kiện khác
 - Nâng cấp cấu hình multer với tính năng làm sạch tên tệp để ngăn chặn các khoảng trống và ký tự đặc biệt
 - Tạo hàm tiện ích `createImageUrl` để mã hóa URL đúng cách cho cả màn hình 4K và màn hình tiêu chuẩn
