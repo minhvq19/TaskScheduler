@@ -64,12 +64,14 @@ const upload = multer({
       const sanitizedName = sanitizeFilename(file.originalname);
       const filename = `${timestamp}-${randomString}-${sanitizedName}`;
       
-      console.log('File upload naming:', {
+      console.log('🔧 MULTER FILE UPLOAD NAMING:', {
         original: file.originalname,
         sanitized: sanitizedName,
         final: filename,
         timestamp: new Date(timestamp).toISOString(),
-        willReplace: 'spaces with underscores'
+        willReplace: 'spaces with underscores',
+        hasSpaces: file.originalname.includes(' '),
+        finalHasSpaces: filename.includes(' ')
       });
       
       cb(null, filename);
@@ -556,7 +558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               throw new Error(`Copy verification failed: public=${publicExists}, backup=${backupExists}`);
             }
 
-            console.log('✓ FILE UPLOAD COMPLETE SUCCESS:', {
+            console.log('🎉 FILE UPLOAD COMPLETE SUCCESS:', {
               original: file.originalname,
               sanitized: file.filename,
               source: file.path,
@@ -564,7 +566,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               backupPath,
               publicExists,
               backupExists,
-              fileSize: fs.statSync(publicPath).size
+              fileSize: fs.statSync(publicPath).size,
+              httpUrl: `http://localhost:5000/uploads/${file.filename}`
             });
 
           } catch (error) {
