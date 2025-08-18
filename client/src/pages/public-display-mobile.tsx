@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, startOfDay, eachDayOfInterval, getDay } from "date-fns";
+import { format, addDays, startOfDay, eachDayOfInterval, getDay, startOfWeek, endOfWeek } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSystemColors } from "@/hooks/useSystemColors";
 import { ChevronLeft, ChevronRight, Pause, Play, Calendar, Clock, Users } from "lucide-react";
@@ -356,17 +356,19 @@ export default function PublicDisplayMobile() {
 
     // Hàm kiểm tra xem phòng có đang được sử dụng không
     const isRoomBusy = (roomId: string, checkTime: Date) => {
-      return meetingSchedules.some((meeting: any) => {
+      return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
         return meeting.meetingRoomId === roomId && 
                checkTime >= meetingStart && 
                checkTime < meetingEnd;
-      });
+      }) : false;
     };
 
     // Hàm lấy cuộc họp tiếp theo của phòng
     const getNextMeeting = (roomId: string) => {
+      if (!Array.isArray(meetingSchedules)) return null;
+      
       const now = new Date();
       const upcomingMeetings = meetingSchedules
         .filter((meeting: any) => {
@@ -380,6 +382,8 @@ export default function PublicDisplayMobile() {
 
     // Hàm lấy cuộc họp hiện tại của phòng
     const getCurrentMeeting = (roomId: string) => {
+      if (!Array.isArray(meetingSchedules)) return null;
+      
       const now = new Date();
       return meetingSchedules.find((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
@@ -402,7 +406,7 @@ export default function PublicDisplayMobile() {
 
         {/* Danh sách phòng họp */}
         <div className="space-y-3">
-          {meetingRooms.map((room: any) => {
+          {Array.isArray(meetingRooms) && meetingRooms.map((room: any) => {
             const currentMeeting = getCurrentMeeting(room.id);
             const nextMeeting = getNextMeeting(room.id);
             const isBusy = isRoomBusy(room.id, new Date());
@@ -473,13 +477,13 @@ export default function PublicDisplayMobile() {
                     Lịch hôm nay:
                   </div>
                   {(() => {
-                    const todayMeetings = meetingSchedules
+                    const todayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules
                       .filter((meeting: any) => {
                         const meetingDate = startOfDay(new Date(meeting.startDateTime));
                         return meeting.meetingRoomId === room.id && 
                                format(meetingDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
                       })
-                      .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+                      .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()) : [];
 
                     if (todayMeetings.length === 0) {
                       return (
