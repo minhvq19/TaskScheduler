@@ -146,6 +146,7 @@ export default function PublicDisplayMobile() {
   const WorkScheduleDisplayMobile = () => {
     const [selectedStaff, setSelectedStaff] = useState<string>('all');
     const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
+    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     
     if (!displayData?.workSchedules) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
 
@@ -162,8 +163,7 @@ export default function PublicDisplayMobile() {
     // Lọc chỉ cán bộ thuộc Ban giám đốc
     const managementStaff = Array.isArray(staff) ? staff.filter(s => s.department?.name === 'Ban giám đốc') : [];
     
-    console.log('Management staff:', managementStaff.map(s => s.fullName));
-    console.log('Selected staff:', selectedStaff);
+
 
     // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
@@ -178,7 +178,7 @@ export default function PublicDisplayMobile() {
       }
     });
     
-    console.log('Filtered schedules:', filteredSchedules.length);
+
 
     // Hiển thị theo layout mới như hình mẫu
     const renderScheduleView = () => {
@@ -273,32 +273,59 @@ export default function PublicDisplayMobile() {
             </button>
           </div>
 
-          {/* Bộ lọc cán bộ - Mobile optimized */}
+          {/* Bộ lọc cán bộ - Custom dropdown cho mobile */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
             <div className="relative">
-              <select
-                value={selectedStaff}
-                onChange={(e) => setSelectedStaff(e.target.value)}
-                className="w-full p-4 text-base border-2 border-gray-300 rounded-lg bg-white focus:border-[#006b68] focus:outline-none appearance-none"
-                style={{ 
-                  minHeight: '50px',
-                  fontSize: '16px', // Prevents zoom on iOS
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none'
-                }}
+              {/* Dropdown button */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-full p-4 text-base border-2 border-gray-300 rounded-lg bg-white focus:border-[#006b68] focus:outline-none text-left flex items-center justify-between"
+                style={{ minHeight: '50px', fontSize: '16px' }}
               >
-                <option value="all">Tất cả cán bộ</option>
-                {managementStaff.map((staffMember) => (
-                  <option key={staffMember.id} value={staffMember.id}>
-                    {staffMember.positionShort}. {staffMember.fullName}
-                  </option>
-                ))}
-              </select>
-              {/* Custom dropdown arrow */}
-              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                <ChevronRight className="w-5 h-5 text-gray-400 transform rotate-90" />
-              </div>
+                <span>
+                  {selectedStaff === 'all' 
+                    ? 'Tất cả cán bộ' 
+                    : (() => {
+                        const staff = managementStaff.find(s => s.id === selectedStaff);
+                        return staff ? `${staff.positionShort}. ${staff.fullName}` : 'Tất cả cán bộ';
+                      })()
+                  }
+                </span>
+                <ChevronRight className={`w-5 h-5 text-gray-400 transform transition-transform duration-200 ${isDropdownOpen ? 'rotate-90' : 'rotate-90'}`} />
+              </button>
+
+              {/* Dropdown menu */}
+              {isDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedStaff('all');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 ${selectedStaff === 'all' ? 'bg-blue-50 text-blue-700' : ''}`}
+                    style={{ fontSize: '16px' }}
+                  >
+                    Tất cả cán bộ
+                  </button>
+                  {managementStaff.map((staffMember) => (
+                    <button
+                      key={staffMember.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedStaff(staffMember.id);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${selectedStaff === staffMember.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                      style={{ fontSize: '16px' }}
+                    >
+                      {staffMember.positionShort}. {staffMember.fullName}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
