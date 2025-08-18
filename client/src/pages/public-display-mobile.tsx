@@ -348,8 +348,8 @@ export default function PublicDisplayMobile() {
         const localCheckTime = new Date(checkTime.getTime() + 7 * 60 * 60 * 1000);
         
         // Debug log để kiểm tra thời gian
-        if (meeting.meetingContent?.includes('BIDV direct')) {
-          console.log('Debug room busy check (fixed):', {
+        if (meeting.meetingContent?.includes('BIDV direct') || meeting.meetingContent?.includes('Họp trực tuyến')) {
+          console.log('Debug room busy check (NEW):', {
             roomId,
             meetingRoomId: meeting.roomId,
             meetingContent: meeting.meetingContent,
@@ -358,6 +358,13 @@ export default function PublicDisplayMobile() {
             meetingStart: meetingStart.toISOString(),
             meetingEnd: meetingEnd.toISOString(),
             roomMatch: meeting.roomId === roomId,
+            timeComparison: {
+              localCheckTime_ms: localCheckTime.getTime(),
+              meetingStart_ms: meetingStart.getTime(),
+              meetingEnd_ms: meetingEnd.getTime(),
+              isAfterStart: localCheckTime.getTime() >= meetingStart.getTime(),
+              isBeforeEnd: localCheckTime.getTime() < meetingEnd.getTime()
+            },
             timeInRange: localCheckTime.getTime() >= meetingStart.getTime() && localCheckTime.getTime() < meetingEnd.getTime()
           });
         }
