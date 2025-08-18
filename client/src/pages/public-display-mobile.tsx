@@ -436,11 +436,29 @@ export default function PublicDisplayMobile() {
                     </div>
                     <div className="text-xs text-gray-600">
                       {(() => {
-                        const startTime = new Date(currentMeeting.startDateTime);
-                        const endTime = new Date(currentMeeting.endDateTime);
-                        const startDisplay = `${String(startTime.getUTCHours()).padStart(2, '0')}:${String(startTime.getUTCMinutes()).padStart(2, '0')}`;
-                        const endDisplay = `${String(endTime.getUTCHours()).padStart(2, '0')}:${String(endTime.getUTCMinutes()).padStart(2, '0')}`;
-                        return `${startDisplay} - ${endDisplay}`;
+                        const utcStartTime = new Date(currentMeeting.startDateTime);
+                        const utcEndTime = new Date(currentMeeting.endDateTime);
+                        const today = new Date();
+                        
+                        // Logic giống 4K display - kiểm tra xem cuộc họp có bắt đầu/kết thúc hôm nay không
+                        const meetingStartDate = `${utcStartTime.getUTCFullYear()}-${String(utcStartTime.getUTCMonth() + 1).padStart(2, "0")}-${String(utcStartTime.getUTCDate()).padStart(2, "0")}`;
+                        const meetingEndDate = `${utcEndTime.getUTCFullYear()}-${String(utcEndTime.getUTCMonth() + 1).padStart(2, "0")}-${String(utcEndTime.getUTCDate()).padStart(2, "0")}`;
+                        const currentDayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+                        
+                        let displayStartTime, displayEndTime;
+                        if (meetingStartDate === currentDayDate) {
+                          displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, "0")}:${String(utcStartTime.getUTCMinutes()).padStart(2, "0")}`;
+                        } else {
+                          displayStartTime = "00:00";
+                        }
+                        
+                        if (meetingEndDate === currentDayDate) {
+                          displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, "0")}:${String(utcEndTime.getUTCMinutes()).padStart(2, "0")}`;
+                        } else {
+                          displayEndTime = "23:59";
+                        }
+                        
+                        return `${displayStartTime} - ${displayEndTime}`;
                       })()}
                       {currentMeeting.contactPerson && ` • Người liên hệ: ${currentMeeting.contactPerson}`}
                     </div>
@@ -458,10 +476,12 @@ export default function PublicDisplayMobile() {
                     </div>
                     <div className="text-xs text-gray-600">
                       {(() => {
-                        const startTime = new Date(nextMeeting.startDateTime);
-                        const endTime = new Date(nextMeeting.endDateTime);
-                        const startDisplay = `${String(startTime.getUTCDate()).padStart(2, '0')}/${String(startTime.getUTCMonth() + 1).padStart(2, '0')} ${String(startTime.getUTCHours()).padStart(2, '0')}:${String(startTime.getUTCMinutes()).padStart(2, '0')}`;
-                        const endDisplay = `${String(endTime.getUTCHours()).padStart(2, '0')}:${String(endTime.getUTCMinutes()).padStart(2, '0')}`;
+                        const utcStartTime = new Date(nextMeeting.startDateTime);
+                        const utcEndTime = new Date(nextMeeting.endDateTime);
+                        
+                        // Hiển thị ngày và giờ bắt đầu cho cuộc họp tiếp theo
+                        const startDisplay = `${String(utcStartTime.getUTCDate()).padStart(2, '0')}/${String(utcStartTime.getUTCMonth() + 1).padStart(2, '0')} ${String(utcStartTime.getUTCHours()).padStart(2, '0')}:${String(utcStartTime.getUTCMinutes()).padStart(2, '0')}`;
+                        const endDisplay = `${String(utcEndTime.getUTCHours()).padStart(2, '0')}:${String(utcEndTime.getUTCMinutes()).padStart(2, '0')}`;
                         return `${startDisplay} - ${endDisplay}`;
                       })()}
                       {nextMeeting.contactPerson && ` • Người liên hệ: ${nextMeeting.contactPerson}`}

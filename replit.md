@@ -21,6 +21,7 @@ Hệ thống này cung cấp giải pháp quản lý lịch làm việc toàn di
 - Sửa `isValidWorkTime` function để cho phép chọn giờ quá khứ
 - Cập nhật cả `add-schedule-modal.tsx` và `enhanced-schedule-modal.tsx`
 - **Mobile meeting room display cleanup**: Đã loại bỏ bộ lọc "Lọc theo cán bộ" khỏi mobile work schedule và xóa phần "Lịch hôm nay" khỏi mobile meeting room display để tránh hiển thị thông tin không chính xác
+- **Sửa lỗi timezone mobile meeting rooms**: Áp dụng logic xử lý thời gian giống 4K display sử dụng getUTCHours/getUTCMinutes và logic xử lý cuộc họp kéo dài qua nhiều ngày (00:00-23:59 cho ngày giữa)
 - **Sửa lỗi tải ảnh và mã hóa URL**: Đã khắc phục các vấn đề tải ảnh trong môi trường sản xuất cho mục Sự kiện khác
 - Nâng cấp cấu hình multer với tính năng làm sạch tên tệp để ngăn chặn các khoảng trống và ký tự đặc biệt
 - Tạo hàm tiện ích `createImageUrl` để mã hóa URL đúng cách cho cả màn hình 4K và màn hình tiêu chuẩn
