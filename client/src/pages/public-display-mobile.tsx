@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, startOfDay, eachDayOfInterval, getDay, startOfWeek, endOfWeek, addHours } from "date-fns";
+import { format, addDays, startOfDay, eachDayOfInterval, getDay, startOfWeek, endOfWeek } from "date-fns";
 import { vi } from "date-fns/locale";
-
-// Hàm chuyển đổi UTC sang GMT+7 (Vietnam timezone)
-const convertToVietnamTime = (utcDate: Date): Date => {
-  return addHours(utcDate, 7);
-};
 import { useSystemColors } from "@/hooks/useSystemColors";
 import { ChevronLeft, ChevronRight, Pause, Play, Calendar, Clock, Users } from "lucide-react";
 import "@/styles/mobile-display.css";
@@ -345,8 +340,8 @@ export default function PublicDisplayMobile() {
     // Hàm kiểm tra xem phòng có đang được sử dụng không
     const isRoomBusy = (roomId: string, checkTime: Date) => {
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
-        const meetingStart = convertToVietnamTime(new Date(meeting.startDateTime));
-        const meetingEnd = convertToVietnamTime(new Date(meeting.endDateTime));
+        const meetingStart = new Date(meeting.startDateTime);
+        const meetingEnd = new Date(meeting.endDateTime);
         // Sử dụng roomId thay vì meetingRoomId
         return meeting.roomId === roomId && 
                checkTime >= meetingStart && 
@@ -361,7 +356,7 @@ export default function PublicDisplayMobile() {
       const now = new Date();
       const upcomingMeetings = meetingSchedules
         .filter((meeting: any) => {
-          const meetingStart = convertToVietnamTime(new Date(meeting.startDateTime));
+          const meetingStart = new Date(meeting.startDateTime);
           return meeting.roomId === roomId && meetingStart > now;
         })
         .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
@@ -375,8 +370,8 @@ export default function PublicDisplayMobile() {
       
       const now = new Date();
       return meetingSchedules.find((meeting: any) => {
-        const meetingStart = convertToVietnamTime(new Date(meeting.startDateTime));
-        const meetingEnd = convertToVietnamTime(new Date(meeting.endDateTime));
+        const meetingStart = new Date(meeting.startDateTime);
+        const meetingEnd = new Date(meeting.endDateTime);
         return meeting.roomId === roomId && 
                now >= meetingStart && 
                now < meetingEnd;
@@ -440,7 +435,7 @@ export default function PublicDisplayMobile() {
                       {currentMeeting.meetingContent || currentMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {format(convertToVietnamTime(new Date(currentMeeting.startDateTime)), 'HH:mm')} - {format(convertToVietnamTime(new Date(currentMeeting.endDateTime)), 'HH:mm')}
+                      {format(new Date(currentMeeting.startDateTime), 'HH:mm')} - {format(new Date(currentMeeting.endDateTime), 'HH:mm')}
                       {currentMeeting.contactPerson && ` • Người liên hệ: ${currentMeeting.contactPerson}`}
                     </div>
                   </div>
@@ -456,7 +451,7 @@ export default function PublicDisplayMobile() {
                       {nextMeeting.meetingContent || nextMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {format(convertToVietnamTime(new Date(nextMeeting.startDateTime)), 'dd/MM HH:mm')} - {format(convertToVietnamTime(new Date(nextMeeting.endDateTime)), 'HH:mm')}
+                      {format(new Date(nextMeeting.startDateTime), 'dd/MM HH:mm')} - {format(new Date(nextMeeting.endDateTime), 'HH:mm')}
                       {nextMeeting.contactPerson && ` • Người liên hệ: ${nextMeeting.contactPerson}`}
                     </div>
                   </div>
