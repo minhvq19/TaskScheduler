@@ -332,7 +332,10 @@ export default function PublicDisplay4K() {
         >
           <div
             className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400"
-            style={{ fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
+            style={{
+              fontFamily:
+                "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+            }}
           >
             LÃNH ĐẠO
           </div>
@@ -344,7 +347,10 @@ export default function PublicDisplay4K() {
               <div
                 key={index}
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
-                style={{ fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
+                style={{
+                  fontFamily:
+                    "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                }}
               >
                 <div className="font-bold text-[30px]">{dayName}</div>
                 <div className="text-2xl font-bold">
@@ -357,7 +363,7 @@ export default function PublicDisplay4K() {
         {/* Nội dung với các hàng cho từng nhân viên */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 100px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 90px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -382,7 +388,8 @@ export default function PublicDisplay4K() {
                   <div
                     className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[#791301] text-[34px]"
                     style={{
-                      fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                      fontFamily:
+                        "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                       fontWeight: "700",
                     }}
                   >
@@ -404,7 +411,8 @@ export default function PublicDisplay4K() {
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
                         backgroundColor: isWeekendDay ? "#adacac" : "#f5f4f0",
-                        fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                        fontFamily:
+                          "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                       }}
                     >
                       {schedules.length > 0 ? (
@@ -478,7 +486,8 @@ export default function PublicDisplay4K() {
                                     fontSize: "26pt",
                                     lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                                    fontFamily:
+                                      "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                     fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
@@ -490,9 +499,10 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                                          fontFamily:
+                                            "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                           fontWeight: "400",
-                                          fontSize: "26pt",
+                                          fontSize: "24pt",
                                           color: isWorkAtBranch
                                             ? "#260705"
                                             : "#ffffff",
@@ -515,7 +525,8 @@ export default function PublicDisplay4K() {
                                           <div
                                             className="opacity-90"
                                             style={{
-                                              fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                                              fontFamily:
+                                                "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                               fontSize: "26pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
@@ -534,7 +545,8 @@ export default function PublicDisplay4K() {
                             <div
                               className="text-center"
                               style={{
-                                fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+                                fontFamily:
+                                  "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                 fontSize: "30pt",
                                 color: "#d1d5db",
                               }}
@@ -1359,8 +1371,10 @@ export default function PublicDisplay4K() {
         <div
           className="font-bold text-[42px] text-[#791301]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
-        >NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM - CHI NHÁNH SỞ GIAO DỊCH 1
-</div>
+        >
+          NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM - CHI NHÁNH SỞ GIAO DỊCH
+          1
+        </div>
 
         <div
           className="font-bold mt-4 text-6xl text-[#421001]"
