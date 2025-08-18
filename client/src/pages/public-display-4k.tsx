@@ -1311,7 +1311,9 @@ export default function PublicDisplay4K() {
           imageUrls: currentEvent.imageUrls,
           imageUrl: currentEvent.imageUrl,
           hasImageUrls: !!currentEvent.imageUrls,
-          imageUrlsLength: currentEvent.imageUrls?.length || 0
+          imageUrlsLength: currentEvent.imageUrls?.length || 0,
+          startDateTime: currentEvent.startDateTime,
+          endDateTime: currentEvent.endDateTime
         });
 
         const finalImages = currentEvent.imageUrls && currentEvent.imageUrls.length > 0
