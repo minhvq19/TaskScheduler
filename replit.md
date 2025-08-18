@@ -24,6 +24,8 @@ Hệ thống này cung cấp giải pháp quản lý lịch làm việc toàn di
 - **Sửa lỗi timezone mobile meeting rooms**: Áp dụng logic xử lý thời gian giống 4K display sử dụng getUTCHours/getUTCMinutes và logic xử lý cuộc họp kéo dài qua nhiều ngày (00:00-23:59 cho ngày giữa)
 - **Hoàn thiện logic phát hiện phòng bận**: Đã cập nhật logic so sánh thời gian với offset UTC+7 để phát hiện chính xác trạng thái phòng họp, đảm bảo hiển thị đúng "Đang sử dụng"/"Trống" dựa trên thời gian thực
 - **Thêm điều hướng ngày cho mobile meeting rooms**: Tạo tính năng xem lịch họp các ngày khác với navigation buttons và quick access (Hôm qua/Hôm nay/Ngày mai), hiển thị danh sách meetings theo ngày được chọn với thời gian chính xác
+- **Sửa lỗi state reset cho navigation**: Di chuyển state navigation (meetingDateOffset, workWeekOffset) lên parent component để persist qua re-renders, tránh reset về ngày hiện tại khi user điều hướng
+- **Gom nhóm lịch công tác mobile**: Cải thiện hiển thị work schedule bằng cách gom nhóm các lịch của cùng một cán bộ lại với nhau, tách biệt tên cán bộ và danh sách công việc
 - **Sửa lỗi tải ảnh và mã hóa URL**: Đã khắc phục các vấn đề tải ảnh trong môi trường sản xuất cho mục Sự kiện khác
 - Nâng cấp cấu hình multer với tính năng làm sạch tên tệp để ngăn chặn các khoảng trống và ký tự đặc biệt
 - Tạo hàm tiện ích `createImageUrl` để mã hóa URL đúng cách cho cả màn hình 4K và màn hình tiêu chuẩn

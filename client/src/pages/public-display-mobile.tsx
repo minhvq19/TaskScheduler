@@ -216,57 +216,81 @@ export default function PublicDisplayMobile() {
                   </div>
                 </div>
 
-                {/* Danh sách lịch công tác */}
-                <div className="divide-y divide-gray-200">
-                  {daySchedules.map((schedule, index) => {
-                    const staffMember = staff.find(s => s.id === schedule.staffId);
-                    const startTime = new Date(schedule.startDateTime);
-                    const endTime = new Date(schedule.endDateTime);
-                    const scheduleStartDate = startOfDay(new Date(schedule.startDateTime));
-                    const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
-                    const currentDay = startOfDay(day);
-                    
-                    // Hiển thị thời gian khác nhau tùy theo lịch một ngày hay nhiều ngày
-                    const isMultiDay = format(scheduleStartDate, 'yyyy-MM-dd') !== format(scheduleEndDate, 'yyyy-MM-dd');
-                    let timeDisplay = '';
-                    
-                    if (isMultiDay) {
-                      if (format(currentDay, 'yyyy-MM-dd') === format(scheduleStartDate, 'yyyy-MM-dd')) {
-                        // Ngày đầu
-                        timeDisplay = `${format(startTime, 'HH:mm')} - 12:00`;
-                      } else if (format(currentDay, 'yyyy-MM-dd') === format(scheduleEndDate, 'yyyy-MM-dd')) {
-                        // Ngày cuối
-                        timeDisplay = `08:00 - ${format(endTime, 'HH:mm')}`;
-                      } else {
-                        // Ngày giữa
-                        timeDisplay = '08:00 - 12:00';
+                {/* Danh sách lịch công tác - gom nhóm theo staff */}
+                <div className="space-y-3 p-3">
+                  {(() => {
+                    // Gom nhóm lịch theo staff
+                    const schedulesByStaff = daySchedules.reduce((acc, schedule) => {
+                      const staffId = schedule.staffId;
+                      if (!acc[staffId]) {
+                        acc[staffId] = [];
                       }
-                    } else {
-                      // Lịch trong ngày
-                      timeDisplay = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
-                    }
-                    
-                    return (
-                      <div key={`${schedule.id}-${index}`} className="p-3 border-l-4 border-gray-400">
-                        <div className="space-y-1">
-                          {/* Tên với chức danh viết tắt */}
-                          <div className="font-bold text-gray-900 text-sm">
-                            {staffMember?.positionShort}. {staffMember?.fullName || 'Không xác định'}
+                      acc[staffId].push(schedule);
+                      return acc;
+                    }, {} as Record<string, any[]>);
+
+                    return Object.entries(schedulesByStaff).map(([staffId, staffSchedules]) => {
+                      const staffMember = staff.find(s => s.id === staffId);
+                      
+                      return (
+                        <div key={staffId} className="bg-gray-50 rounded-lg border border-gray-200">
+                          {/* Tên staff */}
+                          <div className="bg-gray-100 px-3 py-2 rounded-t-lg border-b border-gray-300">
+                            <div className="font-bold text-gray-900 text-sm">
+                              {staffMember?.positionShort}. {staffMember?.fullName || 'Không xác định'}
+                            </div>
                           </div>
                           
-                          {/* Thời gian */}
-                          <div className="text-xs text-gray-600">
-                            {timeDisplay}
-                          </div>
-                          
-                          {/* Nội dung công việc */}
-                          <div className="text-sm text-gray-800">
-                            {schedule.workType === 'Khác' ? schedule.customContent : schedule.workType}
+                          {/* Danh sách lịch của staff này */}
+                          <div className="divide-y divide-gray-200">
+                            {staffSchedules.map((schedule, scheduleIndex) => {
+                              const startTime = new Date(schedule.startDateTime);
+                              const endTime = new Date(schedule.endDateTime);
+                              const scheduleStartDate = startOfDay(new Date(schedule.startDateTime));
+                              const scheduleEndDate = startOfDay(new Date(schedule.endDateTime));
+                              const currentDay = startOfDay(day);
+                              
+                              // Hiển thị thời gian khác nhau tùy theo lịch một ngày hay nhiều ngày
+                              const isMultiDay = format(scheduleStartDate, 'yyyy-MM-dd') !== format(scheduleEndDate, 'yyyy-MM-dd');
+                              let timeDisplay = '';
+                              
+                              if (isMultiDay) {
+                                if (format(currentDay, 'yyyy-MM-dd') === format(scheduleStartDate, 'yyyy-MM-dd')) {
+                                  // Ngày đầu
+                                  timeDisplay = `${format(startTime, 'HH:mm')} - 12:00`;
+                                } else if (format(currentDay, 'yyyy-MM-dd') === format(scheduleEndDate, 'yyyy-MM-dd')) {
+                                  // Ngày cuối
+                                  timeDisplay = `08:00 - ${format(endTime, 'HH:mm')}`;
+                                } else {
+                                  // Ngày giữa
+                                  timeDisplay = '08:00 - 12:00';
+                                }
+                              } else {
+                                // Lịch trong ngày
+                                timeDisplay = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
+                              }
+
+                              return (
+                                <div key={`${schedule.id}-${scheduleIndex}`} className="p-3 bg-white border-l-4 border-gray-400">
+                                  <div className="space-y-1">
+                                    {/* Thời gian */}
+                                    <div className="text-xs text-gray-600">
+                                      {timeDisplay}
+                                    </div>
+                                    
+                                    {/* Nội dung công việc */}
+                                    <div className="text-sm text-gray-800">
+                                      {schedule.workType === 'Khác' ? schedule.customContent : schedule.workType}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             );
