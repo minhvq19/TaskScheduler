@@ -372,19 +372,6 @@ export default function PublicDisplayMobile() {
       });
       console.log('Today meetings found:', todayMeetings.length, todayMeetings);
       
-      // Debug: Kiểm tra tình trạng từng phòng
-      if (Array.isArray(meetingRooms)) {
-        meetingRooms.forEach((room: any) => {
-          const currentMeeting = getCurrentMeeting(room.id);
-          const nextMeeting = getNextMeeting(room.id);
-          const isBusy = isRoomBusy(room.id, new Date());
-          console.log(`Room ${room.name} (${room.id}):`, {
-            isBusy,
-            currentMeeting: currentMeeting?.meetingContent || currentMeeting?.title || 'None',
-            nextMeeting: nextMeeting?.meetingContent || nextMeeting?.title || 'None'
-          });
-        });
-      }
     }
     const currentWeek = eachDayOfInterval({
       start: startOfWeek(today, { weekStartsOn: 1 }),
@@ -431,6 +418,20 @@ export default function PublicDisplayMobile() {
                now < meetingEnd;
       }) || null;
     };
+
+    // Debug: Kiểm tra tình trạng từng phòng (sau khi functions được define)
+    if (Array.isArray(meetingRooms)) {
+      meetingRooms.forEach((room: any) => {
+        const currentMeeting = getCurrentMeeting(room.id);
+        const nextMeeting = getNextMeeting(room.id);
+        const isBusy = isRoomBusy(room.id, new Date());
+        console.log(`Room ${room.name} (${room.id}):`, {
+          isBusy,
+          currentMeeting: currentMeeting?.meetingContent || currentMeeting?.title || 'None',
+          nextMeeting: nextMeeting?.meetingContent || nextMeeting?.title || 'None'
+        });
+      });
+    }
 
     return (
       <div className="space-y-4">
