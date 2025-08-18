@@ -11,6 +11,11 @@ Hệ thống này cung cấp giải pháp quản lý lịch làm việc toàn di
 - CSS responsive riêng biệt với media queries cho từng loại device
 - Routing mới: `/display-mobile`, `/public-display-mobile`, `/public-mobile`, `/mobile`
 - Cập nhật Display Selection để bao gồm option cho mobile với icon Smartphone
+- **Thiết kế lại lịch phòng họp mobile**: Cải thiện UX bằng cách hiển thị tình trạng phòng họp theo thời gian thực
+- Hiển thị trạng thái phòng (Đang sử dụng/Trống) với màu sắc trực quan (đỏ/xanh)
+- Thông tin cuộc họp hiện tại và cuộc họp tiếp theo cho mỗi phòng
+- Lịch chi tiết trong ngày với highlight cuộc họp đang diễn ra
+- Layout theo từng phòng thay vì theo ngày để dễ theo dõi tình trạng sử dụng
 - **Nhập dữ liệu quá khứ**: Đã gỡ bỏ các hạn chế về ngày/giờ trong quản lý lịch làm việc để cho phép sửa đổi các ngày đã qua
 - Xóa `min` attribute trong datetime inputs và validation logic cho ngày giờ quá khứ
 - Sửa `isValidWorkTime` function để cho phép chọn giờ quá khứ

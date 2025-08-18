@@ -349,89 +349,181 @@ export default function PublicDisplayMobile() {
     if (!meetingRooms) return <div className="text-center text-gray-500">Không có dữ liệu phòng họp</div>;
 
     const today = startOfDay(new Date());
-    const weekDays = eachDayOfInterval({
-      start: addDays(today, -getDay(today) + 1),
-      end: addDays(today, -getDay(today) + 7)
+    const currentWeek = eachDayOfInterval({
+      start: startOfWeek(today, { weekStartsOn: 1 }),
+      end: endOfWeek(today, { weekStartsOn: 1 })
     });
 
+    // Hàm kiểm tra xem phòng có đang được sử dụng không
+    const isRoomBusy = (roomId: string, checkTime: Date) => {
+      return meetingSchedules.some((meeting: any) => {
+        const meetingStart = new Date(meeting.startDateTime);
+        const meetingEnd = new Date(meeting.endDateTime);
+        return meeting.meetingRoomId === roomId && 
+               checkTime >= meetingStart && 
+               checkTime < meetingEnd;
+      });
+    };
+
+    // Hàm lấy cuộc họp tiếp theo của phòng
+    const getNextMeeting = (roomId: string) => {
+      const now = new Date();
+      const upcomingMeetings = meetingSchedules
+        .filter((meeting: any) => {
+          const meetingStart = new Date(meeting.startDateTime);
+          return meeting.meetingRoomId === roomId && meetingStart > now;
+        })
+        .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+      
+      return upcomingMeetings[0] || null;
+    };
+
+    // Hàm lấy cuộc họp hiện tại của phòng
+    const getCurrentMeeting = (roomId: string) => {
+      const now = new Date();
+      return meetingSchedules.find((meeting: any) => {
+        const meetingStart = new Date(meeting.startDateTime);
+        const meetingEnd = new Date(meeting.endDateTime);
+        return meeting.meetingRoomId === roomId && 
+               now >= meetingStart && 
+               now < meetingEnd;
+      }) || null;
+    };
+
     return (
-      <div className="space-y-3">
-        {/* Danh sách phòng họp theo ngày */}
-        <div className="space-y-2">
-          {weekDays.map((day) => {
-            const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-            const dayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules.filter((meeting: any) => {
-              const meetingDate = new Date(meeting.startDateTime);
-              return format(meetingDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            }) : [];
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="text-center bg-[#006b68] text-white p-3 rounded-lg">
+          <h2 className="text-lg font-bold">Tình trạng phòng họp hôm nay</h2>
+          <div className="text-sm">
+            {format(today, 'dd/MM/yyyy')} - {format(new Date(), 'HH:mm')}
+          </div>
+        </div>
+
+        {/* Danh sách phòng họp */}
+        <div className="space-y-3">
+          {meetingRooms.map((room: any) => {
+            const currentMeeting = getCurrentMeeting(room.id);
+            const nextMeeting = getNextMeeting(room.id);
+            const isBusy = isRoomBusy(room.id, new Date());
 
             return (
               <div 
-                key={format(day, 'yyyy-MM-dd')} 
-                className={`p-3 rounded-lg border-2 ${
-                  isToday 
-                    ? 'border-blue-400 bg-blue-50' 
-                    : 'border-gray-200 bg-white'
+                key={room.id}
+                className={`p-4 rounded-lg border-2 ${
+                  isBusy 
+                    ? 'border-red-400 bg-red-50' 
+                    : 'border-green-400 bg-green-50'
                 }`}
               >
-                {/* Ngày đơn giản hóa */}
-                <div className={`text-center mb-2 pb-2 border-b ${
-                  isToday ? 'border-blue-300' : 'border-gray-200'
-                }`}>
-                  <div className={`text-lg font-bold ${
-                    isToday ? 'text-blue-700' : 'text-gray-800'
+                {/* Header phòng */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      isBusy ? 'bg-red-500' : 'bg-green-500'
+                    }`}></div>
+                    <h3 className="font-bold text-lg text-gray-800">
+                      {room.name}
+                    </h3>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    isBusy 
+                      ? 'bg-red-200 text-red-800' 
+                      : 'bg-green-200 text-green-800'
                   }`}>
-                    {format(day, 'dd/MM')}
+                    {isBusy ? 'Đang sử dụng' : 'Trống'}
                   </div>
                 </div>
 
-                {/* Danh sách cuộc họp */}
+                {/* Thông tin hiện tại */}
+                {currentMeeting && (
+                  <div className="mb-3 p-3 bg-white rounded border border-red-200">
+                    <div className="text-sm font-medium text-red-700 mb-1">
+                      Đang diễn ra:
+                    </div>
+                    <div className="text-sm text-gray-800 font-medium">
+                      {currentMeeting.title || 'Cuộc họp'}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {format(new Date(currentMeeting.startDateTime), 'HH:mm')} - {format(new Date(currentMeeting.endDateTime), 'HH:mm')}
+                      {currentMeeting.organizer && ` • Chủ trì: ${currentMeeting.organizer}`}
+                    </div>
+                  </div>
+                )}
+
+                {/* Cuộc họp tiếp theo */}
+                {nextMeeting && (
+                  <div className="mb-3 p-3 bg-white rounded border border-blue-200">
+                    <div className="text-sm font-medium text-blue-700 mb-1">
+                      Cuộc họp tiếp theo:
+                    </div>
+                    <div className="text-sm text-gray-800 font-medium">
+                      {nextMeeting.title || 'Cuộc họp'}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {format(new Date(nextMeeting.startDateTime), 'dd/MM HH:mm')} - {format(new Date(nextMeeting.endDateTime), 'HH:mm')}
+                      {nextMeeting.organizer && ` • Chủ trì: ${nextMeeting.organizer}`}
+                    </div>
+                  </div>
+                )}
+
+                {/* Lịch trong ngày */}
                 <div className="space-y-2">
-                  {dayMeetings.length > 0 ? (
-                    dayMeetings.map((meeting: any, index: number) => {
-                      const room = meetingRooms.find((r: any) => r.id === meeting.meetingRoomId);
+                  <div className="text-sm font-medium text-gray-700">
+                    Lịch hôm nay:
+                  </div>
+                  {(() => {
+                    const todayMeetings = meetingSchedules
+                      .filter((meeting: any) => {
+                        const meetingDate = startOfDay(new Date(meeting.startDateTime));
+                        return meeting.meetingRoomId === room.id && 
+                               format(meetingDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+                      })
+                      .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+
+                    if (todayMeetings.length === 0) {
+                      return (
+                        <div className="text-sm text-gray-400 py-2">
+                          Không có cuộc họp hôm nay
+                        </div>
+                      );
+                    }
+
+                    return todayMeetings.map((meeting: any, index: number) => {
                       const startTime = new Date(meeting.startDateTime);
                       const endTime = new Date(meeting.endDateTime);
-                      
-                      // Debug: log meeting và room data
-                      console.log('Meeting:', meeting.title, 'Room ID:', meeting.meetingRoomId, 'Room found:', room?.name);
-                      
+                      const isActive = getCurrentMeeting(room.id)?.id === meeting.id;
+
                       return (
                         <div 
                           key={`${meeting.id}-${index}`}
-                          className="p-3 border-l-4 border-blue-500 bg-blue-50"
+                          className={`p-2 rounded text-xs ${
+                            isActive 
+                              ? 'bg-red-100 border border-red-300' 
+                              : 'bg-gray-50 border border-gray-200'
+                          }`}
                         >
-                          <div className="space-y-1">
-                            {/* Thời gian */}
-                            <div className="font-bold text-blue-800 text-sm">
-                              {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className={`font-medium ${
+                                isActive ? 'text-red-800' : 'text-gray-800'
+                              }`}>
+                                {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
+                              </div>
+                              <div className="text-gray-700">
+                                {meeting.title || 'Cuộc họp'}
+                              </div>
                             </div>
-                            
-                            {/* Tên phòng họp */}
-                            <div className="text-sm text-blue-700 font-medium">
-                              📍 {room?.name || meeting.meetingRoomName || 'Phòng họp'}
-                            </div>
-                            
-                            {/* Tiêu đề cuộc họp */}
-                            <div className="text-sm text-gray-800">
-                              {meeting.title || meeting.content || 'Cuộc họp'}
-                            </div>
-                            
-                            {/* Người chủ trì */}
-                            {meeting.organizer && (
-                              <div className="text-xs text-gray-600">
-                                Chủ trì: {meeting.organizer}
+                            {isActive && (
+                              <div className="text-red-600 font-medium text-xs">
+                                Đang diễn ra
                               </div>
                             )}
                           </div>
                         </div>
                       );
-                    })
-                  ) : (
-                    <div className="text-center text-gray-400 text-sm py-2">
-                      Không có cuộc họp
-                    </div>
-                  )}
+                    });
+                  })()}
                 </div>
               </div>
             );
