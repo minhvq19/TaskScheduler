@@ -337,30 +337,35 @@ export default function PublicDisplayMobile() {
       end: endOfWeek(today, { weekStartsOn: 1 })
     });
 
-    // Hàm kiểm tra xem phòng có đang được sử dụng không (sử dụng UTC như 4K display)
+    // Hàm kiểm tra xem phòng có đang được sử dụng không 
     const isRoomBusy = (roomId: string, checkTime: Date) => {
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
         
+        // Chuyển đổi thời gian hiện tại sang UTC+7 để so sánh với database UTC
+        // Database lưu UTC nhưng thực tế là giờ địa phương UTC+7
+        const localCheckTime = new Date(checkTime.getTime() + 7 * 60 * 60 * 1000);
+        
         // Debug log để kiểm tra thời gian
         if (meeting.meetingContent?.includes('BIDV direct')) {
-          console.log('Debug room busy check:', {
+          console.log('Debug room busy check (fixed):', {
             roomId,
             meetingRoomId: meeting.roomId,
             meetingContent: meeting.meetingContent,
-            checkTime: checkTime.toISOString(),
+            originalCheckTime: checkTime.toISOString(),
+            localCheckTime: localCheckTime.toISOString(),
             meetingStart: meetingStart.toISOString(),
             meetingEnd: meetingEnd.toISOString(),
             roomMatch: meeting.roomId === roomId,
-            timeInRange: checkTime.getTime() >= meetingStart.getTime() && checkTime.getTime() < meetingEnd.getTime()
+            timeInRange: localCheckTime.getTime() >= meetingStart.getTime() && localCheckTime.getTime() < meetingEnd.getTime()
           });
         }
         
-        // Sử dụng roomId thay vì meetingRoomId
+        // Sử dụng roomId thay vì meetingRoomId và so sánh với thời gian địa phương
         return meeting.roomId === roomId && 
-               checkTime.getTime() >= meetingStart.getTime() && 
-               checkTime.getTime() < meetingEnd.getTime();
+               localCheckTime.getTime() >= meetingStart.getTime() && 
+               localCheckTime.getTime() < meetingEnd.getTime();
       }) : false;
     };
 
@@ -369,10 +374,11 @@ export default function PublicDisplayMobile() {
       if (!Array.isArray(meetingSchedules)) return null;
       
       const now = new Date();
+      const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
       const upcomingMeetings = meetingSchedules
         .filter((meeting: any) => {
           const meetingStart = new Date(meeting.startDateTime);
-          return meeting.roomId === roomId && meetingStart.getTime() > now.getTime();
+          return meeting.roomId === roomId && meetingStart.getTime() > localNow.getTime();
         })
         .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
       
@@ -384,12 +390,13 @@ export default function PublicDisplayMobile() {
       if (!Array.isArray(meetingSchedules)) return null;
       
       const now = new Date();
+      const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
       return meetingSchedules.find((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
         return meeting.roomId === roomId && 
-               now.getTime() >= meetingStart.getTime() && 
-               now.getTime() < meetingEnd.getTime();
+               localNow.getTime() >= meetingStart.getTime() && 
+               localNow.getTime() < meetingEnd.getTime();
       }) || null;
     };
 
