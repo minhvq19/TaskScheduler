@@ -523,32 +523,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const file of req.files) {
           // file.filename đã được sanitize bởi multer storage configuration
           const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', file.filename);
+          const backupPath = path.join(process.cwd(), 'uploads', file.filename);
           
-          // Ensure uploads directory exists
-          const uploadsDir = path.dirname(publicPath);
-          if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
-          }
+          // Ensure both directories exist
+          [path.dirname(publicPath), path.dirname(backupPath)].forEach(dir => {
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir, { recursive: true });
+            }
+          });
           
-          // Copy file to public uploads directory for serving - ENHANCED ERROR HANDLING
+          // Copy file to BOTH locations for redundancy - ENHANCED ERROR HANDLING
           try {
-            if (fs.existsSync(file.path)) {
-              fs.copyFileSync(file.path, publicPath);
-              console.log('✓ File upload SUCCESS:', {
-                original: file.originalname,
-                sanitized: file.filename,
-                source: file.path,
-                destination: publicPath,
-                publicExists: fs.existsSync(publicPath)
-              });
-            } else {
+            if (!fs.existsSync(file.path)) {
               const error = `Source file not found: ${file.path}`;
-              console.error('✗ CRITICAL FILE ERROR:', error);
+              console.error('✗ CRITICAL SOURCE ERROR:', error);
               return res.status(500).json({ message: 'File upload failed - source not found' });
             }
+
+            // Copy to public directory (for serving)
+            fs.copyFileSync(file.path, publicPath);
+            console.log('✓ Copied to PUBLIC:', publicPath);
+
+            // Copy to backup directory (for backup)
+            fs.copyFileSync(file.path, backupPath);
+            console.log('✓ Copied to BACKUP:', backupPath);
+
+            // Verify both copies exist
+            const publicExists = fs.existsSync(publicPath);
+            const backupExists = fs.existsSync(backupPath);
+            
+            if (!publicExists || !backupExists) {
+              throw new Error(`Copy verification failed: public=${publicExists}, backup=${backupExists}`);
+            }
+
+            console.log('✓ FILE UPLOAD COMPLETE SUCCESS:', {
+              original: file.originalname,
+              sanitized: file.filename,
+              source: file.path,
+              publicPath,
+              backupPath,
+              publicExists,
+              backupExists,
+              fileSize: fs.statSync(publicPath).size
+            });
+
           } catch (error) {
             console.error('✗ CRITICAL COPY ERROR:', error);
-            return res.status(500).json({ message: 'File upload failed - copy error', error: String(error) });
+            return res.status(500).json({ 
+              message: 'File upload failed - copy error', 
+              error: String(error),
+              filename: file.filename 
+            });
           }
           
           // Sử dụng tên file đã sanitize (có _ thay vì dấu cách) cho database
