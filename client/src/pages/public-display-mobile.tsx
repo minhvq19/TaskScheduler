@@ -146,7 +146,6 @@ export default function PublicDisplayMobile() {
   const WorkScheduleDisplayMobile = () => {
     const [selectedStaff, setSelectedStaff] = useState<string>('all');
     const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
-    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     
     if (!displayData?.workSchedules) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
 
@@ -172,9 +171,11 @@ export default function PublicDisplayMobile() {
       const staffInManagement = managementStaff.some(s => s.id === schedule.staffId);
       
       if (selectedStaff === 'all') {
-        return isInCurrentWeek && staffInManagement;
+        return isInCurrentWeek; // Hiển thị tất cả
+      } else if (selectedStaff === 'management') {
+        return isInCurrentWeek && staffInManagement; // Chỉ Ban GĐ
       } else {
-        return isInCurrentWeek && schedule.staffId === selectedStaff && staffInManagement;
+        return isInCurrentWeek && schedule.staffId === selectedStaff; // Cá nhân cụ thể
       }
     });
     
@@ -273,60 +274,53 @@ export default function PublicDisplayMobile() {
             </button>
           </div>
 
-          {/* Bộ lọc cán bộ - Custom dropdown cho mobile */}
-          <div className="space-y-2">
+          {/* Bộ lọc cán bộ - Simple tab-based filter */}
+          <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
-            <div className="relative">
-              {/* Dropdown button */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full p-4 text-base border-2 border-gray-300 rounded-lg bg-white focus:border-[#006b68] focus:outline-none text-left flex items-center justify-between"
-                style={{ minHeight: '50px', fontSize: '16px' }}
+                onClick={() => setSelectedStaff('all')}
+                className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStaff === 'all' 
+                    ? 'bg-[#006b68] text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                <span>
-                  {selectedStaff === 'all' 
-                    ? 'Tất cả cán bộ' 
-                    : (() => {
-                        const staff = managementStaff.find(s => s.id === selectedStaff);
-                        return staff ? `${staff.positionShort}. ${staff.fullName}` : 'Tất cả cán bộ';
-                      })()
-                  }
-                </span>
-                <ChevronRight className={`w-5 h-5 text-gray-400 transform transition-transform duration-200 ${isDropdownOpen ? 'rotate-90' : 'rotate-90'}`} />
+                Tất cả
               </button>
-
-              {/* Dropdown menu */}
-              {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedStaff('all');
-                      setIsDropdownOpen(false);
-                    }}
-                    className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 ${selectedStaff === 'all' ? 'bg-blue-50 text-blue-700' : ''}`}
-                    style={{ fontSize: '16px' }}
-                  >
-                    Tất cả cán bộ
-                  </button>
-                  {managementStaff.map((staffMember) => (
-                    <button
-                      key={staffMember.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedStaff(staffMember.id);
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${selectedStaff === staffMember.id ? 'bg-blue-50 text-blue-700' : ''}`}
-                      style={{ fontSize: '16px' }}
-                    >
-                      {staffMember.positionShort}. {staffMember.fullName}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setSelectedStaff('management')}
+                className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStaff === 'management' 
+                    ? 'bg-[#006b68] text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Ban GĐ
+              </button>
             </div>
+            
+            {/* Hiển thị danh sách cán bộ nếu chọn "Ban GĐ" */}
+            {selectedStaff === 'management' && (
+              <div className="grid grid-cols-1 gap-1 max-h-40 overflow-y-auto">
+                {managementStaff.map((staffMember) => (
+                  <button
+                    key={staffMember.id}
+                    type="button"
+                    onClick={() => setSelectedStaff(staffMember.id)}
+                    className={`p-2 text-left rounded text-sm transition-colors ${
+                      selectedStaff === staffMember.id 
+                        ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    {staffMember.positionShort}. {staffMember.fullName}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
