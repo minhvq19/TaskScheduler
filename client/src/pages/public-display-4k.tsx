@@ -1238,12 +1238,23 @@ export default function PublicDisplay4K() {
     console.log("4K Display - Other Events Info:", {
       relevantEventsCount: relevantEvents.length,
       currentEventIndex,
+      allOtherEventsCount: displayData?.otherEvents?.length || 0,
+      allOtherEvents: displayData?.otherEvents?.map((e: any) => ({
+        id: e.id,
+        shortName: e.shortName?.substring(0, 30),
+        startDateTime: e.startDateTime,
+        endDateTime: e.endDateTime,
+        imageUrl: e.imageUrl,
+        imageUrls: e.imageUrls
+      })) || [],
       currentEvent: currentEvent
         ? {
             id: currentEvent.id,
             shortName: currentEvent.shortName.substring(0, 50) + "...",
             startTime: currentEvent.startDateTime,
             endTime: currentEvent.endDateTime,
+            imageUrl: currentEvent.imageUrl,
+            imageUrls: currentEvent.imageUrls
           }
         : null,
       screenDuration: "Full screen rotation time",
