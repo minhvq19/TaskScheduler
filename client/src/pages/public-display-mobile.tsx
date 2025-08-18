@@ -344,7 +344,7 @@ export default function PublicDisplayMobile() {
       refetchInterval: 60000
     });
 
-    const meetingSchedules = displayData?.meetingSchedules || [];
+    const meetingSchedules = (displayData as any)?.meetingSchedules || [];
     const meetingsLoading = displayLoading;
 
     if (meetingsLoading || roomsLoading) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
@@ -367,10 +367,24 @@ export default function PublicDisplayMobile() {
       const todayMeetings = meetingSchedules.filter((meeting: any) => {
         const meetingDate = startOfDay(new Date(meeting.startDateTime));
         const meetingDateString = format(meetingDate, 'yyyy-MM-dd');
-        console.log('Meeting date:', meetingDateString, 'Meeting:', meeting.title);
+        console.log('Meeting date:', meetingDateString, 'Meeting:', meeting.meetingContent, 'Room ID:', meeting.roomId);
         return meetingDateString === todayString;
       });
       console.log('Today meetings found:', todayMeetings.length, todayMeetings);
+      
+      // Debug: Kiểm tra tình trạng từng phòng
+      if (Array.isArray(meetingRooms)) {
+        meetingRooms.forEach((room: any) => {
+          const currentMeeting = getCurrentMeeting(room.id);
+          const nextMeeting = getNextMeeting(room.id);
+          const isBusy = isRoomBusy(room.id, new Date());
+          console.log(`Room ${room.name} (${room.id}):`, {
+            isBusy,
+            currentMeeting: currentMeeting?.meetingContent || currentMeeting?.title || 'None',
+            nextMeeting: nextMeeting?.meetingContent || nextMeeting?.title || 'None'
+          });
+        });
+      }
     }
     const currentWeek = eachDayOfInterval({
       start: startOfWeek(today, { weekStartsOn: 1 }),
@@ -382,7 +396,8 @@ export default function PublicDisplayMobile() {
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
-        return meeting.meetingRoomId === roomId && 
+        // Sử dụng roomId thay vì meetingRoomId
+        return meeting.roomId === roomId && 
                checkTime >= meetingStart && 
                checkTime < meetingEnd;
       }) : false;
@@ -396,7 +411,7 @@ export default function PublicDisplayMobile() {
       const upcomingMeetings = meetingSchedules
         .filter((meeting: any) => {
           const meetingStart = new Date(meeting.startDateTime);
-          return meeting.meetingRoomId === roomId && meetingStart > now;
+          return meeting.roomId === roomId && meetingStart > now;
         })
         .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
       
@@ -411,7 +426,7 @@ export default function PublicDisplayMobile() {
       return meetingSchedules.find((meeting: any) => {
         const meetingStart = new Date(meeting.startDateTime);
         const meetingEnd = new Date(meeting.endDateTime);
-        return meeting.meetingRoomId === roomId && 
+        return meeting.roomId === roomId && 
                now >= meetingStart && 
                now < meetingEnd;
       }) || null;
@@ -469,11 +484,11 @@ export default function PublicDisplayMobile() {
                       Đang diễn ra:
                     </div>
                     <div className="text-sm text-gray-800 font-medium">
-                      {currentMeeting.title || 'Cuộc họp'}
+                      {currentMeeting.meetingContent || currentMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
                       {format(new Date(currentMeeting.startDateTime), 'HH:mm')} - {format(new Date(currentMeeting.endDateTime), 'HH:mm')}
-                      {currentMeeting.organizer && ` • Chủ trì: ${currentMeeting.organizer}`}
+                      {currentMeeting.contactPerson && ` • Người liên hệ: ${currentMeeting.contactPerson}`}
                     </div>
                   </div>
                 )}
@@ -485,11 +500,11 @@ export default function PublicDisplayMobile() {
                       Cuộc họp tiếp theo:
                     </div>
                     <div className="text-sm text-gray-800 font-medium">
-                      {nextMeeting.title || 'Cuộc họp'}
+                      {nextMeeting.meetingContent || nextMeeting.title || 'Cuộc họp'}
                     </div>
                     <div className="text-xs text-gray-600">
                       {format(new Date(nextMeeting.startDateTime), 'dd/MM HH:mm')} - {format(new Date(nextMeeting.endDateTime), 'HH:mm')}
-                      {nextMeeting.organizer && ` • Chủ trì: ${nextMeeting.organizer}`}
+                      {nextMeeting.contactPerson && ` • Người liên hệ: ${nextMeeting.contactPerson}`}
                     </div>
                   </div>
                 )}
@@ -503,7 +518,7 @@ export default function PublicDisplayMobile() {
                     const todayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules
                       .filter((meeting: any) => {
                         const meetingDate = startOfDay(new Date(meeting.startDateTime));
-                        return meeting.meetingRoomId === room.id && 
+                        return meeting.roomId === room.id && 
                                format(meetingDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
                       })
                       .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime()) : [];
@@ -538,7 +553,7 @@ export default function PublicDisplayMobile() {
                                 {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
                               </div>
                               <div className="text-gray-700">
-                                {meeting.title || 'Cuộc họp'}
+                                {meeting.meetingContent || meeting.title || 'Cuộc họp'}
                               </div>
                             </div>
                             {isActive && (
