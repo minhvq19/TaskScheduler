@@ -338,8 +338,15 @@ export default function PublicDisplayMobile() {
       refetchInterval: 30000
     });
 
-    if (meetingsLoading) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
+    // Lấy dữ liệu phòng họp từ API
+    const { data: meetingRooms, isLoading: roomsLoading } = useQuery({
+      queryKey: ['/api/public/meeting-rooms'],
+      refetchInterval: 60000
+    });
+
+    if (meetingsLoading || roomsLoading) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
     if (!meetingSchedules) return <div className="text-center text-gray-500">Không có dữ liệu lịch họp</div>;
+    if (!meetingRooms) return <div className="text-center text-gray-500">Không có dữ liệu phòng họp</div>;
 
     const today = startOfDay(new Date());
     const weekDays = eachDayOfInterval({
@@ -386,21 +393,31 @@ export default function PublicDisplayMobile() {
                       const startTime = new Date(meeting.startDateTime);
                       const endTime = new Date(meeting.endDateTime);
                       
+                      // Debug: log meeting và room data
+                      console.log('Meeting:', meeting.title, 'Room ID:', meeting.meetingRoomId, 'Room found:', room?.name);
+                      
                       return (
                         <div 
                           key={`${meeting.id}-${index}`}
-                          className="p-2 rounded border-l-4 border-blue-500 bg-blue-50"
+                          className="p-3 border-l-4 border-blue-500 bg-blue-50"
                         >
-                          <div className="flex flex-col space-y-1">
-                            <div className="font-semibold text-gray-800 text-sm">
-                              {meeting.title}
-                            </div>
-                            <div className="text-xs text-gray-600">
+                          <div className="space-y-1">
+                            {/* Thời gian */}
+                            <div className="font-bold text-blue-800 text-sm">
                               {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
                             </div>
-                            <div className="text-sm text-blue-700">
-                              📍 {room?.name || 'Không xác định'}
+                            
+                            {/* Tên phòng họp */}
+                            <div className="text-sm text-blue-700 font-medium">
+                              📍 {room?.name || meeting.meetingRoomName || 'Phòng họp'}
                             </div>
+                            
+                            {/* Tiêu đề cuộc họp */}
+                            <div className="text-sm text-gray-800">
+                              {meeting.title || meeting.content || 'Cuộc họp'}
+                            </div>
+                            
+                            {/* Người chủ trì */}
                             {meeting.organizer && (
                               <div className="text-xs text-gray-600">
                                 Chủ trì: {meeting.organizer}
