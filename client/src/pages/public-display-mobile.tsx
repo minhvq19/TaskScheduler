@@ -332,9 +332,9 @@ export default function PublicDisplayMobile() {
 
   // Component hiển thị lịch phòng họp cho mobile
   const MeetingScheduleDisplayMobile = () => {
-    // Lấy dữ liệu từ API riêng cho meeting schedules
-    const { data: meetingSchedules, isLoading: meetingsLoading } = useQuery({
-      queryKey: ['/api/meeting-schedules'],
+    // Lấy dữ liệu từ API public display data
+    const { data: displayData, isLoading: displayLoading } = useQuery({
+      queryKey: ['/api/public/display-data'],
       refetchInterval: 30000
     });
 
@@ -344,11 +344,34 @@ export default function PublicDisplayMobile() {
       refetchInterval: 60000
     });
 
+    const meetingSchedules = displayData?.meetingSchedules || [];
+    const meetingsLoading = displayLoading;
+
     if (meetingsLoading || roomsLoading) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
     if (!meetingSchedules) return <div className="text-center text-gray-500">Không có dữ liệu lịch họp</div>;
     if (!meetingRooms) return <div className="text-center text-gray-500">Không có dữ liệu phòng họp</div>;
 
+    // Debug logs
+    console.log('Display Data:', displayData);
+    console.log('Meeting Schedules:', meetingSchedules);
+    console.log('Meeting Rooms:', meetingRooms);
+    console.log('Current time:', new Date());
+    
     const today = startOfDay(new Date());
+    
+    // Debug: Kiểm tra lịch hôm nay (18/08)
+    const todayString = format(today, 'yyyy-MM-dd');
+    console.log('Today string:', todayString);
+    
+    if (Array.isArray(meetingSchedules)) {
+      const todayMeetings = meetingSchedules.filter((meeting: any) => {
+        const meetingDate = startOfDay(new Date(meeting.startDateTime));
+        const meetingDateString = format(meetingDate, 'yyyy-MM-dd');
+        console.log('Meeting date:', meetingDateString, 'Meeting:', meeting.title);
+        return meetingDateString === todayString;
+      });
+      console.log('Today meetings found:', todayMeetings.length, todayMeetings);
+    }
     const currentWeek = eachDayOfInterval({
       start: startOfWeek(today, { weekStartsOn: 1 }),
       end: endOfWeek(today, { weekStartsOn: 1 })
