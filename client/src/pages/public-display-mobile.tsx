@@ -41,17 +41,31 @@ const SCREENS = [
   { id: 'other-events', name: 'Sự kiện khác', icon: Clock }
 ];
 
-// Hàm tạo URL ảnh đúng định dạng cho mobile
+// Hàm tạo URL ảnh đúng định dạng cho mobile  
 const createImageUrl = (imagePath: string | null): string => {
   if (!imagePath) return '';
   
   // Đảm bảo đường dẫn bắt đầu bằng /uploads
   const cleanPath = imagePath.startsWith('/uploads') ? imagePath : `/uploads/${imagePath}`;
   
-  // Mã hóa URL để xử lý khoảng trắng và ký tự đặc biệt
-  const encodedPath = cleanPath.split('/').map((segment, index) => 
-    index === 0 ? segment : encodeURIComponent(segment)
-  ).join('/');
+  // Mã hóa từng phần của đường dẫn để xử lý khoảng trắng và ký tự đặc biệt
+  const pathParts = cleanPath.split('/');
+  const encodedParts = pathParts.map((part, index) => {
+    if (index === 0 || part === 'uploads') {
+      return part; // Không encode '/uploads'
+    }
+    // Encode filename với khoảng trắng và ký tự đặc biệt
+    return encodeURIComponent(part);
+  });
+  
+  const encodedPath = encodedParts.join('/');
+  
+  // Debug để kiểm tra URL được tạo
+  console.log('Image URL encoding:', {
+    original: imagePath,
+    clean: cleanPath,
+    encoded: encodedPath
+  });
   
   return encodedPath;
 };
@@ -246,7 +260,7 @@ export default function PublicDisplayMobile() {
                       return (staffA?.displayOrder || 999) - (staffB?.displayOrder || 999);
                     });
 
-                    return sortedStaffEntries.map(([staffId, staffSchedules]: [string, any[]]) => {
+                    return sortedStaffEntries.map(([staffId, staffSchedules]) => {
                       const staffMember = staff.find(s => s.id === staffId);
                       
                       return (
