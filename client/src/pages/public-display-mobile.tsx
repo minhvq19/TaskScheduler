@@ -160,7 +160,10 @@ export default function PublicDisplayMobile() {
     });
 
     // Lọc chỉ cán bộ thuộc Ban giám đốc
-    const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
+    const managementStaff = Array.isArray(staff) ? staff.filter(s => s.department?.name === 'Ban giám đốc') : [];
+    
+    console.log('Management staff:', managementStaff.map(s => s.fullName));
+    console.log('Selected staff:', selectedStaff);
 
     // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
     let filteredSchedules = displayData.workSchedules.filter(schedule => {
@@ -171,9 +174,11 @@ export default function PublicDisplayMobile() {
       if (selectedStaff === 'all') {
         return isInCurrentWeek && staffInManagement;
       } else {
-        return isInCurrentWeek && schedule.staffId === selectedStaff;
+        return isInCurrentWeek && schedule.staffId === selectedStaff && staffInManagement;
       }
     });
+    
+    console.log('Filtered schedules:', filteredSchedules.length);
 
     // Hiển thị theo layout mới như hình mẫu
     const renderScheduleView = () => {
@@ -268,19 +273,20 @@ export default function PublicDisplayMobile() {
             </button>
           </div>
 
-          {/* Bộ lọc cán bộ */}
+          {/* Bộ lọc cán bộ - Mobile optimized */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Lọc theo cán bộ:</label>
             <div className="relative">
               <select
                 value={selectedStaff}
-                onChange={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedStaff(e.target.value);
+                onChange={(e) => setSelectedStaff(e.target.value)}
+                className="w-full p-4 text-base border-2 border-gray-300 rounded-lg bg-white focus:border-[#006b68] focus:outline-none appearance-none"
+                style={{ 
+                  minHeight: '50px',
+                  fontSize: '16px', // Prevents zoom on iOS
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none'
                 }}
-                className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent appearance-none bg-white"
-                style={{ minHeight: '44px' }} // Tăng chiều cao để dễ touch trên mobile
               >
                 <option value="all">Tất cả cán bộ</option>
                 {managementStaff.map((staffMember) => (
@@ -290,8 +296,8 @@ export default function PublicDisplayMobile() {
                 ))}
               </select>
               {/* Custom dropdown arrow */}
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronRight className="w-4 h-4 text-gray-400 transform rotate-90" />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <ChevronRight className="w-5 h-5 text-gray-400 transform rotate-90" />
               </div>
             </div>
           </div>
@@ -326,10 +332,10 @@ export default function PublicDisplayMobile() {
         <div className="space-y-2">
           {weekDays.map((day) => {
             const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-            const dayMeetings = (meetingSchedules || []).filter((meeting: any) => {
+            const dayMeetings = Array.isArray(meetingSchedules) ? meetingSchedules.filter((meeting: any) => {
               const meetingDate = new Date(meeting.startDateTime);
               return format(meetingDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            });
+            }) : [];
 
             return (
               <div 
@@ -410,11 +416,11 @@ export default function PublicDisplayMobile() {
 
     // Lọc sự kiện active và trong khoảng thời gian hiện tại
     const now = new Date();
-    const currentEvents = (otherEvents || []).filter((event: any) => {
+    const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
       return startDate <= now && now <= endDate;
-    });
+    }) : [];
     
     if (currentEvents.length === 0) {
       return (
