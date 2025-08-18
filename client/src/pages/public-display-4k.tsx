@@ -329,7 +329,7 @@ export default function PublicDisplay4K() {
           className="grid border-b-4 border-gray-400 bg-yellow-400"
           style={{ gridTemplateColumns: fullGridTemplate }}
         >
-          <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400">
+          <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400" style={{ fontFamily: "Arial, sans-serif" }}>
             LÃNH ĐẠO
           </div>
           {weekDays.map((day, index) => {
@@ -340,7 +340,7 @@ export default function PublicDisplay4K() {
               <div
                 key={index}
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
-                style={{ fontFamily: "Roboto, sans-serif" }}
+                style={{ fontFamily: "Arial, sans-serif" }}
               >
                 <div className="font-bold text-[24px]">{dayName}</div>
                 <div className="text-2xl font-bold">
@@ -367,7 +367,7 @@ export default function PublicDisplay4K() {
                 className="grid border-b-2 border-gray-300"
                 style={{
                   gridTemplateColumns: fullGridTemplate,
-                  minHeight: "190px",
+                  minHeight: "200px",
                 }}
               >
                 {/* Cột Tên Nhân viên */}
@@ -378,7 +378,7 @@ export default function PublicDisplay4K() {
                   <div
                     className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[36px] text-[#791301]"
                     style={{
-                      fontFamily: "Roboto, sans-serif",
+                      fontFamily: "Arial, sans-serif",
                       fontWeight: "700",
                     }}
                   >
@@ -400,7 +400,7 @@ export default function PublicDisplay4K() {
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
                         backgroundColor: isWeekendDay ? "#adacac" : "#f5f4f0",
-                        fontFamily: "Roboto, sans-serif",
+                        fontFamily: "Arial, sans-serif",
                       }}
                     >
                       {schedules.length > 0 ? (
@@ -474,7 +474,7 @@ export default function PublicDisplay4K() {
                                     fontSize: "26pt",
                                     lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "Roboto, sans-serif",
+                                    fontFamily: "Arial, sans-serif",
                                     fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
@@ -486,7 +486,7 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "Roboto, sans-serif",
+                                          fontFamily: "Arial, sans-serif",
                                           fontWeight: "400",
                                           fontSize: "28pt",
                                           color: isWorkAtBranch
@@ -511,7 +511,7 @@ export default function PublicDisplay4K() {
                                           <div
                                             className="opacity-90"
                                             style={{
-                                              fontFamily: "Roboto, sans-serif",
+                                              fontFamily: "Arial, sans-serif",
                                               fontSize: "28pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
@@ -530,7 +530,7 @@ export default function PublicDisplay4K() {
                             <div
                               className="text-center"
                               style={{
-                                fontFamily: "Roboto, sans-serif",
+                                fontFamily: "Arial, sans-serif",
                                 fontSize: "30pt",
                                 color: "#d1d5db",
                               }}
@@ -1355,8 +1355,10 @@ export default function PublicDisplay4K() {
         <div
           className="font-bold text-[42px] text-[#791301]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
-        >NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM - CHI NHÁNH SỞ GIAO DỊCH 1</div>
-        
+        >
+          NGÂN HÀNG TMCP ĐẦU TƯ VÀ PHÁT TRIỂN VIỆT NAM
+        </div>
+
         <div
           className="font-bold mt-4 text-6xl text-[#421001]"
           style={{ fontFamily: "Roboto, sans-serif", fontWeight: "700" }}
