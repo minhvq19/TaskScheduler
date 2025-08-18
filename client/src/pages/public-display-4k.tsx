@@ -1062,6 +1062,16 @@ export default function PublicDisplay4K() {
             onError={(e) => {
               console.error("4K Single image failed to load:", imgSrc);
               console.error("4K Error details:", e);
+              
+              // Thử fallback: sử dụng ảnh placeholder hoặc ẩn ảnh
+              const target = e.currentTarget as HTMLImageElement;
+              target.style.display = 'none';
+              
+              // Hiển thị thông báo lỗi thay thế
+              const errorDiv = document.createElement('div');
+              errorDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-xl';
+              errorDiv.textContent = 'Không thể tải ảnh';
+              target.parentNode?.appendChild(errorDiv);
             }}
           />
         </div>
