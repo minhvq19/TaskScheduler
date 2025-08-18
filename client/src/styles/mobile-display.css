@@ -1,0 +1,236 @@
+/* CSS tối ưu cho màn hình mobile công cộng BIDV */
+
+/* Base responsive styles cho các độ phân giải phổ biến */
+@media screen and (max-width: 480px) {
+  /* Điện thoại nhỏ */
+  .mobile-container {
+    font-size: 14px;
+    padding: 8px;
+  }
+  
+  .mobile-header {
+    padding: 12px 8px;
+  }
+  
+  .mobile-screen-tabs {
+    gap: 4px;
+  }
+  
+  .mobile-screen-tab {
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+}
+
+@media screen and (min-width: 481px) and (max-width: 768px) {
+  /* Điện thoại lớn và tablet nhỏ */
+  .mobile-container {
+    font-size: 16px;
+    padding: 12px;
+  }
+  
+  .mobile-header {
+    padding: 16px 12px;
+  }
+  
+  .mobile-screen-tabs {
+    gap: 8px;
+  }
+  
+  .mobile-screen-tab {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Tối ưu cho iPhone các loại */
+@media screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) {
+  /* iPhone X/XS/11 Pro */
+  .mobile-org-title {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  
+  .mobile-time-display {
+    font-size: 28px;
+  }
+  
+  .mobile-event-image {
+    max-height: 200px;
+  }
+}
+
+@media screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
+  /* iPhone XR/11 */
+  .mobile-org-title {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  
+  .mobile-time-display {
+    font-size: 32px;
+  }
+  
+  .mobile-event-image {
+    max-height: 250px;
+  }
+}
+
+@media screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
+  /* iPhone XS Max/11 Pro Max */
+  .mobile-org-title {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+  
+  .mobile-time-display {
+    font-size: 36px;
+  }
+  
+  .mobile-event-image {
+    max-height: 280px;
+  }
+}
+
+/* Tối ưu cho Samsung Galaxy */
+@media screen and (device-width: 360px) and (device-height: 740px) and (-webkit-device-pixel-ratio: 3) {
+  /* Samsung Galaxy S series */
+  .mobile-org-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  
+  .mobile-time-display {
+    font-size: 26px;
+  }
+  
+  .mobile-schedule-card {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+}
+
+@media screen and (device-width: 412px) and (device-height: 869px) and (-webkit-device-pixel-ratio: 3.5) {
+  /* Samsung Galaxy Note series */
+  .mobile-org-title {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  
+  .mobile-time-display {
+    font-size: 32px;
+  }
+  
+  .mobile-schedule-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Landscape orientation cho mobile */
+@media screen and (max-width: 896px) and (orientation: landscape) {
+  .mobile-header {
+    padding: 8px 16px;
+  }
+  
+  .mobile-org-title {
+    font-size: 14px;
+  }
+  
+  .mobile-time-display {
+    font-size: 20px;
+  }
+  
+  .mobile-content {
+    padding: 8px;
+  }
+  
+  .mobile-schedule-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* Tối ưu cho màn hình cong */
+@media screen and (max-width: 480px) {
+  .mobile-container {
+    /* Padding thêm cho các cạnh màn hình cong */
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .mobile-safe-area {
+    /* Đảm bảo nội dung không bị che bởi notch */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Touch-friendly button sizes */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth animations cho mobile */
+.mobile-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Typography tối ưu cho mobile */
+.mobile-text-sm { font-size: 12px; }
+.mobile-text-base { font-size: 14px; }
+.mobile-text-lg { font-size: 16px; }
+.mobile-text-xl { font-size: 18px; }
+.mobile-text-2xl { font-size: 20px; }
+.mobile-text-3xl { font-size: 24px; }
+
+/* Spacing tối ưu cho mobile */
+.mobile-spacing-xs { margin: 4px; }
+.mobile-spacing-sm { margin: 8px; }
+.mobile-spacing-md { margin: 12px; }
+.mobile-spacing-lg { margin: 16px; }
+.mobile-spacing-xl { margin: 20px; }
+
+/* Scrollbar ẩn cho mobile */
+.mobile-scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* High contrast cho readability */
+.mobile-high-contrast {
+  color: #000000;
+  background-color: #ffffff;
+  border: 2px solid #006b68;
+}
+
+/* Loading states cho mobile */
+.mobile-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+  background-size: 400% 100%;
+  animation: mobile-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes mobile-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
+}
+
+/* Print styles cho mobile - nếu cần */
+@media print {
+  .mobile-no-print {
+    display: none !important;
+  }
+  
+  .mobile-container {
+    background: white !important;
+    color: black !important;
+  }
+}

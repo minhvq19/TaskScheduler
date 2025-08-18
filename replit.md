@@ -4,6 +4,17 @@ This system provides a comprehensive work schedule management solution for BIDV,
 
 ## Recent Changes (August 2025)
 
+- **Mobile Public Display System**: Xây dựng hoàn chỉnh hệ thống hiển thị công cộng cho mobile
+  - Tạo component `PublicDisplayMobile` với thiết kế responsive tối ưu cho điện thoại
+  - Hỗ trợ các độ phân giải phổ biến: iPhone (2868x1320, 2622x1206), Samsung (3120x1440, 2340x1080)
+  - Layout dọc tối ưu với header cố định, tabs điều hướng touch-friendly
+  - CSS responsive riêng biệt với media queries cho từng loại device
+  - Routing mới: `/display-mobile`, `/public-display-mobile`, `/public-mobile`, `/mobile`
+  - Cập nhật Display Selection để bao gồm option cho mobile với icon Smartphone
+- **Past Date Entry**: Removed date/time restrictions in work schedule management to allow past date modifications
+  - Xóa `min` attribute trong datetime inputs và validation logic cho ngày giờ quá khứ
+  - Sửa `isValidWorkTime` function để cho phép chọn giờ quá khứ
+  - Cập nhật cả `add-schedule-modal.tsx` và `enhanced-schedule-modal.tsx`
 - **Image Upload & URL Encoding Fix**: Resolved production image loading issues for Other Events
   - Enhanced multer configuration with filename sanitization to prevent spaces and special characters
   - Created `createImageUrl` utility function for proper URL encoding in both 4K and standard displays
@@ -13,7 +24,6 @@ This system provides a comprehensive work schedule management solution for BIDV,
   - `display.work_schedule_display_time`: Work schedule screen display duration
   - `display.meeting_schedule_display_time`: Meeting schedule screen display duration  
   - `display.events_display_time`: Other events screen display duration
-- **Past Date Entry**: Removed date/time restrictions in work schedule management to allow past date modifications
 - **Vietnamese Localization**: Converted interface messages and notifications to Vietnamese language
 - **Multi-day Schedule Display**: Enhanced time display logic for multi-day work schedules in both public displays
 
@@ -25,15 +35,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Frontend Architecture
 
-The client-side application is built with React 18 and TypeScript, leveraging a component-based architecture with `shadcn/ui` for consistent design. It uses Wouter for lightweight routing and TanStack Query for server state management and caching. The system features dual display modes:
+The client-side application is built with React 18 and TypeScript, leveraging a component-based architecture with `shadcn/ui` for consistent design. It uses Wouter for lightweight routing and TanStack Query for server state management and caching. The system features triple display modes:
 
 - **Standard Display (1920x1080)**: Optimized for regular monitors and laptops
 - **4K Display (3840x2160)**: Specially designed for 65-inch TV displays with larger fonts, increased spacing, and optimized layouts
+- **Mobile Display (Responsive)**: Tối ưu cho điện thoại với layout dọc, touch-friendly controls và responsive design
 
 Public display routes include:
 - `/select-display`: Display selection interface
 - `/public-display`: Standard resolution display
 - `/public-display-4k`: 4K resolution display
+- `/public-display-mobile`: Mobile optimized display (responsive)
+- `/mobile`: Alternative mobile route
 
 Styling is managed with Tailwind CSS, utilizing custom properties for BIDV brand colors. Vite is used for fast development and optimized production builds.
 

@@ -9,6 +9,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import PublicDisplay from "@/pages/public-display";
 import PublicDisplay4K from "@/pages/public-display-4k";
+import PublicDisplayMobile from "@/pages/public-display-mobile";
 import DisplaySelection from "@/pages/display-selection";
 import SystemConfig from "@/pages/system-config";
 
@@ -29,6 +30,12 @@ function Router() {
       <Route path="/display-4k" component={PublicDisplay4K} />
       <Route path="/public-display-4k" component={PublicDisplay4K} />
       <Route path="/public-4k" component={PublicDisplay4K} />
+      
+      {/* Mobile Public display routes for phones (responsive design) */}
+      <Route path="/display-mobile" component={PublicDisplayMobile} />
+      <Route path="/public-display-mobile" component={PublicDisplayMobile} />
+      <Route path="/public-mobile" component={PublicDisplayMobile} />
+      <Route path="/mobile" component={PublicDisplayMobile} />
       
       {/* Protected routes */}
       {isLoading ? (

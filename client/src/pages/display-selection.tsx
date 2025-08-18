@@ -1,4 +1,4 @@
-import { Monitor, Tv } from 'lucide-react';
+import { Monitor, Tv, Smartphone } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 export default function DisplaySelection() {
@@ -7,6 +7,8 @@ export default function DisplaySelection() {
   const navigateToDisplay = (type: string) => {
     if (type === '4k') {
       setLocation('/public-display-4k');
+    } else if (type === 'mobile') {
+      setLocation('/public-display-mobile');
     } else {
       setLocation('/public-display');
     }
@@ -28,7 +30,7 @@ export default function DisplaySelection() {
         </div>
 
         {/* Display Options */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-3 gap-6">
           {/* Standard Display */}
           <div 
             onClick={() => navigateToDisplay('standard')}
@@ -80,6 +82,32 @@ export default function DisplaySelection() {
               </button>
             </div>
           </div>
+
+          {/* Mobile Display */}
+          <div 
+            onClick={() => navigateToDisplay('mobile')}
+            className="bg-white rounded-xl shadow-2xl p-8 cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-3xl border-4 border-transparent hover:border-green-400"
+          >
+            <div className="text-center">
+              <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Smartphone size={40} className="text-green-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">MÀN HÌNH MOBILE</h3>
+              <div className="text-lg text-gray-600 mb-6">
+                <p className="mb-2"><strong>Độ phân giải:</strong> Responsive</p>
+                <p className="mb-2"><strong>Thiết bị:</strong> Điện thoại, Tablet</p>
+                <p className="mb-4"><strong>Kích thước:</strong> 5" - 12"</p>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg mb-6">
+                <p className="text-gray-700">
+                  Tối ưu cho iPhone, Samsung và các thiết bị di động khác
+                </p>
+              </div>
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                CHỌN MÀN HÌNH NÀY
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Additional Info */}
@@ -101,6 +129,7 @@ export default function DisplaySelection() {
                   <li>• Lịch công tác lãnh đạo</li>
                   <li>• Lịch họp trong ngày</li>
                   <li>• Sự kiện và thông báo</li>
+                  <li>• Tối ưu cho mobile</li>
                 </ul>
               </div>
             </div>
