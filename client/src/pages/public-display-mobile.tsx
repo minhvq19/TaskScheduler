@@ -65,6 +65,9 @@ export default function PublicDisplayMobile() {
   
   // State để quản lý ngày hiện tại cho meeting schedule - di chuyển lên parent để persist
   const [meetingDateOffset, setMeetingDateOffset] = useState(0);
+  
+  // State để quản lý tuần hiện tại cho work schedule - di chuyển lên parent để persist
+  const [workWeekOffset, setWorkWeekOffset] = useState(0);
 
   // Cập nhật thời gian hiện tại mỗi giây
   useEffect(() => {
@@ -129,6 +132,7 @@ export default function PublicDisplayMobile() {
         if (prev <= 1) {
           setCurrentScreenIndex((prevIndex) => (prevIndex + 1) % SCREENS.length);
           setMeetingDateOffset(0); // Reset meeting date offset khi auto rotation
+          setWorkWeekOffset(0); // Reset work week offset khi auto rotation
           return duration;
         }
         return prev - 1;
@@ -142,6 +146,7 @@ export default function PublicDisplayMobile() {
   const handleScreenChange = (index: number) => {
     setCurrentScreenIndex(index);
     setMeetingDateOffset(0); // Reset meeting date offset khi chuyển screen thủ công
+    setWorkWeekOffset(0); // Reset work week offset khi chuyển screen thủ công
     const newScreen = SCREENS[index];
     const duration = screenDurations[newScreen.id];
     setTimeRemaining(duration);
@@ -149,7 +154,9 @@ export default function PublicDisplayMobile() {
 
   // Component hiển thị kế hoạch công tác cho mobile
   const WorkScheduleDisplayMobile = () => {
-    const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
+    // Sử dụng state từ parent component
+    const currentWeekOffset = workWeekOffset;
+    const setCurrentWeekOffset = setWorkWeekOffset;
     
     if (!displayData?.workSchedules) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
 
