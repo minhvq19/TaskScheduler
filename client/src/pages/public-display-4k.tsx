@@ -376,7 +376,7 @@ export default function PublicDisplay4K() {
                   style={{ backgroundColor: "#f5f0dc" }}
                 >
                   <div
-                    className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[36px] text-[#791301]"
+                    className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[#791301] text-[34px]"
                     style={{
                       fontFamily: "Arial, sans-serif",
                       fontWeight: "700",
