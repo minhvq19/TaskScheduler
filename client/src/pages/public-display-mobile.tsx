@@ -27,6 +27,7 @@ interface Staff {
   employeeId: string;
   fullName: string;
   position: string;
+  positionShort: string;
   department: {
     name: string;
   };
@@ -144,151 +145,80 @@ export default function PublicDisplayMobile() {
   // Component hiển thị kế hoạch công tác cho mobile
   const WorkScheduleDisplayMobile = () => {
     const [selectedStaff, setSelectedStaff] = useState<string>('all');
-    const [viewMode, setViewMode] = useState<'week' | 'staff'>('week');
+    const [currentWeekOffset, setCurrentWeekOffset] = useState<number>(0);
     
     if (!displayData?.workSchedules) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
 
-    // Lọc lịch công tác trong tuần hiện tại
+    // Tính toán tuần hiện tại + offset
     const today = startOfDay(new Date());
+    const currentWeekStart = addDays(today, -getDay(today) + 1 + (currentWeekOffset * 7)); // Thứ Hai
+    const currentWeekEnd = addDays(currentWeekStart, 6); // Chủ Nhật
+    
     const weekDays = eachDayOfInterval({
-      start: addDays(today, -getDay(today) + 1), // Thứ Hai
-      end: addDays(today, -getDay(today) + 7)    // Chủ Nhật
+      start: currentWeekStart,
+      end: currentWeekEnd
     });
 
-    // Lọc lịch theo cán bộ đã chọn
-    const filteredSchedules = selectedStaff === 'all' 
-      ? displayData.workSchedules 
-      : displayData.workSchedules.filter(schedule => schedule.staffId === selectedStaff);
+    // Lọc chỉ cán bộ thuộc Ban giám đốc
+    const managementStaff = staff.filter(s => s.department?.name === 'Ban giám đốc');
 
-    // Hàm rút gọn chức danh
-    const getShortTitle = (position: string) => {
-      const titleMap: Record<string, string> = {
-        'Giám đốc': 'GĐ',
-        'Phó Giám đốc': 'PGĐ',
-        'Trưởng phòng': 'TP',
-        'Phó Trưởng phòng': 'PTP',
-        'Chuyên viên': 'CV',
-        'Nhân viên': 'NV',
-        'Kế toán': 'KT',
-        'Thủ quỹ': 'TQ',
-        'Bảo vệ': 'BV',
-        'Lái xe': 'LX'
-      };
-      return titleMap[position] || position.substring(0, 2).toUpperCase();
-    };
+    // Lọc lịch theo cán bộ đã chọn và tuần hiện tại
+    let filteredSchedules = displayData.workSchedules.filter(schedule => {
+      const scheduleDate = new Date(schedule.startDateTime);
+      const isInCurrentWeek = scheduleDate >= currentWeekStart && scheduleDate <= addDays(currentWeekEnd, 1);
+      const staffInManagement = managementStaff.some(s => s.id === schedule.staffId);
+      
+      if (selectedStaff === 'all') {
+        return isInCurrentWeek && staffInManagement;
+      } else {
+        return isInCurrentWeek && schedule.staffId === selectedStaff;
+      }
+    });
 
-    // Hiển thị theo tuần
-    const renderWeekView = () => (
-      <div className="space-y-2">
-        {weekDays.map((day) => {
-          const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-          const daySchedules = filteredSchedules.filter(schedule => {
-            const scheduleDate = new Date(schedule.startDateTime);
-            return format(scheduleDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-          });
+    // Hiển thị theo layout mới như hình mẫu
+    const renderScheduleView = () => {
+      return (
+        <div className="space-y-3">
+          {weekDays.map((day) => {
+            const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+            const daySchedules = filteredSchedules.filter(schedule => {
+              const scheduleDate = new Date(schedule.startDateTime);
+              return format(scheduleDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
+            });
 
-          return (
-            <div 
-              key={format(day, 'yyyy-MM-dd')} 
-              className={`p-3 rounded-lg border-2 ${
-                isToday 
-                  ? 'border-orange-400 bg-orange-50' 
-                  : 'border-gray-200 bg-white'
-              }`}
-            >
-              {/* Ngày đơn giản hóa */}
-              <div className={`text-center mb-2 pb-2 border-b ${
-                isToday ? 'border-orange-300' : 'border-gray-200'
-              }`}>
-                <div className={`text-lg font-bold ${
-                  isToday ? 'text-orange-700' : 'text-gray-800'
-                }`}>
-                  {format(day, 'dd/MM')}
+            if (daySchedules.length === 0) return null;
+
+            return (
+              <div key={format(day, 'yyyy-MM-dd')} className="bg-white rounded-lg overflow-hidden shadow-sm">
+                {/* Header ngày với background màu cam */}
+                <div className="bg-orange-100 border border-orange-200 p-3 text-center">
+                  <div className="text-lg font-bold text-orange-700">
+                    {format(day, 'dd/MM')}
+                  </div>
                 </div>
-              </div>
 
-              {/* Danh sách lịch công tác */}
-              <div className="space-y-2">
-                {daySchedules.length > 0 ? (
-                  daySchedules.map((schedule, index) => {
+                {/* Danh sách lịch công tác */}
+                <div className="divide-y divide-gray-200">
+                  {daySchedules.map((schedule, index) => {
                     const staffMember = staff.find(s => s.id === schedule.staffId);
                     const startTime = new Date(schedule.startDateTime);
                     const endTime = new Date(schedule.endDateTime);
-                    const shortTitle = getShortTitle(staffMember?.position || '');
                     
                     return (
-                      <div 
-                        key={`${schedule.id}-${index}`}
-                        className="p-2 rounded border-l-4 border-[#006b68] bg-gray-50"
-                      >
-                        <div className="flex flex-col space-y-1">
-                          <div className="font-semibold text-gray-800 text-sm">
-                            {shortTitle}. {staffMember?.fullName || 'Không xác định'}
+                      <div key={`${schedule.id}-${index}`} className="p-3 border-l-4 border-gray-400">
+                        <div className="space-y-1">
+                          {/* Tên với chức danh viết tắt */}
+                          <div className="font-bold text-gray-900 text-sm">
+                            {staffMember?.positionShort}. {staffMember?.fullName || 'Không xác định'}
                           </div>
+                          
+                          {/* Thời gian */}
                           <div className="text-xs text-gray-600">
                             {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
                           </div>
-                          <div className="text-sm text-gray-700">
-                            {schedule.workType === 'Khác' ? schedule.customContent : schedule.workType}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-center text-gray-400 text-sm py-2">
-                    Không có lịch công tác
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-
-    // Hiển thị theo cán bộ
-    const renderStaffView = () => {
-      // Gom nhóm lịch theo cán bộ
-      const schedulesByStaff = filteredSchedules.reduce((acc, schedule) => {
-        const staffId = schedule.staffId;
-        if (!acc[staffId]) acc[staffId] = [];
-        acc[staffId].push(schedule);
-        return acc;
-      }, {} as Record<string, (typeof filteredSchedules)>);
-
-      return (
-        <div className="space-y-3">
-          {Object.entries(schedulesByStaff).map(([staffId, schedules]) => {
-            const staffMember = staff.find(s => s.id === staffId);
-            const shortTitle = getShortTitle(staffMember?.position || '');
-            
-            return (
-              <div key={staffId} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
-                {/* Header cán bộ */}
-                <div className="bg-[#006b68] text-white p-3">
-                  <div className="font-bold text-sm text-center">
-                    {shortTitle}. {staffMember?.fullName || 'Không xác định'}
-                  </div>
-                </div>
-                
-                {/* Lịch của cán bộ */}
-                <div className="p-3 space-y-2">
-                  {(schedules as any[]).map((schedule: any, index: number) => {
-                    const startTime = new Date(schedule.startDateTime);
-                    const endTime = new Date(schedule.endDateTime);
-                    const scheduleDate = new Date(schedule.startDateTime);
-                    
-                    return (
-                      <div 
-                        key={`${schedule.id}-${index}`}
-                        className="p-2 bg-gray-50 rounded border-l-4 border-orange-400"
-                      >
-                        <div className="flex flex-col space-y-1">
-                          <div className="font-medium text-gray-800 text-sm">
-                            {format(scheduleDate, 'dd/MM')} - {format(startTime, 'HH:mm')} đến {format(endTime, 'HH:mm')}
-                          </div>
-                          <div className="text-sm text-gray-700">
+                          
+                          {/* Nội dung công việc */}
+                          <div className="text-sm text-gray-800">
                             {schedule.workType === 'Khác' ? schedule.customContent : schedule.workType}
                           </div>
                         </div>
@@ -299,35 +229,42 @@ export default function PublicDisplayMobile() {
               </div>
             );
           })}
+          
+          {filteredSchedules.length === 0 && (
+            <div className="text-center py-8">
+              <div className="text-gray-400 text-lg">Không có lịch công tác trong tuần này</div>
+            </div>
+          )}
         </div>
       );
     };
 
+
+
     return (
       <div className="space-y-3">
-        {/* Bộ lọc và điều khiển */}
+        {/* Header điều khiển tuần */}
         <div className="bg-white p-3 rounded-lg shadow-sm">
-          {/* Nút chuyển đổi chế độ xem */}
-          <div className="flex space-x-2 mb-3">
+          {/* Navigation tuần */}
+          <div className="flex items-center justify-between mb-3">
             <button
-              onClick={() => setViewMode('week')}
-              className={`flex-1 py-2 px-3 text-sm font-medium rounded ${
-                viewMode === 'week'
-                  ? 'bg-[#006b68] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
             >
-              📅 Theo tuần
+              <ChevronLeft size={20} />
             </button>
+            
+            <div className="text-center flex-1">
+              <div className="font-bold text-lg text-gray-800">
+                Tuần {format(currentWeekStart, 'dd/MM')} - {format(currentWeekEnd, 'dd/MM/yyyy')}
+              </div>
+            </div>
+            
             <button
-              onClick={() => setViewMode('staff')}
-              className={`flex-1 py-2 px-3 text-sm font-medium rounded ${
-                viewMode === 'staff'
-                  ? 'bg-[#006b68] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
             >
-              👥 Theo cán bộ
+              <ChevronRight size={20} />
             </button>
           </div>
 
@@ -340,9 +277,9 @@ export default function PublicDisplayMobile() {
               className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#006b68] focus:border-transparent"
             >
               <option value="all">Tất cả cán bộ</option>
-              {staff.map((staffMember) => (
+              {managementStaff.map((staffMember) => (
                 <option key={staffMember.id} value={staffMember.id}>
-                  {getShortTitle(staffMember.position)}. {staffMember.fullName}
+                  {staffMember.positionShort}. {staffMember.fullName}
                 </option>
               ))}
             </select>
@@ -350,7 +287,7 @@ export default function PublicDisplayMobile() {
         </div>
 
         {/* Nội dung hiển thị */}
-        {viewMode === 'week' ? renderWeekView() : renderStaffView()}
+        {renderScheduleView()}
       </div>
     );
   };
@@ -378,7 +315,7 @@ export default function PublicDisplayMobile() {
         <div className="space-y-2">
           {weekDays.map((day) => {
             const isToday = format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-            const dayMeetings = meetingSchedules.filter((meeting: any) => {
+            const dayMeetings = (meetingSchedules || []).filter((meeting: any) => {
               const meetingDate = new Date(meeting.startDateTime);
               return format(meetingDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
             });
@@ -462,7 +399,7 @@ export default function PublicDisplayMobile() {
 
     // Lọc sự kiện active và trong khoảng thời gian hiện tại
     const now = new Date();
-    const currentEvents = otherEvents.filter((event: any) => {
+    const currentEvents = (otherEvents || []).filter((event: any) => {
       const startDate = new Date(event.startDateTime);
       const endDate = new Date(event.endDateTime);
       return startDate <= now && now <= endDate;
