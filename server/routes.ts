@@ -23,21 +23,47 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Configure multer for file uploads
+// Utility function để tạo tên file an toàn
+function sanitizeFilename(filename: string): string {
+  // Loại bỏ các ký tự đặc biệt và thay thế bằng dấu gạch ngang
+  return filename
+    .replace(/[^a-zA-Z0-9.\-_]/g, '-') // Thay thế ký tự đặc biệt bằng -
+    .replace(/\s+/g, '-') // Thay thế khoảng trắng bằng -
+    .replace(/-+/g, '-') // Loại bỏ nhiều dấu - liên tiếp
+    .replace(/^-|-$/g, '') // Loại bỏ - ở đầu và cuối
+    .toLowerCase();
+}
+
+// Configure multer for file uploads với custom filename handling
 const upload = multer({
-  dest: 'uploads/',
+  storage: multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+      // Tạo tên file duy nhất với timestamp và random string
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const sanitizedName = sanitizeFilename(file.originalname);
+      const filename = `${timestamp}-${randomString}-${sanitizedName}`;
+      console.log('File upload naming:', {
+        original: file.originalname,
+        sanitized: sanitizedName,
+        final: filename
+      });
+      cb(null, filename);
+    }
+  }),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Only image files (jpg, jpeg, png, gif) are allowed'));
+      cb(new Error('Only image files (jpg, jpeg, png, gif, webp) are allowed'));
     }
   },
 });
@@ -470,10 +496,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let imageUrls: string[] = [];
       
       if (req.files && Array.isArray(req.files)) {
-        // Xử lý nhiều file
+        // Xử lý nhiều file với tên đã được sanitize từ multer
         for (const file of req.files) {
-          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.originalname}`;
-          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', filename);
+          // file.filename đã được sanitize bởi multer storage configuration
+          const publicPath = path.join(process.cwd(), 'dist', 'public', 'uploads', file.filename);
           
           // Ensure uploads directory exists
           const uploadsDir = path.dirname(publicPath);
@@ -481,17 +507,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
           
-          fs.renameSync(file.path, publicPath);
-          
-          // Also copy to the backup uploads directory for compatibility
-          const backupPath = path.join(process.cwd(), 'uploads', filename);
-          const backupDir = path.dirname(backupPath);
-          if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
+          // Move file từ temp location đến public uploads (file đã ở đúng vị trí từ multer)
+          // Chỉ copy đến dist/public/uploads nếu cần
+          if (!fs.existsSync(publicPath) && fs.existsSync(file.path)) {
+            fs.copyFileSync(file.path, publicPath);
           }
-          fs.copyFileSync(publicPath, backupPath);
           
-          const fileUrl = `/uploads/${filename}`;
+          console.log('File uploaded successfully:', {
+            original: file.originalname,
+            sanitized: file.filename,
+            path: file.path,
+            publicPath,
+            exists: fs.existsSync(file.path)
+          });
+          
+          const fileUrl = `/uploads/${file.filename}`;
           imageUrls.push(fileUrl);
         }
         

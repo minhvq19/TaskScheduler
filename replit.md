@@ -4,6 +4,11 @@ This system provides a comprehensive work schedule management solution for BIDV,
 
 ## Recent Changes (August 2025)
 
+- **Image Upload & URL Encoding Fix**: Resolved production image loading issues for Other Events
+  - Enhanced multer configuration with filename sanitization to prevent spaces and special characters
+  - Created `createImageUrl` utility function for proper URL encoding in both 4K and standard displays
+  - Added comprehensive debugging for image loading in production environments
+  - Fixed database file paths for events with spaces in filenames
 - **Display Timing Configuration**: Replaced single screen rotation interval with separate timing controls for each screen type:
   - `display.work_schedule_display_time`: Work schedule screen display duration
   - `display.meeting_schedule_display_time`: Meeting schedule screen display duration  
