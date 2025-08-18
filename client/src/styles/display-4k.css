@@ -1,0 +1,54 @@
+/* CSS riêng cho màn hình 4K public display */
+
+/* Font configuration tối ưu cho 4K display */
+.display-4k {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Force font loading để đảm bảo hiển thị đúng trên production */
+.display-4k * {
+  font-family: inherit !important;
+  font-display: swap;
+}
+
+/* Specific font sizing cho các components chính */
+.display-4k .header-text {
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.display-4k .schedule-text {
+  font-size: 26pt !important;
+  font-weight: 400 !important;
+  line-height: 1.1 !important;
+}
+
+.display-4k .meeting-text {
+  font-size: 26pt !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+
+.display-4k .room-name-text {
+  font-size: 26pt !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+/* Performance optimization cho 4K */
+.display-4k {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Đảm bảo text hiển thị sharp trên các độ phân giải cao */
+.display-4k .text-sharp {
+  -webkit-font-smoothing: subpixel-antialiased;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}

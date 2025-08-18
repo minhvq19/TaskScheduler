@@ -4,6 +4,7 @@ import { format, startOfDay, addDays, eachDayOfInterval } from "date-fns";
 import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
+import "../styles/display-4k.css";
 
 // Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
@@ -331,7 +332,7 @@ export default function PublicDisplay4K() {
         >
           <div
             className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400"
-            style={{ fontFamily: "Arial, sans-serif" }}
+            style={{ fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
           >
             LÃNH ĐẠO
           </div>
@@ -343,7 +344,7 @@ export default function PublicDisplay4K() {
               <div
                 key={index}
                 className={`p-4 text-black font-bold text-2xl text-center border-r-4 border-gray-400 ${isWeekendDay ? "bg-gray-300" : "bg-yellow-400"}`}
-                style={{ fontFamily: "Arial, sans-serif" }}
+                style={{ fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
               >
                 <div className="font-bold text-[30px]">{dayName}</div>
                 <div className="text-2xl font-bold">
@@ -381,7 +382,7 @@ export default function PublicDisplay4K() {
                   <div
                     className="font-bold pl-[0px] pr-[0px] mt-[0px] mb-[0px] pt-[0px] pb-[0px] text-[#791301] text-[34px]"
                     style={{
-                      fontFamily: "Arial, sans-serif",
+                      fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                       fontWeight: "700",
                     }}
                   >
@@ -403,7 +404,7 @@ export default function PublicDisplay4K() {
                       className="border-r-2 border-gray-300 relative p-2"
                       style={{
                         backgroundColor: isWeekendDay ? "#adacac" : "#f5f4f0",
-                        fontFamily: "Arial, sans-serif",
+                        fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                       }}
                     >
                       {schedules.length > 0 ? (
@@ -477,7 +478,7 @@ export default function PublicDisplay4K() {
                                     fontSize: "26pt",
                                     lineHeight: "1.1",
                                     opacity: 1,
-                                    fontFamily: "Arial, sans-serif",
+                                    fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                     fontWeight: "400",
                                     whiteSpace: "normal",
                                     wordWrap: "break-word",
@@ -489,7 +490,7 @@ export default function PublicDisplay4K() {
                                       <div
                                         className="font-semibold"
                                         style={{
-                                          fontFamily: "Arial, sans-serif",
+                                          fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                           fontWeight: "400",
                                           fontSize: "26pt",
                                           color: isWorkAtBranch
@@ -514,7 +515,7 @@ export default function PublicDisplay4K() {
                                           <div
                                             className="opacity-90"
                                             style={{
-                                              fontFamily: "Arial, sans-serif",
+                                              fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                               fontSize: "26pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
@@ -533,7 +534,7 @@ export default function PublicDisplay4K() {
                             <div
                               className="text-center"
                               style={{
-                                fontFamily: "Arial, sans-serif",
+                                fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
                                 fontSize: "30pt",
                                 color: "#d1d5db",
                               }}
@@ -1343,7 +1344,7 @@ export default function PublicDisplay4K() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden flex flex-col"
+      className="display-4k min-h-screen relative overflow-hidden flex flex-col"
       style={{
         width: "100vw",
         height: "100vh",
