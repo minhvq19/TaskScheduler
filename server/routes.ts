@@ -530,31 +530,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.mkdirSync(uploadsDir, { recursive: true });
           }
           
-          // Copy file to public uploads directory for serving
+          // Copy file to public uploads directory for serving - ENHANCED ERROR HANDLING
           try {
             if (fs.existsSync(file.path)) {
               fs.copyFileSync(file.path, publicPath);
-              console.log('File copied to public directory with sanitized name:', publicPath);
+              console.log('✓ File upload SUCCESS:', {
+                original: file.originalname,
+                sanitized: file.filename,
+                source: file.path,
+                destination: publicPath,
+                publicExists: fs.existsSync(publicPath)
+              });
             } else {
-              console.error('Source file does not exist:', file.path);
+              const error = `Source file not found: ${file.path}`;
+              console.error('✗ CRITICAL FILE ERROR:', error);
+              return res.status(500).json({ message: 'File upload failed - source not found' });
             }
           } catch (error) {
-            console.error('Error copying file to public directory:', error);
+            console.error('✗ CRITICAL COPY ERROR:', error);
+            return res.status(500).json({ message: 'File upload failed - copy error', error: error.message });
           }
           
           // Sử dụng tên file đã sanitize (có _ thay vì dấu cách) cho database
           const fileUrl = `/uploads/${file.filename}`;
-          
-          console.log('File processed with space->underscore replacement:', {
-            original: file.originalname,
-            sanitizedFilename: file.filename,
-            sourcePath: file.path,
-            publicPath,
-            sourceExists: fs.existsSync(file.path),
-            publicExists: fs.existsSync(publicPath),
-            databaseUrl: fileUrl
-          });
-          
           imageUrls.push(fileUrl);
         }
         
