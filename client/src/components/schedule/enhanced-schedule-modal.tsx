@@ -211,17 +211,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
       return false;
     }
     
-    // If date is today, check if time is not in the past
-    if (dateString) {
-      const selectedDate = new Date(dateString);
-      const today = new Date();
-      
-      if (isSameDay(selectedDate, today)) {
-        const currentTime = format(new Date(), "HH:mm");
-        return timeString >= currentTime;
-      }
-    }
-    
+    // Allow past times - removed past time validation
     return true;
   };
 
@@ -365,26 +355,12 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const handleSubmit = (data: FormData) => {
     // Only validate times if not full day and times are provided
     if (!data.isFullDay && data.startTime && !isValidWorkTime(data.startTime, data.startDate)) {
-      const selectedDate = new Date(data.startDate);
-      const today = new Date();
-      
-      if (isSameDay(selectedDate, today)) {
-        form.setError("startTime", { message: "Không thể chọn giờ quá khứ" });
-      } else {
-        form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
-      }
+      form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
       return;
     }
 
     if (!data.isFullDay && data.endTime && !isValidWorkTime(data.endTime, data.endDate)) {
-      const selectedDate = new Date(data.endDate);
-      const today = new Date();
-      
-      if (isSameDay(selectedDate, today)) {
-        form.setError("endTime", { message: "Không thể chọn giờ quá khứ" });
-      } else {
-        form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
-      }
+      form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
       return;
     }
 

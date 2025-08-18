@@ -261,25 +261,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     const endDateTime = new Date(data.endDateTime);
     const now = new Date();
     
-    // Validate start time is not in the past
-    if (startDateTime < now) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể chọn ngày giờ bắt đầu trong quá khứ.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate end time is not in the past
-    if (endDateTime < now) {
-      toast({
-        title: "Lỗi",
-        description: "Không thể chọn ngày giờ kết thúc trong quá khứ.",
-        variant: "destructive",
-      });
-      return;
-    }
+
 
     // Validate end time is after start time
     if (endDateTime <= startDateTime) {
@@ -345,7 +327,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 <Input
                   id="startDateTime"
                   type="datetime-local"
-                  min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   value={watchedStartDateTime || ""}
                   onChange={(e) => {
                     console.log("Start datetime onChange triggered:", e.target.value);
@@ -372,7 +353,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 <Input
                   id="endDateTime"
                   type="datetime-local"
-                  min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                   value={watchedEndDateTime || ""}
                   onChange={(e) => {
                     console.log("End datetime onChange triggered:", e.target.value);

@@ -329,7 +329,10 @@ export default function PublicDisplay4K() {
           className="grid border-b-4 border-gray-400 bg-yellow-400"
           style={{ gridTemplateColumns: fullGridTemplate }}
         >
-          <div className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400" style={{ fontFamily: "Arial, sans-serif" }}>
+          <div
+            className="p-6 bg-yellow-400 text-black font-bold text-3xl flex items-center justify-center border-r-4 border-gray-400"
+            style={{ fontFamily: "Arial, sans-serif" }}
+          >
             LÃNH ĐẠO
           </div>
           {weekDays.map((day, index) => {
@@ -488,7 +491,7 @@ export default function PublicDisplay4K() {
                                         style={{
                                           fontFamily: "Arial, sans-serif",
                                           fontWeight: "400",
-                                          fontSize: "28pt",
+                                          fontSize: "26pt",
                                           color: isWorkAtBranch
                                             ? "#260705"
                                             : "#ffffff",
@@ -512,7 +515,7 @@ export default function PublicDisplay4K() {
                                             className="opacity-90"
                                             style={{
                                               fontFamily: "Arial, sans-serif",
-                                              fontSize: "28pt",
+                                              fontSize: "26pt",
                                               color: isWorkAtBranch
                                                 ? "#260705"
                                                 : "#ffffff",
