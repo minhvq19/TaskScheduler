@@ -50,21 +50,35 @@ export default function PublicDisplay4K() {
 
   // Lấy thời gian hiển thị cho từng loại màn hình từ cấu hình
   const screenDurations = React.useMemo(() => {
-    const workScheduleConfig = systemConfig.find(config => config.key === 'display.work_schedule_display_time');
-    const meetingScheduleConfig = systemConfig.find(config => config.key === 'display.meeting_schedule_display_time');
-    const eventsConfig = systemConfig.find(config => config.key === 'display.events_display_time');
-    
+    const workScheduleConfig = systemConfig.find(
+      (config) => config.key === "display.work_schedule_display_time",
+    );
+    const meetingScheduleConfig = systemConfig.find(
+      (config) => config.key === "display.meeting_schedule_display_time",
+    );
+    const eventsConfig = systemConfig.find(
+      (config) => config.key === "display.events_display_time",
+    );
+
     return {
-      'work-schedule': workScheduleConfig ? parseInt(workScheduleConfig.value) * 1000 : 15000,
-      'meeting-schedule': meetingScheduleConfig ? parseInt(meetingScheduleConfig.value) * 1000 : 15000,
-      'other-events': eventsConfig ? parseInt(eventsConfig.value) * 1000 : 15000,
+      "work-schedule": workScheduleConfig
+        ? parseInt(workScheduleConfig.value) * 1000
+        : 15000,
+      "meeting-schedule": meetingScheduleConfig
+        ? parseInt(meetingScheduleConfig.value) * 1000
+        : 15000,
+      "other-events": eventsConfig
+        ? parseInt(eventsConfig.value) * 1000
+        : 15000,
     };
   }, [systemConfig]);
 
   // Lấy thời gian hiển thị cho màn hình hiện tại
   const getCurrentScreenDuration = () => {
     const currentScreen = SCREENS[currentScreenIndex];
-    return screenDurations[currentScreen.id as keyof typeof screenDurations] || 15000;
+    return (
+      screenDurations[currentScreen.id as keyof typeof screenDurations] || 15000
+    );
   };
 
   // Cập nhật timeRemaining khi cấu hình hoặc màn hình thay đổi
@@ -110,13 +124,17 @@ export default function PublicDisplay4K() {
         if (prev <= 1) {
           // Chuyển sang màn hình tiếp theo và đặt lại đếm ngược
           const currentScreen = SCREENS[currentScreenIndex];
-          
-          if (currentScreen.id === 'other-events' && displayData && displayData.otherEvents) {
+
+          if (
+            currentScreen.id === "other-events" &&
+            displayData &&
+            displayData.otherEvents
+          ) {
             // Đối với các sự kiện khác, xoay qua các sự kiện liên quan (đang diễn ra + sắp tới trong vòng 30 ngày)
             const now = new Date();
             const thirtyDaysFromNow = new Date();
             thirtyDaysFromNow.setDate(now.getDate() + 30);
-            
+
             const relevantEvents = displayData.otherEvents
               .filter((event: any) => {
                 const start = new Date(event.startDateTime);
@@ -130,13 +148,14 @@ export default function PublicDisplay4K() {
                 const startB = new Date(b.startDateTime);
                 return startA.getTime() - startB.getTime();
               });
-            
+
             if (relevantEvents.length > 1) {
               // Nếu có nhiều sự kiện, xoay qua chúng
-              const nextEventIndex = (currentEventIndex + 1) % relevantEvents.length;
+              const nextEventIndex =
+                (currentEventIndex + 1) % relevantEvents.length;
               if (nextEventIndex === 0) {
                 // Hoàn thành tất cả sự kiện, chuyển sang màn hình tiếp theo
-                setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+                setCurrentScreenIndex((prev) => (prev + 1) % SCREENS.length);
                 setCurrentEventIndex(0);
               } else {
                 // Hiển thị sự kiện tiếp theo
@@ -144,15 +163,15 @@ export default function PublicDisplay4K() {
               }
             } else {
               // Một hoặc không có sự kiện, chuyển sang màn hình tiếp theo
-              setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+              setCurrentScreenIndex((prev) => (prev + 1) % SCREENS.length);
               setCurrentEventIndex(0);
             }
           } else {
             // Xoay màn hình thông thường
-            setCurrentScreenIndex(prev => (prev + 1) % SCREENS.length);
+            setCurrentScreenIndex((prev) => (prev + 1) % SCREENS.length);
             setCurrentEventIndex(0);
           }
-          
+
           return getCurrentScreenDuration() / 1000;
         }
         return prev - 1;
@@ -160,7 +179,13 @@ export default function PublicDisplay4K() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentScreenIndex, currentEventIndex, isPaused, screenDurations, displayData]);
+  }, [
+    currentScreenIndex,
+    currentEventIndex,
+    isPaused,
+    screenDurations,
+    displayData,
+  ]);
 
   // Lấy dữ liệu nhân viên
   const { data: staff = [] } = useQuery<any[]>({
@@ -328,7 +353,7 @@ export default function PublicDisplay4K() {
         {/* Nội dung với các hàng cho từng nhân viên */}
         <div
           className="overflow-auto"
-          style={{ height: "calc(100% - 310px)", backgroundColor: "#f5f0dc" }}
+          style={{ height: "calc(100% - 100px)", backgroundColor: "#f5f0dc" }}
         >
           {staff
             .filter(
@@ -342,7 +367,7 @@ export default function PublicDisplay4K() {
                 className="grid border-b-2 border-gray-300"
                 style={{
                   gridTemplateColumns: fullGridTemplate,
-                  minHeight: "180px",
+                  minHeight: "190px",
                 }}
               >
                 {/* Cột Tên Nhân viên */}
@@ -387,36 +412,56 @@ export default function PublicDisplay4K() {
                                 schedule.workType === "Làm việc tại CN";
 
                               // Tính toán thời gian hiển thị phù hợp cho ngày hiện tại
-                              const scheduleStartDate = parseLocalDateTime(schedule.startDateTime);
-                              const scheduleEndDate = parseLocalDateTime(schedule.endDateTime);
+                              const scheduleStartDate = parseLocalDateTime(
+                                schedule.startDateTime,
+                              );
+                              const scheduleEndDate = parseLocalDateTime(
+                                schedule.endDateTime,
+                              );
                               const currentDay = new Date(day);
                               currentDay.setHours(0, 0, 0, 0);
-                              
-                              const scheduleStartDay = new Date(scheduleStartDate);
+
+                              const scheduleStartDay = new Date(
+                                scheduleStartDate,
+                              );
                               scheduleStartDay.setHours(0, 0, 0, 0);
-                              
+
                               const scheduleEndDay = new Date(scheduleEndDate);
                               scheduleEndDay.setHours(0, 0, 0, 0);
-                              
+
                               let displayStartTime, displayEndTime;
-                              
+
                               // Nếu ngày hiện tại là ngày bắt đầu lịch
-                              if (currentDay.getTime() === scheduleStartDay.getTime()) {
-                                displayStartTime = format(scheduleStartDate, "HH:mm");
+                              if (
+                                currentDay.getTime() ===
+                                scheduleStartDay.getTime()
+                              ) {
+                                displayStartTime = format(
+                                  scheduleStartDate,
+                                  "HH:mm",
+                                );
                               } else {
                                 // Ngày giữa hoặc ngày cuối: bắt đầu từ giờ làm việc
                                 displayStartTime = workHours.start;
                               }
-                              
+
                               // Nếu ngày hiện tại là ngày kết thúc lịch
-                              if (currentDay.getTime() === scheduleEndDay.getTime()) {
-                                displayEndTime = format(scheduleEndDate, "HH:mm");
+                              if (
+                                currentDay.getTime() ===
+                                scheduleEndDay.getTime()
+                              ) {
+                                displayEndTime = format(
+                                  scheduleEndDate,
+                                  "HH:mm",
+                                );
                               } else {
                                 // Ngày đầu hoặc ngày giữa: kết thúc vào giờ làm việc
                                 displayEndTime = workHours.end;
                               }
-                              
-                              const isFullDay = displayStartTime === workHours.start && displayEndTime === workHours.end;
+
+                              const isFullDay =
+                                displayStartTime === workHours.start &&
+                                displayEndTime === workHours.end;
 
                               return (
                                 <div
@@ -563,7 +608,7 @@ export default function PublicDisplay4K() {
         const weekEndDate = endOfWeek;
 
         // Bao gồm cuộc họp nếu nó chồng lấp với tuần hiện tại - hoàn toàn giống như tiêu chuẩn
-        // Cuộc họp chồng lấp nếu: cuộc họp bắt đầu trước hoặc vào cuối tuần VÀ cuộc họp kết thúc sau hoặc vào đầu tuần
+        // Cuộc họp chồng lấp nếu: cuộc họp bắt đầu trước hoặc vào cuối tuần VÀ cuộc họp k  �t thúc sau hoặc vào đầu tuần
         return (
           meetingStartDate <= weekEndDate && meetingEndDate >= weekStartDate
         );
@@ -881,32 +926,35 @@ export default function PublicDisplay4K() {
 
   // Utility function để tạo URL ảnh đúng cách cho production và development
   const createImageUrl = (path: string) => {
-    if (!path) return '';
-    
+    if (!path) return "";
+
     // Nếu đã là URL đầy đủ, return ngay
-    if (path.startsWith('http://') || path.startsWith('https://')) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    
+
     // Đảm bảo path bắt đầu với /
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
     // Encode các ký tự đặc biệt nhưng giữ nguyên /
-    const encodedPath = normalizedPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-    
+    const encodedPath = normalizedPath
+      .split("/")
+      .map((segment) => encodeURIComponent(segment))
+      .join("/");
+
     // Tạo full URL
     const fullUrl = `${window.location.origin}${encodedPath}`;
-    
-    console.log('4K createImageUrl:', { 
-      originalPath: path, 
-      normalizedPath, 
-      encodedPath, 
+
+    console.log("4K createImageUrl:", {
+      originalPath: path,
+      normalizedPath,
+      encodedPath,
       fullUrl,
       environment: process.env.NODE_ENV,
-      hasSpaces: path.includes(' '),
-      hasUnderscores: path.includes('_')
+      hasSpaces: path.includes(" "),
+      hasUnderscores: path.includes("_"),
     });
-    
+
     return fullUrl;
   };
 
@@ -927,62 +975,85 @@ export default function PublicDisplay4K() {
               borderRadius: "12px",
               boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
             }}
-            onLoad={() => console.log("4K Single image loaded successfully:", imgSrc)}
+            onLoad={() =>
+              console.log("4K Single image loaded successfully:", imgSrc)
+            }
             onError={async (e) => {
               const target = e.currentTarget as HTMLImageElement;
               const originalSrc = target.src;
-              
+
               console.error("4K Single image failed to load:", originalSrc);
               console.error("4K Error details:", e);
-              
+
               // Thử fallback strategies theo thứ tự ưu tiên
               const fallbackUrls = [];
-              
+
               // Strategy 1: Thay dấu cách bằng dấu gạch dưới
-              if (images[0].includes(' ')) {
-                fallbackUrls.push(createImageUrl(images[0].replace(/\s+/g, '_')));
+              if (images[0].includes(" ")) {
+                fallbackUrls.push(
+                  createImageUrl(images[0].replace(/\s+/g, "_")),
+                );
               }
-              
+
               // Strategy 2: Thử với encoding khác
-              if (images[0].includes('%')) {
-                fallbackUrls.push(createImageUrl(decodeURIComponent(images[0])));
+              if (images[0].includes("%")) {
+                fallbackUrls.push(
+                  createImageUrl(decodeURIComponent(images[0])),
+                );
               }
-              
+
               // Strategy 3: Thử direct path từ uploads
               const pathMatch = images[0].match(/\/uploads\/(.+)$/);
               if (pathMatch) {
-                fallbackUrls.push(`${window.location.origin}/uploads/${pathMatch[1]}`);
-                fallbackUrls.push(`${window.location.origin}/uploads/${pathMatch[1].replace(/\s+/g, '_')}`);
+                fallbackUrls.push(
+                  `${window.location.origin}/uploads/${pathMatch[1]}`,
+                );
+                fallbackUrls.push(
+                  `${window.location.origin}/uploads/${pathMatch[1].replace(/\s+/g, "_")}`,
+                );
               }
-              
+
               // Thử từng fallback URL
               for (let i = 0; i < fallbackUrls.length; i++) {
                 const fallbackUrl = fallbackUrls[i];
                 if (fallbackUrl === originalSrc) continue; // Bỏ qua URL đã thử
-                
-                console.log(`4K Trying fallback strategy ${i+1}:`, fallbackUrl);
-                
+
+                console.log(
+                  `4K Trying fallback strategy ${i + 1}:`,
+                  fallbackUrl,
+                );
+
                 try {
-                  const response = await fetch(fallbackUrl, { method: 'HEAD' });
+                  const response = await fetch(fallbackUrl, { method: "HEAD" });
                   if (response.ok) {
-                    console.log(`4K Fallback strategy ${i+1} SUCCESS:`, fallbackUrl);
+                    console.log(
+                      `4K Fallback strategy ${i + 1} SUCCESS:`,
+                      fallbackUrl,
+                    );
                     target.src = fallbackUrl;
                     return;
                   }
                 } catch (fallbackError) {
-                  console.log(`4K Fallback strategy ${i+1} failed:`, fallbackError);
+                  console.log(
+                    `4K Fallback strategy ${i + 1} failed:`,
+                    fallbackError,
+                  );
                   continue;
                 }
               }
-              
+
               // Tất cả fallback thất bại - ẩn ảnh
-              console.error('4K All fallback strategies failed for:', images[0]);
-              target.style.display = 'none';
-              
+              console.error(
+                "4K All fallback strategies failed for:",
+                images[0],
+              );
+              target.style.display = "none";
+
               // Hiển thị thông báo lỗi
-              const errorDiv = document.createElement('div');
-              errorDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-xl';
-              errorDiv.textContent = 'Không thể tải ảnh';
+              const errorDiv = document.createElement("div");
+              errorDiv.className =
+                "flex items-center justify-center h-full bg-gray-100 text-gray-500 text-xl";
+              errorDiv.textContent = "Không thể tải ảnh";
               target.parentNode?.appendChild(errorDiv);
             }}
           />
@@ -996,7 +1067,7 @@ export default function PublicDisplay4K() {
         <div className="w-full h-full flex gap-8 p-8">
           {images.map((src, index) => {
             const imageUrl = createImageUrl(src);
-            
+
             return (
               <div key={index} className="flex-1 h-full">
                 <img
@@ -1009,9 +1080,16 @@ export default function PublicDisplay4K() {
                     borderRadius: "12px",
                     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
                   }}
-                  onLoad={() => console.log(`4K Image ${index + 1} loaded successfully: ${imageUrl}`)}
+                  onLoad={() =>
+                    console.log(
+                      `4K Image ${index + 1} loaded successfully: ${imageUrl}`,
+                    )
+                  }
                   onError={(e) => {
-                    console.error(`4K Failed to load image ${index + 1}: ${imageUrl}`, e);
+                    console.error(
+                      `4K Failed to load image ${index + 1}: ${imageUrl}`,
+                      e,
+                    );
                   }}
                 />
               </div>
@@ -1151,14 +1229,15 @@ export default function PublicDisplay4K() {
       relevantEventsCount: relevantEvents.length,
       currentEventIndex,
       allOtherEventsCount: displayData?.otherEvents?.length || 0,
-      allOtherEvents: displayData?.otherEvents?.map((e: any) => ({
-        id: e.id,
-        shortName: e.shortName?.substring(0, 30),
-        startDateTime: e.startDateTime,
-        endDateTime: e.endDateTime,
-        imageUrl: e.imageUrl,
-        imageUrls: e.imageUrls
-      })) || [],
+      allOtherEvents:
+        displayData?.otherEvents?.map((e: any) => ({
+          id: e.id,
+          shortName: e.shortName?.substring(0, 30),
+          startDateTime: e.startDateTime,
+          endDateTime: e.endDateTime,
+          imageUrl: e.imageUrl,
+          imageUrls: e.imageUrls,
+        })) || [],
       currentEvent: currentEvent
         ? {
             id: currentEvent.id,
@@ -1166,7 +1245,7 @@ export default function PublicDisplay4K() {
             startTime: currentEvent.startDateTime,
             endTime: currentEvent.endDateTime,
             imageUrl: currentEvent.imageUrl,
-            imageUrls: currentEvent.imageUrls
+            imageUrls: currentEvent.imageUrls,
           }
         : null,
       screenDuration: "Full screen rotation time",
@@ -1215,14 +1294,15 @@ export default function PublicDisplay4K() {
           hasImageUrls: !!currentEvent.imageUrls,
           imageUrlsLength: currentEvent.imageUrls?.length || 0,
           startDateTime: currentEvent.startDateTime,
-          endDateTime: currentEvent.endDateTime
+          endDateTime: currentEvent.endDateTime,
         });
 
-        const finalImages = currentEvent.imageUrls && currentEvent.imageUrls.length > 0
-          ? currentEvent.imageUrls.filter(Boolean)
-          : currentEvent.imageUrl
-            ? [currentEvent.imageUrl]
-            : [];
+        const finalImages =
+          currentEvent.imageUrls && currentEvent.imageUrls.length > 0
+            ? currentEvent.imageUrls.filter(Boolean)
+            : currentEvent.imageUrl
+              ? [currentEvent.imageUrl]
+              : [];
 
         console.log("4K EventDisplay - Final images array:", finalImages);
         return finalImages;
