@@ -181,6 +181,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
+  // Middleware kiểm tra quyền cho function cụ thể
+  const requirePermission = (functionName: string, requiredPermission: 'VIEW' | 'EDIT' = 'VIEW') => {
+    return async (req: any, res: any, next: any) => {
+      try {
+        if (!req.user?.userGroupId) {
+          return res.status(403).json({ message: "Access denied - No user group" });
+        }
+
+        // Lấy thông tin user group và permissions
+        const userGroup = await storage.getUserGroup(req.user.userGroupId);
+        if (!userGroup) {
+          return res.status(403).json({ message: "Access denied - Invalid user group" });
+        }
+
+        // Admin group có tất cả quyền
+        if (userGroup.id === 'admin-group') {
+          return next();
+        }
+
+        // Kiểm tra quyền cụ thể cho function
+        const permissions = userGroup.permissions as any;
+        const userPermission = permissions[functionName];
+
+        if (!userPermission) {
+          return res.status(403).json({ 
+            message: `Access denied - No permission for ${functionName}` 
+          });
+        }
+
+        // Kiểm tra level quyền
+        if (requiredPermission === 'EDIT' && userPermission !== 'EDIT') {
+          return res.status(403).json({ 
+            message: `Access denied - Need EDIT permission for ${functionName}` 
+          });
+        }
+
+        next();
+      } catch (error) {
+        console.error("Permission check error:", error);
+        res.status(500).json({ message: "Permission check failed" });
+      }
+    };
+  };
+
   // Routes phòng ban
   app.get('/api/departments', requireAuth, async (req, res) => {
     try {
@@ -297,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meeting-rooms', requireAuth, async (req, res) => {
+  app.post('/api/meeting-rooms', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingRoomSchema.parse(req.body);
       const room = await storage.createMeetingRoom(validatedData);
@@ -311,7 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/meeting-rooms/:id', requireAuth, async (req, res) => {
+  app.put('/api/meeting-rooms/:id', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertMeetingRoomSchema.partial().parse(req.body);
@@ -326,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meeting-rooms/:id', requireAuth, async (req, res) => {
+  app.delete('/api/meeting-rooms/:id', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteMeetingRoom(id);
@@ -353,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/work-schedules', requireAuth, async (req, res) => {
+  app.post('/api/work-schedules', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertWorkScheduleSchema.parse({
         ...req.body,
@@ -361,6 +405,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDateTime: new Date(req.body.endDateTime),
         createdBy: (req.user as any)?.id || 'admin-user',
       });
+
+      // Kiểm tra quyền tạo lịch cho staff cụ thể (chỉ áp dụng cho non-admin)
+      const userGroup = await storage.getUserGroup(req.user.userGroupId);
+      if (userGroup && userGroup.id !== 'admin-group') {
+        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
+        const allowedStaffIds = hasPermissionForStaff.map(p => p.staffId);
+        
+        if (allowedStaffIds.length > 0 && !allowedStaffIds.includes(validatedData.staffId)) {
+          return res.status(403).json({ 
+            message: "Bạn không có quyền tạo lịch công tác cho nhân viên này" 
+          });
+        }
+      }
 
       // Check daily limit (max 4 schedules per staff per day) for the entire date range
       const startDate = new Date(validatedData.startDateTime);
@@ -392,7 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/work-schedules/:id', requireAuth, async (req, res) => {
+  app.put('/api/work-schedules/:id', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertWorkScheduleSchema.partial().parse({
@@ -435,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/work-schedules/:id', requireAuth, async (req, res) => {
+  app.delete('/api/work-schedules/:id', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteWorkSchedule(id);
@@ -462,9 +519,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meeting-schedules', requireAuth, async (req, res) => {
+  app.post('/api/meeting-schedules', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
+      
+      // Kiểm tra quyền đặt lịch họp cho staff (chỉ áp dụng cho non-admin)
+      const userGroup = await storage.getUserGroup(req.user.userGroupId);
+      if (userGroup && userGroup.id !== 'admin-group') {
+        // Lấy contact person từ meeting content hoặc contact person field
+        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
+        if (hasPermissionForStaff.length === 0) {
+          return res.status(403).json({ 
+            message: "Bạn không có quyền tạo lịch họp" 
+          });
+        }
+      }
+      
       const schedule = await storage.createMeetingSchedule(validatedData);
       res.status(201).json(schedule);
     } catch (error) {
@@ -476,7 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
+  app.put('/api/meeting-schedules/:id', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
       const schedule = await storage.updateMeetingSchedule(req.params.id, validatedData);
@@ -490,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
+  app.delete('/api/meeting-schedules/:id', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
     try {
       await storage.deleteMeetingSchedule(req.params.id);
       res.status(200).json({ message: "Meeting schedule deleted successfully" });
