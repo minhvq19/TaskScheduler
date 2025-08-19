@@ -331,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Meeting rooms routes
-  app.get('/api/meeting-rooms', requireAuth, async (req, res) => {
+  app.get('/api/meeting-rooms', requireAuth, requirePermission('meeting-rooms', 'VIEW'), async (req, res) => {
     try {
       const rooms = await storage.getMeetingRooms();
       res.json(rooms);
@@ -385,6 +385,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/work-schedules', requireAuth, async (req, res) => {
     try {
       const { startDate, endDate, staffId } = req.query;
+      
+      // Kiểm tra quyền xem work schedules cho non-admin users
+      const userGroup = await storage.getUserGroup(req.user.userGroupId);
+      if (userGroup && userGroup.id !== 'admin-group') {
+        const permissions = userGroup.permissions as any;
+        if (!permissions['work-schedules'] || permissions['work-schedules'] === 'NONE') {
+          return res.status(403).json({ 
+            message: "Bạn không có quyền xem lịch công tác" 
+          });
+        }
+        
+        // Nếu không phải admin, chỉ cho phép xem schedules của staff được phân quyền
+        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
+        const allowedStaffIds = hasPermissionForStaff.map(p => p.staffId);
+        
+        // Nếu user chưa được phân quyền cho staff nào, trả về empty array
+        if (allowedStaffIds.length === 0) {
+          return res.json([]);
+        }
+        
+        // Filter schedules để chỉ trả về của staff được phân quyền
+        const allSchedules = await storage.getWorkSchedules(
+          startDate ? new Date(startDate as string) : undefined,
+          endDate ? new Date(endDate as string) : undefined,
+          staffId as string
+        );
+        
+        const filteredSchedules = allSchedules.filter(schedule => 
+          allowedStaffIds.includes(schedule.staffId)
+        );
+        
+        return res.json(filteredSchedules);
+      }
+      
+      // Admin có thể xem tất cả
       const schedules = await storage.getWorkSchedules(
         startDate ? new Date(startDate as string) : undefined,
         endDate ? new Date(endDate as string) : undefined,
@@ -412,7 +447,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
         const allowedStaffIds = hasPermissionForStaff.map(p => p.staffId);
         
-        if (allowedStaffIds.length > 0 && !allowedStaffIds.includes(validatedData.staffId)) {
+        // Nếu chưa được phân quyền cho staff nào, không cho phép tạo lịch
+        if (allowedStaffIds.length === 0) {
+          return res.status(403).json({ 
+            message: "Bạn chưa được phân quyền tạo lịch công tác cho nhân viên nào" 
+          });
+        }
+        
+        if (!allowedStaffIds.includes(validatedData.staffId)) {
           return res.status(403).json({ 
             message: "Bạn không có quyền tạo lịch công tác cho nhân viên này" 
           });
@@ -507,6 +549,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/meeting-schedules', requireAuth, async (req, res) => {
     try {
       const { startDate, endDate, roomId } = req.query;
+      
+      // Kiểm tra quyền xem meeting schedules cho non-admin users
+      const userGroup = await storage.getUserGroup(req.user.userGroupId);
+      if (userGroup && userGroup.id !== 'admin-group') {
+        const permissions = userGroup.permissions as any;
+        if (!permissions['meeting-schedules'] || permissions['meeting-schedules'] === 'NONE') {
+          return res.status(403).json({ 
+            message: "Bạn không có quyền xem lịch họp" 
+          });
+        }
+        
+        // Nếu không phải admin, kiểm tra quyền tạo meeting schedule
+        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
+        if (hasPermissionForStaff.length === 0) {
+          return res.json([]);
+        }
+      }
+      
       const schedules = await storage.getMeetingSchedules(
         startDate ? new Date(startDate as string) : undefined,
         endDate ? new Date(endDate as string) : undefined,
@@ -523,14 +583,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
       
-      // Kiểm tra quyền đặt lịch họp cho staff (chỉ áp dụng cho non-admin)
+      // Kiểm tra quyền đặt lịch họp (chỉ áp dụng cho non-admin)
       const userGroup = await storage.getUserGroup(req.user.userGroupId);
       if (userGroup && userGroup.id !== 'admin-group') {
-        // Lấy contact person từ meeting content hoặc contact person field
         const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
         if (hasPermissionForStaff.length === 0) {
           return res.status(403).json({ 
-            message: "Bạn không có quyền tạo lịch họp" 
+            message: "Bạn chưa được phân quyền tạo lịch họp" 
           });
         }
       }
