@@ -331,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Meeting rooms routes
-  app.get('/api/meeting-rooms', requireAuth, requirePermission('meeting-rooms', 'VIEW'), async (req, res) => {
+  app.get('/api/meeting-rooms', requireAuth, requirePermission('rooms', 'VIEW'), async (req, res) => {
     try {
       const rooms = await storage.getMeetingRooms();
       res.json(rooms);
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meeting-rooms', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
+  app.post('/api/meeting-rooms', requireAuth, requirePermission('rooms', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingRoomSchema.parse(req.body);
       const room = await storage.createMeetingRoom(validatedData);
@@ -355,7 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/meeting-rooms/:id', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
+  app.put('/api/meeting-rooms/:id', requireAuth, requirePermission('rooms', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertMeetingRoomSchema.partial().parse(req.body);
@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meeting-rooms/:id', requireAuth, requirePermission('meeting-rooms', 'EDIT'), async (req, res) => {
+  app.delete('/api/meeting-rooms/:id', requireAuth, requirePermission('rooms', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteMeetingRoom(id);
@@ -390,7 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userGroup = await storage.getUserGroup(req.user.userGroupId);
       if (userGroup && userGroup.id !== 'admin-group') {
         const permissions = userGroup.permissions as any;
-        if (!permissions['work-schedules'] || permissions['work-schedules'] === 'NONE') {
+        if (!permissions['workSchedules'] || permissions['workSchedules'] === 'NONE') {
           return res.status(403).json({ 
             message: "Bạn không có quyền xem lịch công tác" 
           });
@@ -432,7 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/work-schedules', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
+  app.post('/api/work-schedules', requireAuth, requirePermission('workSchedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertWorkScheduleSchema.parse({
         ...req.body,
@@ -491,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/work-schedules/:id', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
+  app.put('/api/work-schedules/:id', requireAuth, requirePermission('workSchedules', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertWorkScheduleSchema.partial().parse({
@@ -534,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/work-schedules/:id', requireAuth, requirePermission('work-schedules', 'EDIT'), async (req, res) => {
+  app.delete('/api/work-schedules/:id', requireAuth, requirePermission('workSchedules', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteWorkSchedule(id);
