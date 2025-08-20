@@ -554,7 +554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userGroup = await storage.getUserGroup(req.user.userGroupId);
       if (userGroup && userGroup.id !== 'admin-group') {
         const permissions = userGroup.permissions as any;
-        if (!permissions['meeting-schedules'] || permissions['meeting-schedules'] === 'NONE') {
+        if (!permissions['meetingSchedules'] || permissions['meetingSchedules'] === 'NONE') {
           return res.status(403).json({ 
             message: "Bạn không có quyền xem lịch họp" 
           });
@@ -579,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meeting-schedules', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
+  app.post('/api/meeting-schedules', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
       
@@ -605,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/meeting-schedules/:id', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
+  app.put('/api/meeting-schedules/:id', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
     try {
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
       const schedule = await storage.updateMeetingSchedule(req.params.id, validatedData);
@@ -619,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meeting-schedules/:id', requireAuth, requirePermission('meeting-schedules', 'EDIT'), async (req, res) => {
+  app.delete('/api/meeting-schedules/:id', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
     try {
       await storage.deleteMeetingSchedule(req.params.id);
       res.status(200).json({ message: "Meeting schedule deleted successfully" });
@@ -630,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Routes sự kiện khác với upload file
-  app.get('/api/other-events', async (req, res) => {
+  app.get('/api/other-events', requireAuth, requirePermission('otherEvents', 'VIEW'), async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
       const events = await storage.getOtherEvents(
@@ -644,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/other-events', requireAuth, upload.array('images', 4), async (req, res) => {
+  app.post('/api/other-events', requireAuth, requirePermission('otherEvents', 'EDIT'), upload.array('images', 4), async (req, res) => {
     try {
       let imageUrl = undefined;
       let imageUrls: string[] = [];
@@ -736,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/other-events/:id', requireAuth, upload.array('images', 4), async (req, res) => {
+  app.put('/api/other-events/:id', requireAuth, requirePermission('otherEvents', 'EDIT'), upload.array('images', 4), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -832,7 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/other-events/:id', requireAuth, async (req, res) => {
+  app.delete('/api/other-events/:id', requireAuth, requirePermission('otherEvents', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteOtherEvent(id);
@@ -1099,7 +1099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Holiday routes
-  app.get('/api/holidays', async (req, res) => {
+  app.get('/api/holidays', requireAuth, requirePermission('holidays', 'VIEW'), async (req, res) => {
     try {
       const holidays = await storage.getHolidays();
       res.json(holidays);
@@ -1109,7 +1109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/holidays/:id', async (req, res) => {
+  app.get('/api/holidays/:id', requireAuth, requirePermission('holidays', 'VIEW'), async (req, res) => {
     try {
       const { id } = req.params;
       const holiday = await storage.getHoliday(id);
@@ -1123,7 +1123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/holidays', async (req, res) => {
+  app.post('/api/holidays', requireAuth, requirePermission('holidays', 'EDIT'), async (req, res) => {
     try {
       // Convert date string to Date object and extract month-day for recurring holidays
       const date = new Date(req.body.date);
@@ -1148,7 +1148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/holidays/:id', async (req, res) => {
+  app.put('/api/holidays/:id', requireAuth, requirePermission('holidays', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       // Convert date string to Date object if present and handle month-day for recurring
@@ -1177,7 +1177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/holidays/:id', async (req, res) => {
+  app.delete('/api/holidays/:id', requireAuth, requirePermission('holidays', 'EDIT'), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteHoliday(id);
