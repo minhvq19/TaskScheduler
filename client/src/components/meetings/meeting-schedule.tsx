@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, CalendarPlus, Search } from "lucide-react";
 import { format, isAfter, isBefore, parseISO } from "date-fns";
@@ -74,6 +75,7 @@ export default function MeetingSchedule() {
   const [selectedRoom, setSelectedRoom] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("createdAt-desc");
   const { toast } = useToast();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
@@ -187,8 +189,8 @@ export default function MeetingSchedule() {
     form.reset({
       roomId: schedule.roomId,
       contactPerson: schedule.contactPerson || "",
-      startDateTime: formatLocalDateTime(schedule.startDateTime, "yyyy-MM-dd'T'HH:mm"),
-      endDateTime: formatLocalDateTime(schedule.endDateTime, "yyyy-MM-dd'T'HH:mm"),
+      startDateTime: formatLocalDateTime(schedule.startDateTime.toString(), "yyyy-MM-dd'T'HH:mm"),
+      endDateTime: formatLocalDateTime(schedule.endDateTime.toString(), "yyyy-MM-dd'T'HH:mm"),
       meetingContent: schedule.meetingContent,
     });
     setShowModal(true);
@@ -226,8 +228,8 @@ export default function MeetingSchedule() {
 
   const getScheduleStatus = (startTime: string | Date, endTime: string | Date) => {
     const now = new Date();
-    const start = parseLocalDateTime(startTime);
-    const end = parseLocalDateTime(endTime);
+    const start = parseLocalDateTime(startTime.toString());
+    const end = parseLocalDateTime(endTime.toString());
 
     if (isAfter(now, start) && isBefore(now, end)) {
       return { label: "Đang sử dụng", className: "bg-red-100 text-red-800" };
@@ -260,10 +262,10 @@ export default function MeetingSchedule() {
         case "endTime-desc":
           return new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime();
         case "createdAt-asc":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime();
         case "createdAt-desc":
         default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime();
       }
     });
 
@@ -275,14 +277,16 @@ export default function MeetingSchedule() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản trị lịch phòng họp
         </h2>
-        <Button
-          onClick={() => setShowModal(true)}
-          className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-meeting"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm lịch phòng họp
-        </Button>
+        {canEdit("meetingSchedules") && (
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-meeting"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm lịch phòng họp
+          </Button>
+        )}
       </div>
 
       {/* Search and Filter */}
@@ -409,10 +413,10 @@ export default function MeetingSchedule() {
                         <TableCell>
                           <div className="text-sm">
                             <div data-testid={`text-meeting-start-${schedule.id}`}>
-                              {formatLocalDateTime(schedule.startDateTime)}
+                              {formatLocalDateTime(schedule.startDateTime.toString())}
                             </div>
                             <div data-testid={`text-meeting-end-${schedule.id}`}>
-                              {formatLocalDateTime(schedule.endDateTime)}
+                              {formatLocalDateTime(schedule.endDateTime.toString())}
                             </div>
                           </div>
                         </TableCell>
@@ -431,24 +435,30 @@ export default function MeetingSchedule() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(schedule)}
-                              className="text-bidv-teal hover:text-bidv-teal/80"
-                              data-testid={`button-edit-${schedule.id}`}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(schedule.id)}
-                              className="text-red-600 hover:text-red-700"
-                              data-testid={`button-delete-${schedule.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {canEdit("meetingSchedules") ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(schedule)}
+                                  className="text-bidv-teal hover:text-bidv-teal/80"
+                                  data-testid={`button-edit-${schedule.id}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(schedule.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                  data-testid={`button-delete-${schedule.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <span className="text-sm text-gray-500">Chỉ xem</span>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

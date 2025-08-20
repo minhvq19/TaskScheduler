@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay, getDay } from "date-fns";
@@ -18,6 +19,7 @@ export default function WorkSchedule() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedStaff, setSelectedStaff] = useState<string>("");
   const { toast } = useToast();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
   const { getWorkScheduleColor } = useSystemColors();
 
@@ -188,14 +190,16 @@ export default function WorkSchedule() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản trị lịch công tác
         </h2>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-schedule"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm lịch công tác
-        </Button>
+        {canEdit("workSchedules") && (
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-schedule"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm lịch công tác
+          </Button>
+        )}
       </div>
 
       {/* Calendar Controls */}
@@ -342,8 +346,8 @@ export default function WorkSchedule() {
                                   );
                                 })()}
                                 
-                                {/* Action buttons - only show for real schedules, not default ones */}
-                                {!isDefaultSchedule && (
+                                {/* Action buttons - only show for real schedules, not default ones, and only if user has edit permission */}
+                                {!isDefaultSchedule && canEdit("workSchedules") && (
                                   <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
                                     <button
                                       onClick={() => handleEdit(schedule)}

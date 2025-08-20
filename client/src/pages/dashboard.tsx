@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, LogOut, Clock } from "lucide-react";
@@ -35,6 +36,7 @@ type Section =
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { canView } = usePermissions();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -179,7 +181,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Phòng họp</p>
-                    <p className="text-3xl font-bold text-gray-900" data-testid="text-room-count">{meetingRooms.length}</p>
+                    <p className="text-3xl font-bold text-gray-900" data-testid="text-room-count">{(meetingRooms as any[]).length}</p>
                   </div>
                   <div className="bg-purple-100 p-3 rounded-lg">
                     <i className="fas fa-door-open text-purple-600 text-xl"></i>
@@ -200,38 +202,44 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button
-                  onClick={() => setActiveSection("work-schedule")}
-                  className="bg-bidv-teal hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
-                  data-testid="button-work-schedule"
-                >
-                  <CalendarDays className="w-6 h-6 mb-2" />
-                  <span>Quản lý lịch công tác</span>
-                </Button>
-                
-                <Button
-                  onClick={() => setActiveSection("meeting-schedule")}
-                  className="bg-bidv-blue hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
-                  data-testid="button-meeting-schedule"
-                >
-                  <i className="fas fa-calendar-plus text-xl mb-2"></i>
-                  <span>Lịch phòng họp</span>
-                </Button>
-                
-                <Button
-                  onClick={openPublicDisplay}
-                  className="bg-orange-500 hover:bg-orange-600 text-white p-4 h-auto flex flex-col items-center"
-                  data-testid="button-public-display"
-                >
-                  <i className="fas fa-tv text-xl mb-2"></i>
-                  <span>Màn hình công cộng</span>
-                </Button>
+            {/* Quick Actions - Only show if user has permission to access calendar features */}
+            {(canView("workSchedules") || canView("meetingSchedules")) && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {canView("workSchedules") && (
+                    <Button
+                      onClick={() => setActiveSection("work-schedule")}
+                      className="bg-bidv-teal hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                      data-testid="button-work-schedule"
+                    >
+                      <CalendarDays className="w-6 h-6 mb-2" />
+                      <span>Quản lý lịch công tác</span>
+                    </Button>
+                  )}
+                  
+                  {canView("meetingSchedules") && (
+                    <Button
+                      onClick={() => setActiveSection("meeting-schedule")}
+                      className="bg-bidv-blue hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                      data-testid="button-meeting-schedule"
+                    >
+                      <i className="fas fa-calendar-plus text-xl mb-2"></i>
+                      <span>Lịch phòng họp</span>
+                    </Button>
+                  )}
+                  
+                  <Button
+                    onClick={openPublicDisplay}
+                    className="bg-orange-500 hover:bg-orange-600 text-white p-4 h-auto flex flex-col items-center"
+                    data-testid="button-public-display"
+                  >
+                    <i className="fas fa-tv text-xl mb-2"></i>
+                    <span>Màn hình công cộng</span>
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         );
     }

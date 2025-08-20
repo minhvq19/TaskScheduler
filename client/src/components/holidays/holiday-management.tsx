@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { apiRequest } from "@/lib/queryClient";
 import { type Holiday } from "@shared/schema";
 import { format } from "date-fns";
@@ -41,6 +42,7 @@ type HolidayFormData = z.infer<typeof holidaySchema>;
 
 export default function HolidayManagement() {
   const { toast } = useToast();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHoliday, setEditingHoliday] = useState<Holiday | null>(null);
@@ -165,19 +167,20 @@ export default function HolidayManagement() {
           <Calendar className="h-5 w-5" />
           Quản lý ngày lễ
         </CardTitle>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              onClick={() => {
-                setEditingHoliday(null);
-                form.reset();
-              }}
-              data-testid="button-add-holiday"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Thêm ngày lễ
-            </Button>
-          </DialogTrigger>
+        {canEdit("holidays") && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => {
+                  setEditingHoliday(null);
+                  form.reset();
+                }}
+                data-testid="button-add-holiday"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Thêm ngày lễ
+              </Button>
+            </DialogTrigger>
           <DialogContent data-testid="dialog-holiday">
             <DialogHeader>
               <DialogTitle data-testid="title-holiday">
@@ -260,6 +263,7 @@ export default function HolidayManagement() {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -309,23 +313,29 @@ export default function HolidayManagement() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(holiday)}
-                        data-testid={`button-edit-holiday-${holiday.id}`}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(holiday.id)}
-                        disabled={deleteHolidayMutation.isPending}
-                        data-testid={`button-delete-holiday-${holiday.id}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canEdit("holidays") ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(holiday)}
+                            data-testid={`button-edit-holiday-${holiday.id}`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(holiday.id)}
+                            disabled={deleteHolidayMutation.isPending}
+                            data-testid={`button-delete-holiday-${holiday.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-sm text-gray-500">Chỉ xem</span>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

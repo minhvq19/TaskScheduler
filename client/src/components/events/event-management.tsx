@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Plus, Edit, Trash2, Calendar, Upload, X, Search } from "lucide-react";
 import { format, isAfter, isBefore } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -63,6 +64,7 @@ export default function EventManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string>("createdAt-desc");
   const { toast } = useToast();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
@@ -369,14 +371,16 @@ export default function EventManagement() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản trị sự kiện khác
         </h2>
-        <Button
-          onClick={() => setShowModal(true)}
-          className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-          data-testid="button-add-event"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm sự kiện khác
-        </Button>
+        {canEdit("otherEvents") && (
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            data-testid="button-add-event"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm sự kiện khác
+          </Button>
+        )}
       </div>
 
       {/* Search and Filter */}
@@ -536,24 +540,30 @@ export default function EventManagement() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(event)}
-                            className="text-bidv-teal hover:text-bidv-teal/80"
-                            data-testid={`button-edit-${event.id}`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(event.id)}
-                            className="text-red-600 hover:text-red-700"
-                            data-testid={`button-delete-${event.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {canEdit("otherEvents") ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(event)}
+                                className="text-bidv-teal hover:text-bidv-teal/80"
+                                data-testid={`button-edit-${event.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(event.id)}
+                                className="text-red-600 hover:text-red-700"
+                                data-testid={`button-delete-${event.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <span className="text-sm text-gray-500">Chỉ xem</span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
