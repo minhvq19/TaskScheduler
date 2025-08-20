@@ -165,12 +165,19 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     queryKey: ["/api/holidays"],
   });
 
+  // Fetch user edit permissions
+  const { data: editPermissions } = useQuery<{editableStaffIds: string[]}>({
+    queryKey: ["/api/user-edit-permissions"],
+  });
+
 
 
   const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
-  const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
-    (a.displayOrder || 0) - (b.displayOrder || 0)
-  );
+  // Chỉ hiện staff mà user được phân quyền
+  const boardStaff = allStaff
+    .filter(s => s.departmentId === boardDept?.id)
+    .filter(s => editPermissions?.editableStaffIds.includes(s.id) || false)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Get work hours from config
   const workStartTime = systemConfigs.find(c => c.key === 'work_hours.start_time')?.value || '08:00';
