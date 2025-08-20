@@ -23,6 +23,12 @@ export default function WorkSchedule() {
   const queryClient = useQueryClient();
   const { getWorkScheduleColor } = useSystemColors();
 
+  // Helper function to check if user can edit schedule for specific staff
+  const canEditStaff = (staffId: string): boolean => {
+    if (!canEdit("workSchedules")) return false;
+    return editPermissions?.editableStaffIds.includes(staffId) || false;
+  };
+
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 }); // Sunday
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -65,6 +71,11 @@ export default function WorkSchedule() {
   const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
+
+  // Fetch user edit permissions
+  const { data: editPermissions } = useQuery<{editableStaffIds: string[]}>({
+    queryKey: ["/api/user-edit-permissions"],
+  });
 
   // Fetch system configurations
   const { data: systemConfigs = [] } = useQuery<any[]>({
@@ -190,7 +201,7 @@ export default function WorkSchedule() {
         <h2 className="text-2xl font-bold text-gray-900" data-testid="text-page-title">
           Quản trị lịch công tác
         </h2>
-        {canEdit("workSchedules") && (
+        {canEdit("workSchedules") && editPermissions && editPermissions.editableStaffIds.length > 0 && (
           <Button
             onClick={() => setShowAddModal(true)}
             className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
@@ -346,8 +357,8 @@ export default function WorkSchedule() {
                                   );
                                 })()}
                                 
-                                {/* Action buttons - only show for real schedules, not default ones, and only if user has edit permission */}
-                                {!isDefaultSchedule && canEdit("workSchedules") && (
+                                {/* Action buttons - only show for real schedules, not default ones, and only if user has edit permission for this staff */}
+                                {!isDefaultSchedule && canEditStaff(staff.id) && (
                                   <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
                                     <button
                                       onClick={() => handleEdit(schedule)}

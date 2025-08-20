@@ -396,16 +396,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Nếu không phải admin, chỉ cho phép xem schedules của staff được phân quyền
-        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
-        const allowedStaffIds = hasPermissionForStaff.map(p => p.staffId);
+        // Lấy tất cả staff trong phòng "Ban giám đốc"
+        const allStaff = await storage.getStaff();
+        const banGiamDocStaff = allStaff.filter(staff => staff.departmentId === '49afe0f4-1eb7-4b2c-9673-3ba79a973c96');
+        const banGiamDocStaffIds = banGiamDocStaff.map(staff => staff.id);
         
-        // Nếu user chưa được phân quyền cho staff nào, trả về empty array
-        if (allowedStaffIds.length === 0) {
-          return res.json([]);
-        }
-        
-        // Filter schedules để chỉ trả về của staff được phân quyền
+        // Lấy tất cả lịch của phòng Ban giám đốc
         const allSchedules = await storage.getWorkSchedules(
           startDate ? new Date(startDate as string) : undefined,
           endDate ? new Date(endDate as string) : undefined,
@@ -413,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         const filteredSchedules = allSchedules.filter(schedule => 
-          allowedStaffIds.includes(schedule.staffId)
+          banGiamDocStaffIds.includes(schedule.staffId)
         );
         
         return res.json(filteredSchedules);
@@ -1185,6 +1181,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting holiday:", error);
       res.status(500).json({ message: "Failed to delete holiday" });
+    }
+  });
+
+  // API để frontend biết user có thể edit lịch của staff nào
+  app.get('/api/user-edit-permissions', requireAuth, async (req, res) => {
+    try {
+      // Admin có thể edit tất cả
+      const userGroup = await storage.getUserGroup((req.user as any).userGroupId);
+      if (userGroup && userGroup.id === 'admin-group') {
+        const allStaff = await storage.getStaff();
+        const allStaffIds = allStaff.map(staff => staff.id);
+        return res.json({ editableStaffIds: allStaffIds });
+      }
+      
+      // Non-admin: chỉ có thể edit staff được phân quyền
+      const hasPermissionForStaff = await storage.getSchedulePermissionsByUser((req.user as any).id);
+      const allowedStaffIds = hasPermissionForStaff.map(p => p.staffId);
+      
+      res.json({ editableStaffIds: allowedStaffIds });
+    } catch (error) {
+      console.error("Error fetching user edit permissions:", error);
+      res.status(500).json({ message: "Failed to fetch edit permissions" });
     }
   });
 
