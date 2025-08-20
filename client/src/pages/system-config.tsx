@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Settings, Plus, Edit2, Trash2, Save, X } from "lucide-react";
+import { Settings, Plus, Edit2, Save, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { SystemConfig, InsertSystemConfig } from "@shared/schema";
 
@@ -103,26 +103,6 @@ export default function SystemConfigPage() {
     },
   });
 
-  // Delete configuration mutation
-  const deleteConfigMutation = useMutation({
-    mutationFn: async (key: string) => {
-      return await apiRequest("DELETE", `/api/system-config/${key}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/system-config"] });
-      toast({
-        title: "Thành công",
-        description: "Đã xóa tham số hệ thống",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Lỗi",
-        description: `Không thể xóa tham số: ${error.message}`,
-        variant: "destructive",
-      });
-    },
-  });
 
   const resetForm = () => {
     setFormData({
@@ -178,11 +158,6 @@ export default function SystemConfigPage() {
     resetForm();
   };
 
-  const handleDelete = async (key: string) => {
-    if (confirm("Bạn có chắc muốn xóa tham số này?")) {
-      await deleteConfigMutation.mutateAsync(key);
-    }
-  };
 
   const groupedConfigs = configs?.reduce((acc, config) => {
     const category = config.category;
@@ -366,26 +341,15 @@ export default function SystemConfigPage() {
                       </div>
                       <div className="flex space-x-2 ml-4">
                         {canEditSystemConfig && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => startEdit(config)}
-                              className="hover:bg-blue-50 hover:border-blue-300"
-                              data-testid={`button-edit-${config.key}`}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDelete(config.key)}
-                              className="hover:bg-red-50 hover:border-red-300 text-red-600"
-                              data-testid={`button-delete-${config.key}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startEdit(config)}
+                            className="hover:bg-blue-50 hover:border-blue-300"
+                            data-testid={`button-edit-${config.key}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
                         )}
                         {!canEditSystemConfig && (
                           <span className="text-sm text-gray-500">Chỉ xem</span>
