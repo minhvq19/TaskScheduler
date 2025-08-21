@@ -387,14 +387,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md" data-testid="dialog-enhanced-schedule">
+      <DialogContent className="w-[95vw] max-w-md mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
         <DialogHeader>
           <DialogTitle data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto">
           {/* Staff Selection */}
           <div className="space-y-2">
             <Label htmlFor="staffId">Cán bộ *</Label>
@@ -455,7 +455,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           {/* Date Range */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">Ngày bắt đầu *</Label>
               <Input
@@ -501,7 +501,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
           {/* Time Range (only if not full day) */}
           {!watchedIsFullDay && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startTime">Giờ bắt đầu *</Label>
                 <Input
@@ -548,7 +548,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           )}
 
           {/* Work Hours Info */}
-          <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700">
+          <div className="bg-blue-50 p-3 rounded-md text-xs sm:text-sm text-blue-700">
             <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
             <p><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
             {watchedWorkType === "Đi khách hàng" && (
@@ -557,12 +557,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isLoading}
+              className="w-full sm:w-auto"
               data-testid="button-cancel"
             >
               Hủy
@@ -570,6 +571,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             <Button
               type="submit"
               disabled={isLoading}
+              className="w-full sm:w-auto"
               data-testid="button-submit"
             >
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}

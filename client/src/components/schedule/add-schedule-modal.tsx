@@ -284,15 +284,15 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="modal-add-schedule">
+      <DialogContent className="w-[95vw] max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-4" data-testid="modal-add-schedule">
         <DialogHeader>
           <DialogTitle data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
                 Chọn cán bộ *
@@ -319,7 +319,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="startDateTime" className="block text-sm font-medium text-gray-700 mb-2">
                   Ngày giờ bắt đầu *
@@ -434,7 +434,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               </div>
               <div className="ml-3">
                 <h4 className="text-sm font-medium text-yellow-800">Lưu ý quan trọng</h4>
-                <p className="text-sm text-yellow-700 mt-1">
+                <p className="text-xs sm:text-sm text-yellow-700 mt-1">
                   • Không thể chọn ngày giờ quá khứ<br/>
                   • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
                   • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
@@ -443,18 +443,19 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
+              className="w-full sm:w-auto"
               data-testid="button-cancel"
             >
               Hủy
             </Button>
             <Button
               type="submit"
-              className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              className="w-full sm:w-auto bg-bidv-teal hover:bg-bidv-teal/90 text-white"
               disabled={isLoading}
               data-testid="button-submit"
             >
