@@ -284,14 +284,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[92vw] max-w-[350px] mx-1 sm:mx-4 sm:max-w-2xl max-h-[88vh] overflow-y-auto" data-testid="modal-add-schedule">
-        <DialogHeader className="pb-3">
-          <DialogTitle className="text-base sm:text-lg" data-testid="text-modal-title">
+      <DialogContent className="w-[95vw] max-w-[380px] mx-auto sm:mx-4 sm:max-w-2xl max-h-[85vh] overflow-y-auto" data-testid="modal-add-schedule">
+        <DialogHeader className="pb-2 px-0">
+          <DialogTitle className="text-base sm:text-lg text-center" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-6 px-0.5 sm:px-1">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-6 px-0">
           <div className="space-y-2 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">

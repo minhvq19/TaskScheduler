@@ -387,14 +387,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[92vw] max-w-[350px] mx-1 sm:mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
-        <DialogHeader className="pb-3">
-          <DialogTitle className="text-base sm:text-lg" data-testid="title-schedule">
+      <DialogContent className="w-[95vw] max-w-[380px] mx-auto sm:mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
+        <DialogHeader className="pb-2 px-0">
+          <DialogTitle className="text-base sm:text-lg text-center" data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2.5 sm:space-y-4 max-h-[82vh] overflow-y-auto px-0.5 sm:px-1">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2.5 sm:space-y-4 max-h-[80vh] overflow-y-auto px-0">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
             <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
