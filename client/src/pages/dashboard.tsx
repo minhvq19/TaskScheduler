@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, LogOut, Clock } from "lucide-react";
+import { CalendarDays, LogOut, Clock, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { startOfDay, endOfDay } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Fetch dashboard statistics
   const today = new Date();
@@ -144,15 +145,15 @@ export default function Dashboard() {
       default:
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900" data-testid="text-dashboard-title">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-dashboard-title">
                 Dashboard
               </h2>
-              <div className="text-sm text-bidv-gray flex items-center">
-                <Clock className="w-4 h-4 mr-1" />
-                <span id="current-time" data-testid="text-current-time">
+              <div className="text-xs lg:text-sm text-bidv-gray flex items-center">
+                <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
+                <span id="current-time" data-testid="text-current-time" className="truncate">
                   {currentTime.toLocaleString('vi-VN', {
-                    weekday: 'long',
+                    weekday: window.innerWidth < 640 ? 'short' : 'long',
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit',
@@ -164,7 +165,7 @@ export default function Dashboard() {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200" data-testid="card-today-schedules">
                 <div className="flex items-center justify-between">
                   <div>
@@ -204,13 +205,13 @@ export default function Dashboard() {
 
             {/* Quick Actions - Only show if user has permission to access calendar features */}
             {(canView("workSchedules") || canView("meetingSchedules")) && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
                   {canView("workSchedules") && (
                     <Button
                       onClick={() => setActiveSection("work-schedule")}
-                      className="bg-bidv-teal hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                      className="bg-bidv-teal hover:bg-opacity-90 text-white p-3 lg:p-4 h-auto flex flex-col items-center text-center"
                       data-testid="button-work-schedule"
                     >
                       <CalendarDays className="w-6 h-6 mb-2" />
@@ -221,7 +222,7 @@ export default function Dashboard() {
                   {canView("meetingSchedules") && (
                     <Button
                       onClick={() => setActiveSection("meeting-schedule")}
-                      className="bg-bidv-blue hover:bg-opacity-90 text-white p-4 h-auto flex flex-col items-center"
+                      className="bg-bidv-blue hover:bg-opacity-90 text-white p-3 lg:p-4 h-auto flex flex-col items-center text-center"
                       data-testid="button-meeting-schedule"
                     >
                       <i className="fas fa-calendar-plus text-xl mb-2"></i>
@@ -231,7 +232,7 @@ export default function Dashboard() {
                   
                   <Button
                     onClick={openPublicDisplay}
-                    className="bg-orange-500 hover:bg-orange-600 text-white p-4 h-auto flex flex-col items-center"
+                    className="bg-orange-500 hover:bg-orange-600 text-white p-3 lg:p-4 h-auto flex flex-col items-center text-center"
                     data-testid="button-public-display"
                   >
                     <i className="fas fa-tv text-xl mb-2"></i>
@@ -247,25 +248,43 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-bidv-teal rounded-lg flex items-center justify-center">
-              <CalendarDays className="text-white" />
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+        <div className="px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-3 lg:space-x-4">
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="lg:hidden p-2"
+              data-testid="button-mobile-menu"
+            >
+              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+            
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-bidv-teal rounded-lg flex items-center justify-center">
+              <CalendarDays className="text-white w-4 h-4 lg:w-5 lg:h-5" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900" data-testid="text-system-title">
+            <div className="hidden sm:block">
+              <h1 className="text-lg lg:text-xl font-bold text-gray-900" data-testid="text-system-title">
                 Hệ thống Quản lý Lịch Công tác
               </h1>
-              <p className="text-sm text-bidv-gray" data-testid="text-organization-name">
+              <p className="text-xs lg:text-sm text-bidv-gray" data-testid="text-organization-name">
                 BIDV Chi nhánh Sở giao dịch 1
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
+          <div className="flex items-center space-x-2 lg:space-x-4">
+            <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-gray-900" data-testid="text-user-name">
                 {(user as any)?.firstName && (user as any)?.lastName 
                   ? `${(user as any).firstName} ${(user as any).lastName} (${(user as any)?.username})`
@@ -280,21 +299,29 @@ export default function Dashboard() {
               size="sm"
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
-              className="hover:bg-gray-100"
+              className="hover:bg-gray-100 p-2"
               data-testid="button-logout"
             >
-              <LogOut className="text-bidv-gray" />
+              <LogOut className="text-bidv-gray w-4 h-4 lg:w-5 lg:h-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex relative">
         {/* Sidebar */}
-        <Sidebar activeSection={activeSection} onSectionChange={(section: string) => setActiveSection(section as Section)} />
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={(section: string) => {
+            setActiveSection(section as Section);
+            setIsSidebarOpen(false); // Close mobile sidebar when item selected
+          }}
+          isMobileOpen={isSidebarOpen}
+          onMobileClose={() => setIsSidebarOpen(false)}
+        />
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 lg:p-6 min-w-0">
           {renderContent()}
         </main>
       </div>

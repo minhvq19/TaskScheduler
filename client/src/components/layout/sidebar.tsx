@@ -20,6 +20,8 @@ import {
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 const menuItems = [
@@ -56,7 +58,7 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+export default function Sidebar({ activeSection, onSectionChange, isMobileOpen = false, onMobileClose }: SidebarProps) {
   const { getMenuPermissions } = usePermissions();
   const menuPermissions = getMenuPermissions();
   
@@ -75,8 +77,13 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen sticky top-0 border-r border-gray-200 overflow-hidden flex flex-col">
-      <nav className="p-6 space-y-4 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+    <aside className={cn(
+      "w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl border-r border-gray-200 overflow-hidden flex flex-col transition-transform duration-300 ease-in-out",
+      "lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", // Desktop: always visible
+      "fixed top-0 left-0 h-full z-50 pt-16", // Mobile: fixed overlay with top padding for header
+      isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0" // Mobile: slide in/out
+    )}>
+      <nav className="p-4 lg:p-6 space-y-3 lg:space-y-4 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {/* Dashboard */}
         <Button
           variant={activeSection === "dashboard" ? "default" : "ghost"}
