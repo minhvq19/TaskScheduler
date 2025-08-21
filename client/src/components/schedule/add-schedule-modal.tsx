@@ -284,14 +284,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[88vw] max-w-[340px] sm:max-w-2xl max-h-[88vh] overflow-hidden flex flex-col p-4" data-testid="modal-add-schedule">
+      <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[350px] sm:max-w-2xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col p-3 sm:p-4" data-testid="modal-add-schedule">
         <DialogHeader className="pb-3 flex-shrink-0">
           <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-2">
           <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
@@ -447,13 +447,13 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           </form>
         </div>
         
-        <div className="flex-shrink-0 pt-3 border-t border-gray-200 mt-3">
-          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+        <div className="flex-shrink-0 pt-2 mt-2">
+          <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="w-full sm:w-auto h-11 text-sm"
+              className="flex-1 h-10 text-sm"
               data-testid="button-cancel"
             >
               Hủy
@@ -461,11 +461,11 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             <Button
               type="submit"
               form="schedule-form"
-              className="w-full sm:w-auto h-11 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
               disabled={isLoading}
               data-testid="button-submit"
             >
-              {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm lịch công tác")}
+              {isLoading ? "Đang xử lý..." : "Thêm"}
             </Button>
           </div>
         </div>
