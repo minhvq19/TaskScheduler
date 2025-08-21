@@ -283,8 +283,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
-      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col" data-testid="modal-add-schedule">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="modal-add-schedule">
         <DialogHeader className="pb-3 flex-shrink-0">
           <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
