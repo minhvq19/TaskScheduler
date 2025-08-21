@@ -291,7 +291,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pb-1 min-h-0">
+        <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
           <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
@@ -447,7 +447,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           </form>
         </div>
         
-        <div className="flex-shrink-0 pt-2 mt-1 border-t border-gray-100">
+        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
           <div className="flex gap-2">
             <Button
               type="button"

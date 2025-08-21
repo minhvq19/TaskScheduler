@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 /* Font loading và fallback configuration cho production */
-body, * {
+body,
+* {
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-display: swap; /* Đảm bảo text hiển thị ngay khi font chưa load */
+  font-display: swap;
+  /* Đảm bảo text hiển thị ngay khi font chưa load */
 }
 
 /* Preload font cho production performance */
@@ -20,31 +22,34 @@ body, * {
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile dialog centering - force center */
+/* Mobile dialog - simple and effective */
 @media (max-width: 640px) {
   [data-radix-dialog-overlay] {
-    background-color: rgba(0, 0, 0, 0.8);
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
+    position: fixed !important;
+    inset: 0 !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 50 !important;
+    padding: 20px !important;
   }
-  
+
   [data-radix-dialog-content] {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+    position: static !important;
+    top: unset !important;
+    left: unset !important;
+    right: unset !important;
+    bottom: unset !important;
     transform: none !important;
-    margin: 20px;
-    width: calc(100vw - 40px);
-    max-width: 340px;
-    height: auto;
-    max-height: calc(100vh - 40px);
-    overflow: hidden;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 300px !important;
+    height: 70vh !important;
+    max-height: 500px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 }
 
@@ -92,7 +97,7 @@ body, * {
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
-  
+
   /* BIDV Colors */
   --bidv-teal: hsl(178, 100%, 21%);
   --bidv-yellow: hsl(47, 100%, 59%);
@@ -140,63 +145,63 @@ body, * {
   .text-bidv-teal {
     color: var(--bidv-teal);
   }
-  
+
   .text-bidv-yellow {
     color: var(--bidv-yellow);
   }
-  
+
   .text-bidv-blue {
     color: var(--bidv-blue);
   }
-  
+
   .text-bidv-light {
     color: var(--bidv-light);
   }
-  
+
   .text-bidv-gray {
     color: var(--bidv-gray);
   }
-  
+
   .bg-bidv-teal {
     background-color: var(--bidv-teal);
   }
-  
+
   .bg-bidv-yellow {
     background-color: var(--bidv-yellow);
   }
-  
+
   .bg-bidv-blue {
     background-color: var(--bidv-blue);
   }
-  
+
   .bg-bidv-light {
     background-color: var(--bidv-light);
   }
-  
+
   .bg-bidv-gray {
     background-color: var(--bidv-gray);
   }
-  
+
   .bg-bidv-light-gray {
     background-color: var(--bidv-light-gray);
   }
-  
+
   .border-bidv-teal {
     border-color: var(--bidv-teal);
   }
-  
+
   .hover\:bg-bidv-teal:hover {
     background-color: var(--bidv-teal);
   }
-  
+
   .hover\:bg-bidv-blue:hover {
     background-color: var(--bidv-blue);
   }
-  
+
   .focus\:ring-bidv-teal:focus {
     --tw-ring-color: var(--bidv-teal);
   }
-  
+
   .focus\:border-bidv-teal:focus {
     border-color: var(--bidv-teal);
   }
@@ -208,19 +213,23 @@ body, * {
 }
 
 .schedule-vacation {
-  background-color: #9f224e; /* Updated to match database */
+  background-color: #9f224e;
+  /* Updated to match database */
 }
 
 .schedule-leadership-duty {
-  background-color: #f58732; /* Updated to match database */
+  background-color: #f58732;
+  /* Updated to match database */
 }
 
 .schedule-domestic-business-trip {
-  background-color: #0071a6; /* Updated to match database */
+  background-color: #0071a6;
+  /* Updated to match database */
 }
 
 .schedule-international-business-trip {
-  background-color: #32a852; /* Updated to match database */
+  background-color: #32a852;
+  /* Updated to match database */
 }
 
 /* Header height optimization */
