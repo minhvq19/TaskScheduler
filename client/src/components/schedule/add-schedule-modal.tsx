@@ -284,7 +284,17 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[350px] sm:max-w-2xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col p-3 sm:p-4" data-testid="modal-add-schedule">
+      <DialogContent 
+        className="w-[90vw] max-w-[350px] sm:max-w-2xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col p-3 sm:p-4"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          margin: 0
+        }}
+        data-testid="modal-add-schedule"
+      >
         <DialogHeader className="pb-3 flex-shrink-0">
           <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
