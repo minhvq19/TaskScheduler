@@ -20,16 +20,19 @@ body, * {
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile dialog centering - simple approach */
+/* Mobile dialog centering - better approach */
 @media (max-width: 640px) {
   [data-radix-dialog-content] {
     position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 90vw;
-    max-width: 350px;
+    width: 85vw;
+    max-width: 340px;
+    height: 75vh;
+    max-height: 500px;
     margin: 0;
+    padding: 16px;
   }
 }
 

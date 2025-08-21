@@ -387,15 +387,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-3 sm:p-4" data-testid="dialog-enhanced-schedule">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col" data-testid="dialog-enhanced-schedule">
         <DialogHeader className="pb-3 flex-shrink-0">
           <DialogTitle className="text-lg font-semibold text-center" data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pb-2">
-          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 sm:space-y-4">
+        <div className="flex-1 overflow-y-auto pb-1 min-h-0">
+          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
             <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
@@ -566,7 +566,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </form>
         </div>
         
-        <div className="flex-shrink-0 pt-2 mt-2">
+        <div className="flex-shrink-0 pt-2 mt-1 border-t border-gray-100">
           <div className="flex gap-2">
             <Button
               type="button"
