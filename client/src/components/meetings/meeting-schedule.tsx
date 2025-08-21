@@ -73,7 +73,7 @@ export default function MeetingSchedule() {
   const [editingSchedule, setEditingSchedule] = useState<MeetingSchedule | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoom, setSelectedRoom] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("createdAt-desc");
+  const [sortBy, setSortBy] = useState<string>("startTime-desc");
   const { toast } = useToast();
   const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
@@ -339,10 +339,10 @@ export default function MeetingSchedule() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="startTime-asc">Thời gian bắt đầu mới nhất</SelectItem>
-                  <SelectItem value="startTime-desc">Thời gian bắt đầu muộn nhất</SelectItem>
                   <SelectItem value="endTime-asc">Thời gian kết thúc mới nhất</SelectItem>
                   <SelectItem value="endTime-desc">Thời gian kết thúc muộn nhất</SelectItem>
-                  <SelectItem value="createdAt-desc">Thời gian nhập lịch muộn nhất (mặc định)</SelectItem>
+                  <SelectItem value="startTime-desc">Thời gian bắt đầu muộn nhất (mặc định)</SelectItem>
+                  <SelectItem value="createdAt-desc">Thời gian nhập lịch muộn nhất</SelectItem>
                   <SelectItem value="createdAt-asc">Thời gian nhập lịch mới nhất</SelectItem>
                 </SelectContent>
               </Select>
