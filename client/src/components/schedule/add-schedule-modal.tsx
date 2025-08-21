@@ -284,15 +284,15 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-4" data-testid="modal-add-schedule">
+      <DialogContent className="w-[95vw] max-w-xs mx-2 sm:mx-4 sm:max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="modal-add-schedule">
         <DialogHeader>
           <DialogTitle data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-          <div className="space-y-3 sm:space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-6 px-1">
+          <div className="space-y-2.5 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
                 Chọn cán bộ *
@@ -301,7 +301,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("staffId")}
                 onValueChange={(value) => form.setValue("staffId", value, { shouldValidate: true })}
               >
-                <SelectTrigger data-testid="select-staff">
+                <SelectTrigger className="h-10 sm:h-9" data-testid="select-staff">
                   <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
                 </SelectTrigger>
                 <SelectContent>
@@ -336,7 +336,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("Start datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("startDateTime", e.target.value);
                   }}
-                  className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="h-10 sm:h-9 focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-start-time"
                 />
                 {form.formState.errors.startDateTime && (
@@ -362,7 +362,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("End datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("endDateTime", e.target.value);
                   }}
-                  className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="h-10 sm:h-9 focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-end-time"
                 />
                 {form.formState.errors.endDateTime && (
@@ -381,7 +381,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("workType")}
                 onValueChange={(value) => form.setValue("workType", value, { shouldValidate: true })}
               >
-                <SelectTrigger data-testid="select-work-type">
+                <SelectTrigger className="h-10 sm:h-9" data-testid="select-work-type">
                   <SelectValue placeholder="Chọn nội dung công tác" />
                 </SelectTrigger>
                 <SelectContent>
@@ -410,7 +410,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   rows={3}
                   maxLength={200}
                   placeholder="Nhập nội dung chi tiết (tối đa 200 ký tự)"
-                  className="focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="text-sm resize-none focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-custom-content"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -425,16 +425,16 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             )}
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 sm:p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
-                <h4 className="text-sm font-medium text-yellow-800">Lưu ý quan trọng</h4>
-                <p className="text-xs sm:text-sm text-yellow-700 mt-1">
+              <div className="ml-2 sm:ml-3">
+                <h4 className="text-xs sm:text-sm font-medium text-yellow-800">Lưu ý quan trọng</h4>
+                <p className="text-xs text-yellow-700 mt-1">
                   • Không thể chọn ngày giờ quá khứ<br/>
                   • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
                   • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn

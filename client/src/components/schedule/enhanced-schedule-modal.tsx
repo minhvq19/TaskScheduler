@@ -387,23 +387,23 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-md mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
+      <DialogContent className="w-[95vw] max-w-sm mx-2 sm:mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
         <DialogHeader>
           <DialogTitle data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 sm:space-y-4 max-h-[85vh] overflow-y-auto px-1">
           {/* Staff Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="staffId">Cán bộ *</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
             <Select 
               value={form.watch("staffId")} 
               onValueChange={(value) => form.setValue("staffId", value)}
               data-testid="select-staff"
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 sm:h-9">
                 <SelectValue placeholder="Chọn cán bộ" />
               </SelectTrigger>
               <SelectContent>
@@ -420,14 +420,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           {/* Work Type */}
-          <div className="space-y-2">
-            <Label htmlFor="workType">Nội dung công tác *</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="workType" className="text-sm font-medium">Nội dung công tác *</Label>
             <Select 
               value={form.watch("workType")} 
               onValueChange={(value) => form.setValue("workType", value)}
               data-testid="select-work-type"
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 sm:h-9">
                 <SelectValue placeholder="Chọn nội dung công tác" />
               </SelectTrigger>
               <SelectContent>
@@ -444,20 +444,20 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           {/* Full Day Checkbox */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 py-1">
             <Checkbox
               id="isFullDay"
               checked={watchedIsFullDay}
               onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
               data-testid="checkbox-full-day"
             />
-            <Label htmlFor="isFullDay">Cả ngày ({workStartTime} - {workEndTime})</Label>
+            <Label htmlFor="isFullDay" className="text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
           </div>
 
           {/* Date Range */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Ngày bắt đầu *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="startDate" className="text-sm font-medium">Ngày bắt đầu *</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -470,6 +470,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("Start date onBlur triggered:", e.target.value);
                   handleDateChange("startDate", e.target.value);
                 }}
+                className="h-10 sm:h-9"
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
@@ -477,8 +478,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="endDate">Ngày kết thúc *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="endDate" className="text-sm font-medium">Ngày kết thúc *</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -491,6 +492,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("End date onBlur triggered:", e.target.value);
                   handleDateChange("endDate", e.target.value);
                 }}
+                className="h-10 sm:h-9"
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (
@@ -502,11 +504,12 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           {/* Time Range (only if not full day) */}
           {!watchedIsFullDay && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Giờ bắt đầu *</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="startTime" className="text-sm font-medium">Giờ bắt đầu *</Label>
                 <Input
                   id="startTime"
                   type="time"
+                  className="h-10 sm:h-9"
                   {...form.register("startTime")}
                   data-testid="input-start-time"
                 />
@@ -515,11 +518,12 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="endTime">Giờ kết thúc *</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="endTime" className="text-sm font-medium">Giờ kết thúc *</Label>
                 <Input
                   id="endTime"
                   type="time"
+                  className="h-10 sm:h-9"
                   {...form.register("endTime")}
                   data-testid="input-end-time"
                 />
@@ -532,12 +536,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
           {/* Custom Content (only for "Khác") */}
           {watchedWorkType === "Khác" && (
-            <div className="space-y-2">
-              <Label htmlFor="customContent">Nội dung cụ thể</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="customContent" className="text-sm font-medium">Nội dung cụ thể</Label>
               <Textarea
                 id="customContent"
                 placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
                 maxLength={200}
+                rows={3}
+                className="text-sm resize-none"
                 {...form.register("customContent")}
                 data-testid="textarea-custom-content"
               />
@@ -548,9 +554,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           )}
 
           {/* Work Hours Info */}
-          <div className="bg-blue-50 p-3 rounded-md text-xs sm:text-sm text-blue-700">
-            <p><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-            <p><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
+          <div className="bg-blue-50 p-2.5 sm:p-3 rounded-md text-xs text-blue-700">
+            <p className="mb-1"><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
+            <p className="mb-1"><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
             {watchedWorkType === "Đi khách hàng" && (
               <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
             )}
