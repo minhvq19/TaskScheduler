@@ -29,6 +29,10 @@ body, * {
   transform: translate(-50%, -50%) !important;
   margin: 0 !important;
   inset: auto !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Custom scrollbar styles */
