@@ -389,13 +389,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent 
         className="w-[90vw] max-w-[350px] sm:max-w-lg lg:max-w-2xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col p-3 sm:p-4"
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          margin: 0
-        }}
         data-testid="dialog-enhanced-schedule"
       >
         <DialogHeader className="pb-3 flex-shrink-0">

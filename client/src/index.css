@@ -20,6 +20,17 @@ body, * {
 @tailwind components;
 @tailwind utilities;
 
+/* Force center dialog content on mobile */
+[data-testid="modal-add-schedule"],
+[data-testid="dialog-enhanced-schedule"] {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  inset: auto !important;
+}
+
 /* Custom scrollbar styles */
 .scrollbar-thin {
   scrollbar-width: thin;
