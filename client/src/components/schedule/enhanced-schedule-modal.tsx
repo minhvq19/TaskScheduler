@@ -387,14 +387,14 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-sm mx-2 sm:mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
-        <DialogHeader>
-          <DialogTitle data-testid="title-schedule">
+      <DialogContent className="w-[92vw] max-w-[350px] mx-1 sm:mx-4 sm:max-w-lg lg:max-w-2xl" data-testid="dialog-enhanced-schedule">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-base sm:text-lg" data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 sm:space-y-4 max-h-[85vh] overflow-y-auto px-1">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2.5 sm:space-y-4 max-h-[82vh] overflow-y-auto px-0.5 sm:px-1">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
             <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
@@ -403,7 +403,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               onValueChange={(value) => form.setValue("staffId", value)}
               data-testid="select-staff"
             >
-              <SelectTrigger className="h-10 sm:h-9">
+              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
                 <SelectValue placeholder="Chọn cán bộ" />
               </SelectTrigger>
               <SelectContent>
@@ -427,7 +427,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               onValueChange={(value) => form.setValue("workType", value)}
               data-testid="select-work-type"
             >
-              <SelectTrigger className="h-10 sm:h-9">
+              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
                 <SelectValue placeholder="Chọn nội dung công tác" />
               </SelectTrigger>
               <SelectContent>
@@ -451,11 +451,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
               data-testid="checkbox-full-day"
             />
-            <Label htmlFor="isFullDay" className="text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
+            <Label htmlFor="isFullDay" className="text-xs sm:text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
           </div>
 
           {/* Date Range */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="startDate" className="text-sm font-medium">Ngày bắt đầu *</Label>
               <Input
@@ -470,7 +470,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("Start date onBlur triggered:", e.target.value);
                   handleDateChange("startDate", e.target.value);
                 }}
-                className="h-10 sm:h-9"
+                className="h-11 text-sm sm:h-9 sm:text-base"
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
@@ -492,7 +492,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("End date onBlur triggered:", e.target.value);
                   handleDateChange("endDate", e.target.value);
                 }}
-                className="h-10 sm:h-9"
+                className="h-11 text-sm sm:h-9 sm:text-base"
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (
@@ -503,13 +503,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
           {/* Time Range (only if not full day) */}
           {!watchedIsFullDay && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="startTime" className="text-sm font-medium">Giờ bắt đầu *</Label>
                 <Input
                   id="startTime"
                   type="time"
-                  className="h-10 sm:h-9"
+                  className="h-11 text-sm sm:h-9 sm:text-base"
                   {...form.register("startTime")}
                   data-testid="input-start-time"
                 />
@@ -523,7 +523,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="endTime"
                   type="time"
-                  className="h-10 sm:h-9"
+                  className="h-11 text-sm sm:h-9 sm:text-base"
                   {...form.register("endTime")}
                   data-testid="input-end-time"
                 />
@@ -563,13 +563,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           {/* Form Actions */}
-          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 pt-3 sm:pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isLoading}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto h-10 text-sm sm:text-base"
               data-testid="button-cancel"
             >
               Hủy
@@ -577,7 +577,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto h-10 text-sm sm:text-base"
               data-testid="button-submit"
             >
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}

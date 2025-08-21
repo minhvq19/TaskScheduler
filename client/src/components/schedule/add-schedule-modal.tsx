@@ -284,15 +284,15 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-xs mx-2 sm:mx-4 sm:max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="modal-add-schedule">
-        <DialogHeader>
-          <DialogTitle data-testid="text-modal-title">
+      <DialogContent className="w-[92vw] max-w-[350px] mx-1 sm:mx-4 sm:max-w-2xl max-h-[88vh] overflow-y-auto" data-testid="modal-add-schedule">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-base sm:text-lg" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-6 px-1">
-          <div className="space-y-2.5 sm:space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-6 px-0.5 sm:px-1">
+          <div className="space-y-2 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
                 Chọn cán bộ *
@@ -301,7 +301,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("staffId")}
                 onValueChange={(value) => form.setValue("staffId", value, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-10 sm:h-9" data-testid="select-staff">
+                <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base" data-testid="select-staff">
                   <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
                 </SelectTrigger>
                 <SelectContent>
@@ -319,7 +319,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
               <div>
                 <Label htmlFor="startDateTime" className="block text-sm font-medium text-gray-700 mb-2">
                   Ngày giờ bắt đầu *
@@ -336,7 +336,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("Start datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("startDateTime", e.target.value);
                   }}
-                  className="h-10 sm:h-9 focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-start-time"
                 />
                 {form.formState.errors.startDateTime && (
@@ -362,7 +362,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("End datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("endDateTime", e.target.value);
                   }}
-                  className="h-10 sm:h-9 focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
                   data-testid="input-end-time"
                 />
                 {form.formState.errors.endDateTime && (
@@ -381,7 +381,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("workType")}
                 onValueChange={(value) => form.setValue("workType", value, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-10 sm:h-9" data-testid="select-work-type">
+                <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base" data-testid="select-work-type">
                   <SelectValue placeholder="Chọn nội dung công tác" />
                 </SelectTrigger>
                 <SelectContent>
@@ -433,8 +433,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 </svg>
               </div>
               <div className="ml-2 sm:ml-3">
-                <h4 className="text-xs sm:text-sm font-medium text-yellow-800">Lưu ý quan trọng</h4>
-                <p className="text-xs text-yellow-700 mt-1">
+                <h4 className="text-xs font-medium text-yellow-800">Lưu ý quan trọng</h4>
+                <p className="text-xs text-yellow-700 mt-0.5 sm:mt-1">
                   • Không thể chọn ngày giờ quá khứ<br/>
                   • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
                   • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
@@ -443,19 +443,19 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-3 sm:pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto h-10 text-sm sm:text-base"
               data-testid="button-cancel"
             >
               Hủy
             </Button>
             <Button
               type="submit"
-              className="w-full sm:w-auto bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              className="w-full sm:w-auto h-10 text-sm sm:text-base bg-bidv-teal hover:bg-bidv-teal/90 text-white"
               disabled={isLoading}
               data-testid="button-submit"
             >
