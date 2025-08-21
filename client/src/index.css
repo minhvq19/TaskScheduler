@@ -20,19 +20,17 @@ body, * {
 @tailwind components;
 @tailwind utilities;
 
-/* Force center dialog content on mobile */
-[data-testid="modal-add-schedule"],
-[data-testid="dialog-enhanced-schedule"] {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  inset: auto !important;
-  z-index: 50 !important;
-  pointer-events: auto !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+/* Mobile dialog centering - simple approach */
+@media (max-width: 640px) {
+  [data-radix-dialog-content] {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 350px;
+    margin: 0;
+  }
 }
 
 /* Custom scrollbar styles */

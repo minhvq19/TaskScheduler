@@ -387,10 +387,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent 
-        className="w-[90vw] max-w-[350px] sm:max-w-lg lg:max-w-2xl h-[85vh] max-h-[600px] overflow-hidden flex flex-col p-3 sm:p-4"
-        data-testid="dialog-enhanced-schedule"
-      >
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-3 sm:p-4" data-testid="dialog-enhanced-schedule">
         <DialogHeader className="pb-3 flex-shrink-0">
           <DialogTitle className="text-lg font-semibold text-center" data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
