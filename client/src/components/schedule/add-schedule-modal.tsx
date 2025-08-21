@@ -284,14 +284,15 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[90vw] max-w-[360px] mx-auto my-auto sm:mx-4 sm:max-w-2xl max-h-[90vh] flex flex-col" data-testid="modal-add-schedule">
-        <DialogHeader className="pb-2 px-0 flex-shrink-0">
-          <DialogTitle className="text-base sm:text-lg text-center" data-testid="text-modal-title">
+      <DialogContent className="w-[88vw] max-w-[340px] sm:max-w-2xl max-h-[88vh] overflow-hidden flex flex-col p-4" data-testid="modal-add-schedule">
+        <DialogHeader className="pb-3 flex-shrink-0">
+          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
             {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-6 flex-1 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
@@ -443,26 +444,31 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-3 sm:pt-4 mt-auto">
+          </form>
+        </div>
+        
+        <div className="flex-shrink-0 pt-3 border-t border-gray-200 mt-3">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="w-full sm:w-auto h-10 text-sm sm:text-base"
+              className="w-full sm:w-auto h-11 text-sm"
               data-testid="button-cancel"
             >
               Hủy
             </Button>
             <Button
               type="submit"
-              className="w-full sm:w-auto h-10 text-sm sm:text-base bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              form="schedule-form"
+              className="w-full sm:w-auto h-11 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
               disabled={isLoading}
               data-testid="button-submit"
             >
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm lịch công tác")}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

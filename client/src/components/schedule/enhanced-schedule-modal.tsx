@@ -387,14 +387,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[90vw] max-w-[360px] mx-auto my-auto sm:mx-4 sm:max-w-lg lg:max-w-2xl max-h-[90vh] flex flex-col" data-testid="dialog-enhanced-schedule">
-        <DialogHeader className="pb-2 px-0 flex-shrink-0">
-          <DialogTitle className="text-base sm:text-lg text-center" data-testid="title-schedule">
+      <DialogContent className="w-[88vw] max-w-[340px] sm:max-w-lg lg:max-w-2xl max-h-[88vh] overflow-hidden flex flex-col p-4" data-testid="dialog-enhanced-schedule">
+        <DialogHeader className="pb-3 flex-shrink-0">
+          <DialogTitle className="text-lg font-semibold text-center" data-testid="title-schedule">
             {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2.5 sm:space-y-4 flex-1 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 sm:space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
             <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
@@ -562,28 +563,32 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 pt-3 sm:pt-4 mt-auto">
+          </form>
+        </div>
+        
+        <div className="flex-shrink-0 pt-3 border-t border-gray-200 mt-3">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isLoading}
-              className="w-full sm:w-auto h-10 text-sm sm:text-base"
+              className="w-full sm:w-auto h-11 text-sm"
               data-testid="button-cancel"
             >
               Hủy
             </Button>
             <Button
               type="submit"
+              form="enhanced-schedule-form"
               disabled={isLoading}
-              className="w-full sm:w-auto h-10 text-sm sm:text-base"
+              className="w-full sm:w-auto h-11 text-sm"
               data-testid="button-submit"
             >
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
