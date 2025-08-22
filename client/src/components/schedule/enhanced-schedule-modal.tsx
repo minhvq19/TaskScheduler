@@ -113,9 +113,9 @@ const ScheduleFormContent = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {staffList?.map((staff) => (
+                {staffList?.map((staff: any) => (
                   <SelectItem key={staff.id} value={staff.id.toString()}>
-                    {staff.fullName}
+                    {staff.positionShort} {staff.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -303,8 +303,8 @@ export default function EnhancedScheduleModal({
   });
 
   // Lọc chỉ lấy cán bộ thuộc Ban giám đốc
-  const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
-  const staffList = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
+  const boardDept = departments.find((d: any) => d.name.toLowerCase().includes("ban giám đốc"));
+  const staffList = allStaff.filter((s: any) => s.departmentId === boardDept?.id).sort((a: any, b: any) => 
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
 
