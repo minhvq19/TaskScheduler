@@ -285,13 +285,28 @@ export default function EnhancedScheduleModal({
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
-  const { data: staffList } = useQuery({
+  // Fetch staff và departments
+  const { data: allStaff = [] } = useQuery({
     queryKey: ["staff"],
     queryFn: async () => {
       const res = await fetch("/api/staff");
       return await res.json();
     },
   });
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      const res = await fetch("/api/departments");
+      return await res.json();
+    },
+  });
+
+  // Lọc chỉ lấy cán bộ thuộc Ban giám đốc
+  const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
+  const staffList = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
+    (a.displayOrder || 0) - (b.displayOrder || 0)
+  );
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
