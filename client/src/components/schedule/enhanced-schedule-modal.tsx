@@ -393,10 +393,10 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const formContent = (
     <>
       <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
-        <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
-            {/* Staff Selection */}
-            <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
+          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
+          {/* Staff Selection */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
             <Select 
               value={form.watch("staffId")} 
               onValueChange={(value) => form.setValue("staffId", value)}
@@ -559,7 +559,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             {watchedWorkType === "Đi khách hàng" && (
               <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
             )}
-            </div>
+          </div>
+
           </form>
         </div>
         
@@ -585,7 +586,6 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
             </Button>
           </div>
-        </div>
       </div>
     </>
   );
@@ -593,45 +593,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[90vh] flex flex-col" 
-          data-testid="dialog-enhanced-schedule"
-        >
-          <SheetHeader className="p-4 border-b border-gray-200">
+        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="dialog-enhanced-schedule">
+          <SheetHeader className="pb-3 flex-shrink-0">
             <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
               {title}
             </SheetTitle>
           </SheetHeader>
-          
-          <div className="flex-grow overflow-y-auto">
-            <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="grid grid-cols-1 gap-4 p-4">
-              {/* Copy form fields here */}
-            </form>
-          </div>
-          
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1 h-10 text-sm"
-                data-testid="button-cancel"
-              >
-                Hủy
-              </Button>
-              <Button
-                type="submit"
-                form="enhanced-schedule-form"
-                className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-                disabled={isLoading}
-                data-testid="button-submit"
-              >
-                {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
-              </Button>
-            </div>
-          </div>
+          {formContent}
         </SheetContent>
       </Sheet>
     );
@@ -645,56 +613,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             {title}
           </DialogTitle>
         </DialogHeader>
-        {formFields}
-      </DialogContent>
-    </Dialog>
-  );
-
-  if (isMobile) {
-    return (
-      <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[90vh] flex flex-col" 
-          data-testid="dialog-enhanced-schedule"
-        >
-          <SheetHeader className="p-4 border-b border-gray-200">
-            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
-              {title}
-            </SheetTitle>
-          </SheetHeader>
-          
-          <div className="flex-grow overflow-y-auto">
-            <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="grid grid-cols-1 gap-4 p-4">
-              {formFields}
-            </form>
-          </div>
-          
-          <SheetFooter className="p-4 border-t border-gray-200">
-            {buttonGroup}
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="dialog-enhanced-schedule">
-        <DialogHeader className="pb-3 flex-shrink-0">
-          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
-            {title}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
-          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
-            {formFields}
-          </form>
-        </div>
-        
-        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
-          {buttonGroup}
-        </div>
+        {formContent}
       </DialogContent>
     </Dialog>
   );
