@@ -391,8 +391,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
   const formContent = (
-    <>
-      <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
+    <div className="sheet-form-container">
+      <div className="sheet-form-content">
           <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
@@ -564,7 +564,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </form>
         </div>
         
-        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
+        <div className="sheet-form-buttons">
           <div className="flex gap-2">
             <Button
               type="button"
@@ -586,15 +586,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
             </Button>
           </div>
-      </div>
-    </>
+        </div>
+    </div>
   );
 
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="dialog-enhanced-schedule">
-          <SheetHeader className="pb-3 flex-shrink-0">
+        <SheetContent side="bottom" className="h-[75vh] max-h-[600px] flex flex-col p-4 w-full max-w-full" data-testid="dialog-enhanced-schedule">
+          <SheetHeader className="pb-2 flex-shrink-0">
             <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
               {title}
             </SheetTitle>
