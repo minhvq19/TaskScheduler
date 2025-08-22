@@ -287,10 +287,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
-  const formContent = (
-    <>
-      <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
-          <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
+  const formFields = (
           <div className="space-y-2 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
@@ -442,32 +439,29 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </div>
           </div>
 
-          </form>
-        </div>
-        
-        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 h-10 text-sm"
-              data-testid="button-cancel"
-            >
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              form="schedule-form"
-              className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-              disabled={isLoading}
-              data-testid="button-submit"
-            >
-              {isLoading ? "Đang xử lý..." : "Thêm"}
-            </Button>
-          </div>
-      </div>
-    </>
+  );
+
+  const footerContent = (
+    <div className="flex gap-2 p-4 border-t border-gray-200">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onClose}
+        className="flex-1 h-10 text-sm"
+        data-testid="button-cancel"
+      >
+        Hủy
+      </Button>
+      <Button
+        type="submit"
+        form="schedule-form"
+        className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+        disabled={isLoading}
+        data-testid="button-submit"
+      >
+        {isLoading ? "Đang xử lý..." : "Thêm"}
+      </Button>
+    </div>
   );
 
   if (isMobile) {
@@ -475,15 +469,23 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent 
           side="bottom" 
-          className="h-[90vh] max-h-[90vh] flex flex-col p-4 w-full max-w-none mx-0 rounded-t-lg" 
+          className="h-[90vh] flex flex-col" 
           data-testid="modal-add-schedule"
         >
-          <SheetHeader className="pb-3 flex-shrink-0">
+          <SheetHeader className="p-4 border-b border-gray-200">
             <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
               {title}
             </SheetTitle>
           </SheetHeader>
-          {formContent}
+          <div className="flex-grow overflow-y-auto">
+            <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 p-4">
+              {formFields}
+            </form>
+          </div>
+          
+          <SheetFooter className="p-4 border-t border-gray-200">
+            {buttonGroup}
+          </SheetFooter>
         </SheetContent>
       </Sheet>
     );
@@ -497,7 +499,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             {title}
           </DialogTitle>
         </DialogHeader>
-        {formContent}
+        <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
+          <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
+            {formFields}
+          </form>
+        </div>
+        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
+          {buttonGroup}
+        </div>
       </DialogContent>
     </Dialog>
   );
