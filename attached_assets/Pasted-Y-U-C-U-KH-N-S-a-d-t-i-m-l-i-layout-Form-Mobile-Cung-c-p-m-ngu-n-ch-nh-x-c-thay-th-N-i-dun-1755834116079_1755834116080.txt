@@ -1,0 +1,98 @@
+YÊU CẦU KHẨN: Sửa dứt điểm lỗi layout Form Mobile - Cung cấp mã nguồn chính xác để thay thế
+
+Nội dung:
+
+Chào team Replit,
+
+Cảm ơn team đã phản hồi. Tuy nhiên, tôi rất tiếc phải thông báo rằng sau khi kiểm tra trên link live và xem lại mã nguồn, lỗi layout trên form mobile vẫn còn y hệt, không có bất kỳ cải thiện nào.
+
+Các thay đổi mà team mô tả đã không mang lại hiệu quả. Khoảng trống lớn vẫn còn, các nút bấm vẫn bị ẩn và chiều rộng các control vẫn bị tràn.
+
+1. Phân tích Nguyên nhân Gốc rễ (Lần cuối)
+Vấn đề cốt lõi không chỉ nằm ở cấu trúc JSX mà còn ở 2 điểm chí mạng sau:
+
+Cấu trúc Flexbox không được áp dụng đúng cách: Dù đã tái cấu trúc, SheetContent có thể có những style nội bộ hoặc padding ẩn làm phá vỡ logic flex-grow của thẻ con. Cần một div bọc ngoài tường minh ngay bên trong SheetContent để kiểm soát 100% layout.
+
+Thiếu w-full trên các Control: Các component SelectTrigger và Input bắt buộc phải có class w-full. Nếu không, chúng sẽ giữ chiều rộng mặc định và làm vỡ layout của form, gây ra hiện tượng tràn lề ngang mà chúng ta đang thấy. Đây là một lỗi rất cơ bản đã bị bỏ qua.
+
+2. Yêu cầu Sửa lỗi Dứt điểm - MÃ NGUỒN CUỐI CÙNG
+Để chấm dứt tình trạng này, đề nghị team thay thế toàn bộ code liên quan đến formContent và Sheet trong cả hai file add-schedule-modal.tsx và enhanced-schedule-modal.tsx bằng đoạn mã chính xác dưới đây.
+
+Vui lòng sao chép và dán (copy-paste) mà không chỉnh sửa hay thay đổi bất kỳ class nào.
+
+TypeScript
+
+// File: add-schedule-modal.tsx (và áp dụng tương tự cho enhanced-schedule-modal.tsx)
+
+// ... (phần code logic và useForm giữ nguyên)
+
+const formContent = (
+  // Vỏ bọc Flexbox TƯỜNG MINH để kiểm soát 100% layout, chiếm toàn bộ chiều cao còn lại
+  <div className="flex h-full flex-col">
+    {/* Vùng nội dung chính, lấp đầy không gian và tự động cuộn */}
+    <div className="flex-grow overflow-y-auto pr-4">
+      <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Ví dụ một trường Select */}
+        <div>
+          <Label htmlFor="staffId">Chọn cán bộ *</Label>
+          <Select onValueChange={(value) => form.setValue("staffId", value)}>
+            {/* QUAN TRỌNG: w-full để control không làm vỡ layout */}
+            <SelectTrigger className="mt-1 w-full">
+              <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
+            </SelectTrigger>
+            <SelectContent>{/* ... options ... */}</SelectContent>
+          </Select>
+        </div>
+
+        {/* Ví dụ một trường Input */}
+        <div>
+          <Label htmlFor="startDateTime">Ngày giờ bắt đầu *</Label>
+          {/* QUAN TRỌNG: w-full để control không làm vỡ layout */}
+          <Input id="startDateTime" type="datetime-local" className="mt-1 w-full" {...form.register("startDateTime")} />
+        </div>
+        
+        {/* ... Áp dụng tương tự cho TẤT CẢ các trường Input và Select khác ... */}
+      </form>
+    </div>
+
+    {/* Vùng nút bấm, cố định ở dưới cùng, không co lại */}
+    <div className="flex-shrink-0 border-t pt-4">
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+          Hủy
+        </Button>
+        <Button type="submit" form="schedule-form" className="flex-1">
+          {isLoading ? "Đang xử lý..." : "Thêm"}
+        </Button>
+      </div>
+    </div>
+  </div>
+);
+
+// ...
+
+// Trong phần return của component
+if (isMobile) {
+  return (
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="bottom" className="flex h-[85vh] flex-col p-4">
+        <SheetHeader className="flex-shrink-0 pb-2">
+          <SheetTitle className="text-center">{title}</SheetTitle>
+        </SheetHeader>
+        {/* Chỉ render formContent ở đây */}
+        {formContent}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// ... (phần code cho Dialog desktop giữ nguyên)
+
+3. Tóm tắt Yêu cầu:
+THAY THẾ TOÀN BỘ: Dùng đoạn mã trên để thay thế hoàn toàn cho biến formContent và cách render Sheet trong cả 2 file modal.
+
+THÊM w-full: Đảm bảo TẤT CẢ các component SelectTrigger và Input bên trong form phải có class w-full.
+
+KIỂM TRA THỰC TẾ: Sau khi deploy, team cần tự kiểm tra lại trên một thiết bị di động thực tế hoặc trình giả lập để xác nhận lỗi đã được khắc phục.
+
+Đây là phân tích và giải pháp cuối cùng. Tôi tin rằng việc áp dụng chính xác 100% mã nguồn trên sẽ khắc phục triệt để vấn đề. Mong team sớm xử lý.

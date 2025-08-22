@@ -288,9 +288,9 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
   const formContent = (
-    <>
-      <div className="flex-grow overflow-y-auto pr-2">
-          <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
+    <div className="flex h-full flex-col">
+      <div className="flex-grow overflow-y-auto pr-4">
+        <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
               <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
@@ -300,7 +300,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("staffId")}
                 onValueChange={(value) => form.setValue("staffId", value, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base" data-testid="select-staff">
+                <SelectTrigger className="mt-1 w-full" data-testid="select-staff">
                   <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,7 +335,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("Start datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("startDateTime", e.target.value);
                   }}
-                  className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="mt-1 w-full"
                   data-testid="input-start-time"
                 />
                 {form.formState.errors.startDateTime && (
@@ -361,7 +361,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                     console.log("End datetime onBlur triggered:", e.target.value);
                     handleDateTimeChange("endDateTime", e.target.value);
                   }}
-                  className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="mt-1 w-full"
                   data-testid="input-end-time"
                 />
                 {form.formState.errors.endDateTime && (
@@ -380,7 +380,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                 value={form.watch("workType")}
                 onValueChange={(value) => form.setValue("workType", value, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base" data-testid="select-work-type">
+                <SelectTrigger className="mt-1 w-full" data-testid="select-work-type">
                   <SelectValue placeholder="Chọn nội dung công tác" />
                 </SelectTrigger>
                 <SelectContent>
@@ -409,7 +409,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   rows={3}
                   maxLength={200}
                   placeholder="Nhập nội dung chi tiết (tối đa 200 ký tự)"
-                  className="text-sm resize-none focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                  className="mt-1 w-full"
                   data-testid="input-custom-content"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -444,40 +444,37 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
           </form>
         </div>
-        
-        <div className="flex-shrink-0 border-t pt-4">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 h-10 text-sm"
-              data-testid="button-cancel"
-            >
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              form="schedule-form"
-              className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-              disabled={isLoading}
-              data-testid="button-submit"
-            >
-              {isLoading ? "Đang xử lý..." : "Thêm"}
-            </Button>
-          </div>
+      </div>
+      
+      <div className="flex-shrink-0 border-t pt-4">
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            form="schedule-form"
+            className="flex-1"
+            disabled={isLoading}
+          >
+            {isLoading ? "Đang xử lý..." : "Thêm"}
+          </Button>
         </div>
-    </>
+      </div>
+    </div>
   );
 
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="bottom" className="h-[75vh] max-h-[600px] flex flex-col p-4 w-full max-w-full" data-testid="modal-add-schedule">
-          <SheetHeader className="pb-2 flex-shrink-0">
-            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
-              {title}
-            </SheetTitle>
+        <SheetContent side="bottom" className="flex h-[85vh] flex-col p-4">
+          <SheetHeader className="flex-shrink-0 pb-2">
+            <SheetTitle className="text-center">{title}</SheetTitle>
           </SheetHeader>
           {formContent}
         </SheetContent>

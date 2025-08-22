@@ -391,9 +391,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
   const formContent = (
-    <>
-      <div className="flex-grow overflow-y-auto pr-2">
-          <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
+    <div className="flex h-full flex-col">
+      <div className="flex-grow overflow-y-auto pr-4">
+        <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
             <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
@@ -402,7 +402,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               onValueChange={(value) => form.setValue("staffId", value)}
               data-testid="select-staff"
             >
-              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Chọn cán bộ" />
               </SelectTrigger>
               <SelectContent>
@@ -426,7 +426,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               onValueChange={(value) => form.setValue("workType", value)}
               data-testid="select-work-type"
             >
-              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Chọn nội dung công tác" />
               </SelectTrigger>
               <SelectContent>
@@ -469,7 +469,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("Start date onBlur triggered:", e.target.value);
                   handleDateChange("startDate", e.target.value);
                 }}
-                className="h-11 text-sm sm:h-9 sm:text-base"
+                className="mt-1 w-full"
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
@@ -491,7 +491,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   console.log("End date onBlur triggered:", e.target.value);
                   handleDateChange("endDate", e.target.value);
                 }}
-                className="h-11 text-sm sm:h-9 sm:text-base"
+                className="mt-1 w-full"
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (
@@ -508,7 +508,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="startTime"
                   type="time"
-                  className="h-11 text-sm sm:h-9 sm:text-base"
+                  className="mt-1 w-full"
                   {...form.register("startTime")}
                   data-testid="input-start-time"
                 />
@@ -522,7 +522,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 <Input
                   id="endTime"
                   type="time"
-                  className="h-11 text-sm sm:h-9 sm:text-base"
+                  className="mt-1 w-full"
                   {...form.register("endTime")}
                   data-testid="input-end-time"
                 />
@@ -562,32 +562,29 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </div>
 
           </form>
+      </div>
+      
+      <div className="flex-shrink-0 border-t pt-4">
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            className="flex-1"
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            form="enhanced-schedule-form"
+            className="flex-1"
+            disabled={isLoading}
+          >
+            {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
+          </Button>
         </div>
-        
-        <div className="flex-shrink-0 border-t pt-4">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="flex-1 h-10 text-sm"
-              data-testid="button-cancel"
-            >
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              form="enhanced-schedule-form"
-              disabled={isLoading}
-              className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-              data-testid="button-submit"
-            >
-              {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
-            </Button>
-          </div>
-        </div>
-    </>
+      </div>
+    </div>
   );
 
   if (isMobile) {
