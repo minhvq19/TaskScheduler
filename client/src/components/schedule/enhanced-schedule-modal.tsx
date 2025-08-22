@@ -14,7 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
 import { type WorkSchedule, type Staff, type Department, type Holiday, type SystemConfigs } from "@shared/schema";
 import { z } from "zod";
@@ -61,6 +63,7 @@ interface EnhancedScheduleModalProps {
 export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: EnhancedScheduleModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   // Get current date in yyyy-MM-dd format for form inputs
   const getCurrentDate = () => {
@@ -385,16 +388,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="dialog-enhanced-schedule">
-        <DialogHeader className="pb-3 flex-shrink-0">
-          <DialogTitle className="text-lg font-semibold text-center" data-testid="title-schedule">
-            {schedule ? "Sửa lịch công tác" : "Thêm lịch công tác"}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
+  const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
+  
+  const formContent = (
+    <>
+      <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
           <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
@@ -588,7 +586,34 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
             </Button>
           </div>
-        </div>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="dialog-enhanced-schedule">
+          <SheetHeader className="pb-3 flex-shrink-0">
+            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+              {title}
+            </SheetTitle>
+          </SheetHeader>
+          {formContent}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="dialog-enhanced-schedule">
+        <DialogHeader className="pb-3 flex-shrink-0">
+          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
     </Dialog>
   );

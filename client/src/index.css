@@ -22,36 +22,7 @@ body,
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile dialog - simple and effective */
-@media (max-width: 640px) {
-  [data-radix-dialog-overlay] {
-    position: fixed !important;
-    inset: 0 !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 50 !important;
-    padding: 20px !important;
-  }
-
-  [data-radix-dialog-content] {
-    position: static !important;
-    top: unset !important;
-    left: unset !important;
-    right: unset !important;
-    bottom: unset !important;
-    transform: none !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: 300px !important;
-    height: 70vh !important;
-    max-height: 500px !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
+/* Sheet mobile styling can be customized here if needed */
 
 /* Custom scrollbar styles */
 .scrollbar-thin {

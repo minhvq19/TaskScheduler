@@ -13,7 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
 import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Department } from "@shared/schema";
 import { z } from "zod";
@@ -47,6 +49,7 @@ interface AddScheduleModalProps {
 export default function AddScheduleModal({ isOpen, onClose, schedule }: AddScheduleModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -282,16 +285,11 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="modal-add-schedule">
-        <DialogHeader className="pb-3 flex-shrink-0">
-          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
-            {schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác"}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
+  const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
+  
+  const formContent = (
+    <>
+      <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
           <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
@@ -468,7 +466,34 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               {isLoading ? "Đang xử lý..." : "Thêm"}
             </Button>
           </div>
-        </div>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="modal-add-schedule">
+          <SheetHeader className="pb-3 flex-shrink-0">
+            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+              {title}
+            </SheetTitle>
+          </SheetHeader>
+          {formContent}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="modal-add-schedule">
+        <DialogHeader className="pb-3 flex-shrink-0">
+          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
     </Dialog>
   );
