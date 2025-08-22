@@ -288,14 +288,20 @@ export default function EnhancedScheduleModal({
   const { data: staffList } = useQuery({
     queryKey: ["staff"],
     queryFn: async () => {
-      const res = await client.api.staff.$get();
+      const res = await fetch("/api/staff");
       return await res.json();
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      const res = await client.api.schedules.$post({ json: values });
+      const res = await fetch("/api/work-schedules", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
       if (!res.ok) {
         throw new Error("Failed to create schedule");
       }
