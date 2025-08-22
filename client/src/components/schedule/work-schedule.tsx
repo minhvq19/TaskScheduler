@@ -202,14 +202,22 @@ export default function WorkSchedule() {
           Quản trị lịch công tác
         </h2>
         {canEdit("workSchedules") && editPermissions && editPermissions.editableStaffIds.length > 0 && (
-          <Button
-            onClick={() => setShowAddModal(true)}
-            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-            data-testid="button-add-schedule"
+          <EnhancedScheduleModal
+            schedule={null}
+            onSuccess={() => {
+              setShowAddModal(false);
+              setEditingSchedule(null);
+              queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+            }}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm lịch công tác
-          </Button>
+            <Button
+              className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              data-testid="button-add-schedule"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Thêm lịch công tác
+            </Button>
+          </EnhancedScheduleModal>
         )}
       </div>
 
@@ -492,12 +500,6 @@ export default function WorkSchedule() {
         </CardContent>
       </Card>
 
-      {/* Add/Edit Schedule Modal */}
-      <EnhancedScheduleModal
-        isOpen={showAddModal}
-        onClose={handleCloseModal}
-        schedule={editingSchedule}
-      />
     </div>
   );
 }
