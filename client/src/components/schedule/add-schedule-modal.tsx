@@ -288,8 +288,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
   const formContent = (
-    <div className="sheet-form-container">
-      <div className="sheet-form-content">
+    <>
+      <div className="flex-grow overflow-y-auto pr-2">
           <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
           <div className="space-y-2 sm:space-y-4">
             <div>
@@ -445,7 +445,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           </form>
         </div>
         
-        <div className="sheet-form-buttons">
+        <div className="flex-shrink-0 border-t pt-4">
           <div className="flex gap-2">
             <Button
               type="button"
@@ -467,7 +467,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </Button>
           </div>
         </div>
-    </div>
+    </>
   );
 
   if (isMobile) {

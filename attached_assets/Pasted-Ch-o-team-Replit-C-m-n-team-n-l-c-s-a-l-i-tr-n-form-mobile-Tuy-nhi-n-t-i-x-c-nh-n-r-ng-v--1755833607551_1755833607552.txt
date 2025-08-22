@@ -1,0 +1,81 @@
+Chào team Replit,
+
+Cảm ơn team đã nỗ lực sửa lỗi trên form mobile. Tuy nhiên, tôi xác nhận rằng vấn đề vẫn còn nguyên vẹn: form bị đẩy xuống đáy, che mất nút bấm và tràn chiều rộng.
+
+Sau khi kiểm tra kỹ mã nguồn, chúng tôi đã xác định được nguyên nhân gốc rễ: Lỗi không nằm ở các giá trị CSS, mà nằm ở cấu trúc JSX bị áp dụng sai trong file enhanced-schedule-modal.tsx (và add-schedule-modal.tsx).
+
+1. Chẩn đoán Kỹ thuật
+Các class CSS trong index.css (.sheet-form-container, .sheet-form-content, .sheet-form-buttons) đã được định nghĩa đúng. Vấn đề là component formContent đang có một cấu trúc div lồng vô ích, khiến logic flexbox bị phá vỡ.
+
+Cụ thể, SheetContent đã là một flex-container theo chiều dọc (flex flex-col), nhưng bên trong nó lại chứa một div .sheet-form-container khác cũng là flex-container. Sự lồng ghép không cần thiết này gây ra xung đột tính toán chiều cao.
+
+2. Yêu cầu Sửa lỗi Chi tiết
+Đề nghị team thực hiện tái cấu trúc lại biến formContent trong file enhanced-schedule-modal.tsx như sau:
+
+A. Cấu trúc JSX HIỆN TẠI đang bị lỗi:
+
+TypeScript
+
+// enhanced-schedule-modal.tsx
+const formContent = (
+  // SAI: Div này là thừa thãi và gây lỗi
+  <div className="sheet-form-container"> 
+    <div className="sheet-form-content">
+        <form id="enhanced-schedule-form" ...>
+          {/* ...form fields... */}
+        </form>
+      </div>
+      
+      <div className="sheet-form-buttons">
+        {/* ...buttons... */}
+      </div>
+  </div>
+);
+B. Cấu trúc JSX MONG MUỐN để sửa lỗi triệt để:
+
+Hãy xóa bỏ div bọc ngoài và áp dụng trực tiếp các class vào các div con một cách hợp lý. Cấu trúc đúng phải như sau:
+
+TypeScript
+
+// enhanced-schedule-modal.tsx
+const formContent = (
+  <>
+    {/* ĐÚNG: Vùng form chiếm toàn bộ không gian còn lại và tự cuộn */}
+    <div className="flex-grow overflow-y-auto pr-2">
+      <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* ...toàn bộ các trường của form đặt ở đây... */}
+      </form>
+    </div>
+    
+    {/* ĐÚNG: Vùng nút bấm luôn cố định ở dưới cùng */}
+    <div className="flex-shrink-0 border-t pt-4">
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleClose}
+          // ...
+        >
+          Hủy
+        </Button>
+        <Button
+          type="submit"
+          form="enhanced-schedule-form"
+          // ...
+        >
+          {schedule ? "Cập nhật" : "Thêm"}
+        </Button>
+      </div>
+    </div>
+  </>
+);
+3. Tóm tắt các hành động cần thực hiện:
+Xóa bỏ div có class .sheet-form-container và các class .sheet-form-content, .sheet-form-buttons đã được định nghĩa sẵn.
+
+Áp dụng class flex-grow overflow-y-auto cho div bọc thẻ <form>.
+
+Áp dụng class flex-shrink-0 cho div bọc các nút bấm và thêm đường kẻ border-t để phân tách.
+
+Việc tái cấu trúc JSX như trên sẽ tận dụng đúng container flex flex-col có sẵn của SheetContent, giúp phân chia layout một cách chính xác và giải quyết triệt để 100% các lỗi hiện tại.
+
+Mong team thực hiện theo đúng chỉ dẫn kỹ thuật này. Cảm ơn.

@@ -29,32 +29,6 @@ body,
     border-radius: 12px 12px 0 0 !important;
     box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1) !important;
   }
-  
-  /* Ensure proper spacing and button visibility */
-  .sheet-form-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 0.75rem;
-  }
-  
-  .sheet-form-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 2px;
-    margin-right: -2px;
-  }
-  
-  .sheet-form-buttons {
-    flex-shrink: 0;
-    padding-top: 0.75rem;
-    border-top: 1px solid #e5e7eb;
-    background: white;
-    margin: 0 -1rem -1rem -1rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 1rem;
-  }
 }
 
 /* Custom scrollbar styles */

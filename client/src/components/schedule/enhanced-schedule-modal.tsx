@@ -391,8 +391,8 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
   const formContent = (
-    <div className="sheet-form-container">
-      <div className="sheet-form-content">
+    <>
+      <div className="flex-grow overflow-y-auto pr-2">
           <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
@@ -564,7 +564,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           </form>
         </div>
         
-        <div className="sheet-form-buttons">
+        <div className="flex-shrink-0 border-t pt-4">
           <div className="flex gap-2">
             <Button
               type="button"
@@ -587,7 +587,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             </Button>
           </div>
         </div>
-    </div>
+    </>
   );
 
   if (isMobile) {
