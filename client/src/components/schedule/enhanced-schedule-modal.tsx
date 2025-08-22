@@ -5,7 +5,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -14,33 +20,56 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
-import { type WorkSchedule, type Staff, type Department, type Holiday, type SystemConfigs } from "@shared/schema";
+import {
+  type WorkSchedule,
+  type Staff,
+  type Department,
+  type Holiday,
+  type SystemConfigs,
+} from "@shared/schema";
 import { z } from "zod";
-import { format, startOfDay, endOfDay, isWeekend, isSameDay, isBefore } from "date-fns";
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  isWeekend,
+  isSameDay,
+  isBefore,
+} from "date-fns";
 
-const formSchema = z.object({
-  staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
-  startDate: z.string().min(1, "Vui lòng chọn ngày bắt đầu"),
-  endDate: z.string().min(1, "Vui lòng chọn ngày kết thúc"),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
-  customContent: z.string().max(200).optional(),
-// Removed customWorkType field
-  isFullDay: z.boolean().default(false),
-}).refine((data) => {
-  if (!data.isFullDay) {
-    return data.startTime && data.endTime;
-  }
-  return true;
-}, {
-  message: "Vui lòng chọn giờ bắt đầu và kết thúc khi không chọn cả ngày",
-  path: ["startTime"]
-});
+const formSchema = z
+  .object({
+    staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
+    startDate: z.string().min(1, "Vui lòng chọn ngày bắt đầu"),
+    endDate: z.string().min(1, "Vui lòng chọn ngày kết thúc"),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
+    customContent: z.string().max(200).optional(),
+    // Removed customWorkType field
+    isFullDay: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      if (!data.isFullDay) {
+        return data.startTime && data.endTime;
+      }
+      return true;
+    },
+    {
+      message: "Vui lòng chọn giờ bắt đầu và kết thúc khi không chọn cả ngày",
+      path: ["startTime"],
+    },
+  );
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -60,7 +89,11 @@ interface EnhancedScheduleModalProps {
   schedule?: WorkSchedule | null;
 }
 
-export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: EnhancedScheduleModalProps) {
+export default function EnhancedScheduleModal({
+  isOpen,
+  onClose,
+  schedule,
+}: EnhancedScheduleModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -87,7 +120,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   });
 
   const watchedWorkType = form.watch("workType");
-// Removed watchedCustomWorkType
+  // Removed watchedCustomWorkType
   const watchedIsFullDay = form.watch("isFullDay");
   const watchedStartDate = form.watch("startDate");
   const watchedEndDate = form.watch("endDate");
@@ -98,40 +131,44 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     refetchInterval: 300000, // 5 minutes
   });
 
-  const allowWeekendSchedule = systemConfigs.find(c => c.key === 'policies.allow_weekend_schedule')?.value === 'true';
+  const allowWeekendSchedule =
+    systemConfigs.find((c) => c.key === "policies.allow_weekend_schedule")
+      ?.value === "true";
 
   // Handle date input change to prevent weekend and holiday selection
   const handleDateChange = (field: "startDate" | "endDate", value: string) => {
     console.log(`handleDateChange called for ${field} with value:`, value);
-    
+
     if (value) {
       const selectedDate = new Date(value);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
-      
+
       console.log(`Selected date: ${value}, day of week: ${dayOfWeek}`);
-      
+
       // Check weekend restriction based on system config
       if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
         console.log("Weekend detected, preventing selection due to policy");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
+          message:
+            "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
         });
         toast({
           title: "Lỗi",
-          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
+          description:
+            "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
           variant: "destructive",
         });
         return;
       }
-      
+
       if (isHoliday(value)) {
         console.log("Holiday detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày lễ"
+          message: "Không thể chọn ngày lễ",
         });
         toast({
           title: "Lỗi",
@@ -140,11 +177,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
         });
         return;
       }
-      
+
       // If valid weekday and not holiday, clear any previous errors and set value
       form.clearErrors(field);
       form.setValue(field, value);
-      
+
       // Auto-fill endDate when startDate is set and isFullDay is checked
       if (field === "startDate" && watchedIsFullDay) {
         form.setValue("endDate", value);
@@ -169,41 +206,45 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   });
 
   // Fetch user edit permissions
-  const { data: editPermissions } = useQuery<{editableStaffIds: string[]}>({
+  const { data: editPermissions } = useQuery<{ editableStaffIds: string[] }>({
     queryKey: ["/api/user-edit-permissions"],
   });
 
-
-
-  const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
+  const boardDept = departments.find((d) =>
+    d.name.toLowerCase().includes("ban giám đốc"),
+  );
   // Chỉ hiện staff mà user được phân quyền
   const boardStaff = allStaff
-    .filter(s => s.departmentId === boardDept?.id)
-    .filter(s => editPermissions?.editableStaffIds.includes(s.id) || false)
+    .filter((s) => s.departmentId === boardDept?.id)
+    .filter((s) => editPermissions?.editableStaffIds.includes(s.id) || false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Get work hours from config
-  const workStartTime = systemConfigs.find(c => c.key === 'work_hours.start_time')?.value || '08:00';
-  const workEndTime = systemConfigs.find(c => c.key === 'work_hours.end_time')?.value || '17:30';
+  const workStartTime =
+    systemConfigs.find((c) => c.key === "work_hours.start_time")?.value ||
+    "08:00";
+  const workEndTime =
+    systemConfigs.find((c) => c.key === "work_hours.end_time")?.value ||
+    "17:30";
 
   // Validation functions
   const isHoliday = (dateString: string) => {
     const date = new Date(dateString);
-    return holidays.some(holiday => {
+    return holidays.some((holiday) => {
       const holidayDate = new Date(holiday.date);
-      
+
       // Check exact date match
       if (isSameDay(holidayDate, date)) {
         return true;
       }
-      
+
       // Check recurring holiday (same month-day but different year)
       if (holiday.isRecurring) {
-        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, '0')}-${String(holidayDate.getDate()).padStart(2, '0')}`;
-        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, "0")}-${String(holidayDate.getDate()).padStart(2, "0")}`;
+        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         return holidayMonthDay === checkMonthDay;
       }
-      
+
       return false;
     });
   };
@@ -215,12 +256,12 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const isValidWorkTime = (timeString: string, dateString?: string) => {
     if (!timeString) return true;
-    
+
     // Check if time is within work hours
     if (timeString < workStartTime || timeString > workEndTime) {
       return false;
     }
-    
+
     // Allow past times - removed past time validation
     return true;
   };
@@ -230,7 +271,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     if (watchedIsFullDay) {
       form.setValue("startTime", workStartTime);
       form.setValue("endTime", workEndTime);
-      
+
       // Auto-fill endDate with startDate when full day is checked
       if (watchedStartDate) {
         form.setValue("endDate", watchedStartDate);
@@ -241,21 +282,28 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   // Monitor form values and prevent weekends
   useEffect(() => {
-    const checkAndPreventWeekends = (field: "startDate" | "endDate", value: string) => {
+    const checkAndPreventWeekends = (
+      field: "startDate" | "endDate",
+      value: string,
+    ) => {
       if (value) {
         const selectedDate = new Date(value);
         const dayOfWeek = selectedDate.getDay();
-        
+
         // Check weekend restriction based on system config
         if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
-          console.log(`Weekend detected in useEffect for ${field}, clearing value due to policy`);
+          console.log(
+            `Weekend detected in useEffect for ${field}, clearing value due to policy`,
+          );
           form.setValue(field, "");
           form.setError(field, {
-            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
+            message:
+              "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
           });
           toast({
             title: "Lỗi",
-            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
+            description:
+              "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
             variant: "destructive",
           });
         }
@@ -270,19 +318,23 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     }
   }, [watchedStartDate, watchedEndDate, form, toast, allowWeekendSchedule]);
 
-
   // Create schedule mutation
   const createScheduleMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
-      const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
+      const startDateTime = new Date(
+        `${data.startDate}T${data.startTime || workStartTime}:00`,
+      );
+      const endDateTime = new Date(
+        `${data.endDate}T${data.endTime || workEndTime}:00`,
+      );
 
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
         workType: data.workType,
-        customContent: data.workType === "Khác" ? data.customContent : undefined,
+        customContent:
+          data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
     },
@@ -307,15 +359,20 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   // Update schedule mutation
   const updateScheduleMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
-      const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
+      const startDateTime = new Date(
+        `${data.startDate}T${data.startTime || workStartTime}:00`,
+      );
+      const endDateTime = new Date(
+        `${data.endDate}T${data.endTime || workEndTime}:00`,
+      );
 
       const payload = {
         staffId: data.staffId,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
         workType: data.workType,
-        customContent: data.workType === "Khác" ? data.customContent : undefined,
+        customContent:
+          data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);
     },
@@ -342,12 +399,13 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     if (schedule && isOpen) {
       const startDate = new Date(schedule.startDateTime);
       const endDate = new Date(schedule.endDateTime);
-      
+
       const startTimeStr = format(startDate, "HH:mm");
       const endTimeStr = format(endDate, "HH:mm");
-      
+
       // Check if it's a full day (matches work hours)
-      const isFullDay = startTimeStr === workStartTime && endTimeStr === workEndTime;
+      const isFullDay =
+        startTimeStr === workStartTime && endTimeStr === workEndTime;
 
       form.reset({
         staffId: schedule.staffId,
@@ -364,13 +422,25 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const handleSubmit = (data: FormData) => {
     // Only validate times if not full day and times are provided
-    if (!data.isFullDay && data.startTime && !isValidWorkTime(data.startTime, data.startDate)) {
-      form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
+    if (
+      !data.isFullDay &&
+      data.startTime &&
+      !isValidWorkTime(data.startTime, data.startDate)
+    ) {
+      form.setError("startTime", {
+        message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}`,
+      });
       return;
     }
 
-    if (!data.isFullDay && data.endTime && !isValidWorkTime(data.endTime, data.endDate)) {
-      form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
+    if (
+      !data.isFullDay &&
+      data.endTime &&
+      !isValidWorkTime(data.endTime, data.endDate)
+    ) {
+      form.setError("endTime", {
+        message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}`,
+      });
       return;
     }
 
@@ -386,19 +456,28 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
     onClose();
   };
 
-  const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
+  const isLoading =
+    createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
-  
+
+  // Dán đoạn mã này để thay thế
   const formContent = (
-    <div className="flex h-full flex-col">
+    // THAY ĐỔI DUY NHẤT Ở ĐÂY: h-full -> flex-grow
+    <div className="flex flex-grow flex-col">
       <div className="flex-grow overflow-y-auto pr-4">
-        <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form
+          id="enhanced-schedule-form"
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
           {/* Staff Selection */}
           <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
-            <Select 
-              value={form.watch("staffId")} 
+            <Label htmlFor="staffId" className="text-sm font-medium">
+              Cán bộ *
+            </Label>
+            <Select
+              value={form.watch("staffId")}
               onValueChange={(value) => form.setValue("staffId", value)}
               data-testid="select-staff"
             >
@@ -414,15 +493,19 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               </SelectContent>
             </Select>
             {form.formState.errors.staffId && (
-              <p className="text-sm text-red-500">{form.formState.errors.staffId.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.staffId.message}
+              </p>
             )}
           </div>
 
           {/* Work Type */}
           <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="workType" className="text-sm font-medium">Nội dung công tác *</Label>
-            <Select 
-              value={form.watch("workType")} 
+            <Label htmlFor="workType" className="text-sm font-medium">
+              Nội dung công tác *
+            </Label>
+            <Select
+              value={form.watch("workType")}
               onValueChange={(value) => form.setValue("workType", value)}
               data-testid="select-work-type"
             >
@@ -438,7 +521,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
               </SelectContent>
             </Select>
             {form.formState.errors.workType && (
-              <p className="text-sm text-red-500">{form.formState.errors.workType.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.workType.message}
+              </p>
             )}
           </div>
 
@@ -447,16 +532,22 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             <Checkbox
               id="isFullDay"
               checked={watchedIsFullDay}
-              onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
+              onCheckedChange={(checked) =>
+                form.setValue("isFullDay", checked as boolean)
+              }
               data-testid="checkbox-full-day"
             />
-            <Label htmlFor="isFullDay" className="text-xs sm:text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
+            <Label htmlFor="isFullDay" className="text-xs sm:text-sm">
+              Cả ngày ({workStartTime} - {workEndTime})
+            </Label>
           </div>
 
           {/* Date Range */}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="startDate" className="text-sm font-medium">Ngày bắt đầu *</Label>
+              <Label htmlFor="startDate" className="text-sm font-medium">
+                Ngày bắt đầu *
+              </Label>
               <Input
                 id="startDate"
                 type="date"
@@ -473,12 +564,16 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 data-testid="input-start-date"
               />
               {form.formState.errors.startDate && (
-                <p className="text-sm text-red-500">{form.formState.errors.startDate.message}</p>
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.startDate.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="endDate" className="text-sm font-medium">Ngày kết thúc *</Label>
+              <Label htmlFor="endDate" className="text-sm font-medium">
+                Ngày kết thúc *
+              </Label>
               <Input
                 id="endDate"
                 type="date"
@@ -495,7 +590,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 data-testid="input-end-date"
               />
               {form.formState.errors.endDate && (
-                <p className="text-sm text-red-500">{form.formState.errors.endDate.message}</p>
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.endDate.message}
+                </p>
               )}
             </div>
           </div>
@@ -504,7 +601,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           {!watchedIsFullDay && (
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="startTime" className="text-sm font-medium">Giờ bắt đầu *</Label>
+                <Label htmlFor="startTime" className="text-sm font-medium">
+                  Giờ bắt đầu *
+                </Label>
                 <Input
                   id="startTime"
                   type="time"
@@ -513,12 +612,16 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   data-testid="input-start-time"
                 />
                 {form.formState.errors.startTime && (
-                  <p className="text-sm text-red-500">{form.formState.errors.startTime.message}</p>
+                  <p className="text-sm text-red-500">
+                    {form.formState.errors.startTime.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="endTime" className="text-sm font-medium">Giờ kết thúc *</Label>
+                <Label htmlFor="endTime" className="text-sm font-medium">
+                  Giờ kết thúc *
+                </Label>
                 <Input
                   id="endTime"
                   type="time"
@@ -527,7 +630,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                   data-testid="input-end-time"
                 />
                 {form.formState.errors.endTime && (
-                  <p className="text-sm text-red-500">{form.formState.errors.endTime.message}</p>
+                  <p className="text-sm text-red-500">
+                    {form.formState.errors.endTime.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -536,7 +641,9 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
           {/* Custom Content (only for "Khác") */}
           {watchedWorkType === "Khác" && (
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="customContent" className="text-sm font-medium">Nội dung cụ thể</Label>
+              <Label htmlFor="customContent" className="text-sm font-medium">
+                Nội dung cụ thể
+              </Label>
               <Textarea
                 id="customContent"
                 placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
@@ -547,23 +654,34 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
                 data-testid="textarea-custom-content"
               />
               {form.formState.errors.customContent && (
-                <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.customContent.message}
+                </p>
               )}
             </div>
           )}
 
           {/* Work Hours Info */}
           <div className="bg-blue-50 p-2.5 sm:p-3 rounded-md text-xs text-blue-700">
-            <p className="mb-1"><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-            <p className="mb-1"><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
+            <p className="mb-1">
+              <strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}
+            </p>
+            <p className="mb-1">
+              <strong>Lưu ý:</strong>{" "}
+              {allowWeekendSchedule
+                ? "Không thể chọn ngày lễ"
+                : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}
+            </p>
             {watchedWorkType === "Đi khách hàng" && (
-              <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
+              <p>
+                <strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng
+                trên nền xanh
+              </p>
             )}
           </div>
-
-          </form>
+        </form>
       </div>
-      
+
       <div className="flex-shrink-0 border-t pt-4">
         <div className="flex gap-2">
           <Button
@@ -580,7 +698,7 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
             className="flex-1"
             disabled={isLoading}
           >
-            {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
+            {isLoading ? "Đang xử lý..." : schedule ? "Cập nhật" : "Thêm"}
           </Button>
         </div>
       </div>
@@ -590,9 +708,16 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-[75vh] max-h-[600px] flex flex-col p-4 w-full max-w-full" data-testid="dialog-enhanced-schedule">
+        <SheetContent
+          side="bottom"
+          className="h-[75vh] max-h-[600px] flex flex-col p-4 w-full max-w-full"
+          data-testid="dialog-enhanced-schedule"
+        >
           <SheetHeader className="pb-2 flex-shrink-0">
-            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+            <SheetTitle
+              className="text-lg font-semibold text-center"
+              data-testid="text-modal-title"
+            >
               {title}
             </SheetTitle>
           </SheetHeader>
@@ -604,9 +729,15 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="dialog-enhanced-schedule">
+      <DialogContent
+        className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]"
+        data-testid="dialog-enhanced-schedule"
+      >
         <DialogHeader className="pb-3 flex-shrink-0">
-          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+          <DialogTitle
+            className="text-lg font-semibold text-center"
+            data-testid="text-modal-title"
+          >
             {title}
           </DialogTitle>
         </DialogHeader>

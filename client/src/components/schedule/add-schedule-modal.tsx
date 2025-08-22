@@ -5,7 +5,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -13,11 +19,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
-import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Department } from "@shared/schema";
+import {
+  insertWorkScheduleSchema,
+  type WorkSchedule,
+  type Staff,
+  type Department,
+} from "@shared/schema";
 import { z } from "zod";
 import { format, isBefore, startOfDay, isSameDay } from "date-fns";
 
@@ -46,7 +62,11 @@ interface AddScheduleModalProps {
   schedule?: WorkSchedule | null;
 }
 
-export default function AddScheduleModal({ isOpen, onClose, schedule }: AddScheduleModalProps) {
+export default function AddScheduleModal({
+  isOpen,
+  onClose,
+  schedule,
+}: AddScheduleModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useMediaQuery("(max-width: 640px)");
@@ -75,41 +95,44 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   // Check if a date is a holiday
   const isHoliday = (dateString: string) => {
     const date = new Date(dateString);
-    return holidays.some(holiday => {
+    return holidays.some((holiday) => {
       const holidayDate = new Date(holiday.date);
-      
+
       // Check exact date match
       if (isSameDay(holidayDate, date)) {
         return true;
       }
-      
+
       // Check recurring holiday (same month-day but different year)
       if (holiday.isRecurring) {
-        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, '0')}-${String(holidayDate.getDate()).padStart(2, '0')}`;
-        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const holidayMonthDay = `${String(holidayDate.getMonth() + 1).padStart(2, "0")}-${String(holidayDate.getDate()).padStart(2, "0")}`;
+        const checkMonthDay = `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         return holidayMonthDay === checkMonthDay;
       }
-      
+
       return false;
     });
   };
 
   // Handle datetime input change to prevent weekend and holiday selection
-  const handleDateTimeChange = (field: "startDateTime" | "endDateTime", value: string) => {
+  const handleDateTimeChange = (
+    field: "startDateTime" | "endDateTime",
+    value: string,
+  ) => {
     console.log(`handleDateTimeChange called for ${field} with value:`, value);
-    
+
     if (value) {
       const selectedDate = new Date(value);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
-      
+
       console.log(`Selected datetime: ${value}, day of week: ${dayOfWeek}`);
-      
+
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         console.log("Weekend detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
         });
         toast({
           title: "Lỗi",
@@ -118,13 +141,13 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
         });
         return;
       }
-      
+
       if (isHoliday(value)) {
         console.log("Holiday detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày lễ"
+          message: "Không thể chọn ngày lễ",
         });
         toast({
           title: "Lỗi",
@@ -133,7 +156,7 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
         });
         return;
       }
-      
+
       // If valid weekday and not holiday, clear any previous errors and set value
       form.clearErrors(field);
       form.setValue(field, value);
@@ -150,17 +173,20 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     queryKey: ["/api/departments"],
   });
 
-  const boardDept = departments.find(d => d.name.toLowerCase().includes("ban giám đốc"));
-  const boardStaff = allStaff.filter(s => s.departmentId === boardDept?.id).sort((a, b) => 
-    (a.displayOrder || 0) - (b.displayOrder || 0)
+  const boardDept = departments.find((d) =>
+    d.name.toLowerCase().includes("ban giám đốc"),
   );
+  const boardStaff = allStaff
+    .filter((s) => s.departmentId === boardDept?.id)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Create schedule mutation
   const createScheduleMutation = useMutation({
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        customContent: data.workType === "Khác" ? data.customContent : undefined,
+        customContent:
+          data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
     },
@@ -187,7 +213,8 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     mutationFn: async (data: FormData) => {
       const payload = {
         ...data,
-        customContent: data.workType === "Khác" ? data.customContent : undefined,
+        customContent:
+          data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);
     },
@@ -213,8 +240,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     if (schedule) {
       form.reset({
         staffId: schedule.staffId,
-        startDateTime: format(new Date(schedule.startDateTime), "yyyy-MM-dd'T'HH:mm"),
-        endDateTime: format(new Date(schedule.endDateTime), "yyyy-MM-dd'T'HH:mm"),
+        startDateTime: format(
+          new Date(schedule.startDateTime),
+          "yyyy-MM-dd'T'HH:mm",
+        ),
+        endDateTime: format(
+          new Date(schedule.endDateTime),
+          "yyyy-MM-dd'T'HH:mm",
+        ),
         workType: schedule.workType,
         customContent: schedule.customContent || "",
       });
@@ -231,16 +264,21 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   // Monitor form values and prevent weekends
   useEffect(() => {
-    const checkAndPreventWeekends = (field: "startDateTime" | "endDateTime", value: string) => {
+    const checkAndPreventWeekends = (
+      field: "startDateTime" | "endDateTime",
+      value: string,
+    ) => {
       if (value) {
         const selectedDate = new Date(value);
         const dayOfWeek = selectedDate.getDay();
-        
+
         if (dayOfWeek === 0 || dayOfWeek === 6) {
-          console.log(`Weekend detected in useEffect for ${field}, clearing value`);
+          console.log(
+            `Weekend detected in useEffect for ${field}, clearing value`,
+          );
           form.setValue(field, "");
           form.setError(field, {
-            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
           });
           toast({
             title: "Lỗi",
@@ -263,8 +301,6 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     const startDateTime = new Date(data.startDateTime);
     const endDateTime = new Date(data.endDateTime);
     const now = new Date();
-    
-
 
     // Validate end time is after start time
     if (endDateTime <= startDateTime) {
@@ -283,24 +319,39 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     }
   };
 
-  const isLoading = createScheduleMutation.isPending || updateScheduleMutation.isPending;
+  const isLoading =
+    createScheduleMutation.isPending || updateScheduleMutation.isPending;
 
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
-  
+
+  // Dán đoạn mã này để thay thế
   const formContent = (
-    <div className="flex h-full flex-col">
+    // THAY ĐỔI DUY NHẤT Ở ĐÂY: h-full -> flex-grow
+    <div className="flex flex-grow flex-col">
       <div className="flex-grow overflow-y-auto pr-4">
-        <form id="schedule-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          id="schedule-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
           <div className="space-y-2 sm:space-y-4">
             <div>
-              <Label htmlFor="staffId" className="block text-sm font-medium text-gray-700 mb-2">
+              <Label
+                htmlFor="staffId"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Chọn cán bộ *
               </Label>
               <Select
                 value={form.watch("staffId")}
-                onValueChange={(value) => form.setValue("staffId", value, { shouldValidate: true })}
+                onValueChange={(value) =>
+                  form.setValue("staffId", value, { shouldValidate: true })
+                }
               >
-                <SelectTrigger className="mt-1 w-full" data-testid="select-staff">
+                <SelectTrigger
+                  className="mt-1 w-full"
+                  data-testid="select-staff"
+                >
                   <SelectValue placeholder="Chọn cán bộ Ban Giám đốc" />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,7 +371,10 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
               <div>
-                <Label htmlFor="startDateTime" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label
+                  htmlFor="startDateTime"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Ngày giờ bắt đầu *
                 </Label>
                 <Input
@@ -328,11 +382,17 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   type="datetime-local"
                   value={watchedStartDateTime || ""}
                   onChange={(e) => {
-                    console.log("Start datetime onChange triggered:", e.target.value);
+                    console.log(
+                      "Start datetime onChange triggered:",
+                      e.target.value,
+                    );
                     handleDateTimeChange("startDateTime", e.target.value);
                   }}
                   onBlur={(e) => {
-                    console.log("Start datetime onBlur triggered:", e.target.value);
+                    console.log(
+                      "Start datetime onBlur triggered:",
+                      e.target.value,
+                    );
                     handleDateTimeChange("startDateTime", e.target.value);
                   }}
                   className="mt-1 w-full"
@@ -346,7 +406,10 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               </div>
 
               <div>
-                <Label htmlFor="endDateTime" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label
+                  htmlFor="endDateTime"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Ngày giờ kết thúc *
                 </Label>
                 <Input
@@ -354,11 +417,17 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
                   type="datetime-local"
                   value={watchedEndDateTime || ""}
                   onChange={(e) => {
-                    console.log("End datetime onChange triggered:", e.target.value);
+                    console.log(
+                      "End datetime onChange triggered:",
+                      e.target.value,
+                    );
                     handleDateTimeChange("endDateTime", e.target.value);
                   }}
                   onBlur={(e) => {
-                    console.log("End datetime onBlur triggered:", e.target.value);
+                    console.log(
+                      "End datetime onBlur triggered:",
+                      e.target.value,
+                    );
                     handleDateTimeChange("endDateTime", e.target.value);
                   }}
                   className="mt-1 w-full"
@@ -373,14 +442,22 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             </div>
 
             <div>
-              <Label htmlFor="workType" className="block text-sm font-medium text-gray-700 mb-2">
+              <Label
+                htmlFor="workType"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Nội dung công tác *
               </Label>
               <Select
                 value={form.watch("workType")}
-                onValueChange={(value) => form.setValue("workType", value, { shouldValidate: true })}
+                onValueChange={(value) =>
+                  form.setValue("workType", value, { shouldValidate: true })
+                }
               >
-                <SelectTrigger className="mt-1 w-full" data-testid="select-work-type">
+                <SelectTrigger
+                  className="mt-1 w-full"
+                  data-testid="select-work-type"
+                >
                   <SelectValue placeholder="Chọn nội dung công tác" />
                 </SelectTrigger>
                 <SelectContent>
@@ -400,7 +477,10 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
             {watchedWorkType === "Khác" && (
               <div>
-                <Label htmlFor="customContent" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label
+                  htmlFor="customContent"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Nội dung chi tiết *
                 </Label>
                 <Textarea
@@ -427,25 +507,35 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 sm:p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <svg
+                  className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-2 sm:ml-3">
-                <h4 className="text-xs font-medium text-yellow-800">Lưu ý quan trọng</h4>
+                <h4 className="text-xs font-medium text-yellow-800">
+                  Lưu ý quan trọng
+                </h4>
                 <p className="text-xs text-yellow-700 mt-0.5 sm:mt-1">
-                  • Không thể chọn ngày giờ quá khứ<br/>
-                  • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
-                  • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
+                  • Không thể chọn ngày giờ quá khứ
+                  <br />
+                  • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong
+                  cùng một ngày
+                  <br />• Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
                 </p>
               </div>
             </div>
           </div>
-
-          </form>
-        </div>
+        </form>
       </div>
-      
+
       <div className="flex-shrink-0 border-t pt-4">
         <div className="flex gap-2">
           <Button
@@ -484,9 +574,15 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="modal-add-schedule">
+      <DialogContent
+        className="sm:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]"
+        data-testid="modal-add-schedule"
+      >
         <DialogHeader className="pb-3 flex-shrink-0">
-          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+          <DialogTitle
+            className="text-lg font-semibold text-center"
+            data-testid="text-modal-title"
+          >
             {title}
           </DialogTitle>
         </DialogHeader>
