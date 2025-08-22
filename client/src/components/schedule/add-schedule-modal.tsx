@@ -344,38 +344,38 @@ export default function AddScheduleModal({
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="bottom" className="mobile-sheet-content">
-          <div className="mobile-modal-header">
-            <SheetTitle className="text-center">{title}</SheetTitle>
-          </div>
-
-          <div className="mobile-modal-content">
-            <form
-              id="schedule-form-mobile"
-              onSubmit={form.handleSubmit(onSubmit)}
-            >
-              <FormFields />
-            </form>
-          </div>
-
-          <div className="mobile-modal-footer">
-            <div className="flex gap-2 w-full">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
+        <SheetContent side="bottom" className="p-0 h-[85vh]">
+          <div className="jailbreak-container">
+            <div className="jailbreak-header">
+              <SheetTitle className="text-center">{title}</SheetTitle>
+            </div>
+            <div className="jailbreak-content">
+              <form
+                id="schedule-form-mobile"
+                onSubmit={form.handleSubmit(onSubmit)}
               >
-                Hủy
-              </Button>
-              <Button
-                type="submit"
-                form="schedule-form-mobile"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? "Đang xử lý..." : schedule ? "Cập nhật" : "Thêm"}
-              </Button>
+                <FormFields />
+              </form>
+            </div>
+            <div className="jailbreak-footer">
+              <div className="flex gap-2 w-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1"
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="submit"
+                  form="schedule-form-mobile"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Đang xử lý..." : schedule ? "Cập nhật" : "Thêm"}
+                </Button>
+              </div>
             </div>
           </div>
         </SheetContent>
