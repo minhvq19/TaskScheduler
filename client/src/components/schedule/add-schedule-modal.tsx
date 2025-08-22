@@ -473,7 +473,11 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="modal-add-schedule">
+        <SheetContent 
+          side="bottom" 
+          className="h-[90vh] max-h-[90vh] flex flex-col p-4 w-full max-w-none mx-0 rounded-t-lg" 
+          data-testid="modal-add-schedule"
+        >
           <SheetHeader className="pb-3 flex-shrink-0">
             <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
               {title}

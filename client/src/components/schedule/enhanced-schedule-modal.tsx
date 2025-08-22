@@ -593,7 +593,11 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-[85vh] flex flex-col p-6" data-testid="dialog-enhanced-schedule">
+        <SheetContent 
+          side="bottom" 
+          className="h-[90vh] max-h-[90vh] flex flex-col p-4 w-full max-w-none mx-0 rounded-t-lg" 
+          data-testid="dialog-enhanced-schedule"
+        >
           <SheetHeader className="pb-3 flex-shrink-0">
             <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
               {title}
