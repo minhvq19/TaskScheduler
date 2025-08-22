@@ -285,6 +285,13 @@ export default function EnhancedScheduleModal({
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
+  // Auto open when schedule is set for editing
+  useEffect(() => {
+    if (schedule) {
+      setIsOpen(true);
+    }
+  }, [schedule]);
+
   // Fetch staff và departments
   const { data: allStaff = [] } = useQuery({
     queryKey: ["staff"],
@@ -324,6 +331,7 @@ export default function EnhancedScheduleModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       setIsOpen(false);
       onSuccess?.();
     },
@@ -367,7 +375,7 @@ export default function EnhancedScheduleModal({
   // Render Drawer cho Mobile
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <Drawer open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) onSuccess?.(); }}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent>
           <DrawerHeader className="text-left">
@@ -400,7 +408,7 @@ export default function EnhancedScheduleModal({
 
   // Render Dialog cho Desktop
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) onSuccess?.(); }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -416,7 +424,7 @@ export default function EnhancedScheduleModal({
           />
         </div>
         <DialogFooter>
-          <Button onClick={() => setIsOpen(false)} variant="outline">
+          <Button onClick={() => { setIsOpen(false); onSuccess?.(); }} variant="outline">
             Hủy
           </Button>
           <Button

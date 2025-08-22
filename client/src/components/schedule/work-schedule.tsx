@@ -124,7 +124,6 @@ export default function WorkSchedule() {
 
   const handleEdit = (schedule: WorkSchedule) => {
     setEditingSchedule(schedule);
-    setShowAddModal(true);
   };
 
   const handleDelete = (id: string) => {
@@ -203,7 +202,7 @@ export default function WorkSchedule() {
         </h2>
         {canEdit("workSchedules") && editPermissions && editPermissions.editableStaffIds.length > 0 && (
           <EnhancedScheduleModal
-            schedule={null}
+            schedule={editingSchedule}
             onSuccess={() => {
               setShowAddModal(false);
               setEditingSchedule(null);
@@ -500,6 +499,18 @@ export default function WorkSchedule() {
         </CardContent>
       </Card>
 
+      {/* Edit Schedule Modal */}
+      {editingSchedule && (
+        <EnhancedScheduleModal
+          schedule={editingSchedule}
+          onSuccess={() => {
+            setEditingSchedule(null);
+            queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+          }}
+        >
+          <div style={{ display: 'none' }}>Edit Trigger</div>
+        </EnhancedScheduleModal>
+      )}
     </div>
   );
 }
