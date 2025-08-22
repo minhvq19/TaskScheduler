@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -390,199 +390,264 @@ export default function EnhancedScheduleModal({ isOpen, onClose, schedule }: Enh
 
   const title = schedule ? "Chỉnh sửa lịch công tác" : "Thêm lịch công tác";
   
-  const formFields = (
+  const formContent = (
     <>
-      {/* Staff Selection */}
-      <div className="space-y-1.5 sm:space-y-2">
-        <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
-        <Select 
-          value={form.watch("staffId")} 
-          onValueChange={(value) => form.setValue("staffId", value)}
-          data-testid="select-staff"
-        >
-          <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
-            <SelectValue placeholder="Chọn cán bộ" />
-          </SelectTrigger>
-          <SelectContent>
-            {boardStaff.map((staff) => (
-              <SelectItem key={staff.id} value={staff.id}>
-                {staff.positionShort} {staff.fullName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {form.formState.errors.staffId && (
-          <p className="text-sm text-red-500">{form.formState.errors.staffId.message}</p>
-        )}
-      </div>
-
-      {/* Work Type */}
-      <div className="space-y-1.5 sm:space-y-2">
-        <Label htmlFor="workType" className="text-sm font-medium">Nội dung công tác *</Label>
-        <Select 
-          value={form.watch("workType")} 
-          onValueChange={(value) => form.setValue("workType", value)}
-          data-testid="select-work-type"
-        >
-          <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
-            <SelectValue placeholder="Chọn nội dung công tác" />
-          </SelectTrigger>
-          <SelectContent>
-            {workTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {form.formState.errors.workType && (
-          <p className="text-sm text-red-500">{form.formState.errors.workType.message}</p>
-        )}
-      </div>
-
-      {/* Full Day Checkbox */}
-      <div className="flex items-center space-x-2 py-1">
-        <Checkbox
-          id="isFullDay"
-          checked={watchedIsFullDay}
-          onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
-          data-testid="checkbox-full-day"
-        />
-        <Label htmlFor="isFullDay" className="text-xs sm:text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
-      </div>
-
-      {/* Date Range */}
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
-        <div className="space-y-1.5 sm:space-y-2">
-          <Label htmlFor="startDate" className="text-sm font-medium">Ngày bắt đầu *</Label>
-          <Input
-            id="startDate"
-            type="date"
-            value={watchedStartDate || ""}
-            onChange={(e) => {
-              console.log("Start date onChange triggered:", e.target.value);
-              handleDateChange("startDate", e.target.value);
-            }}
-            onBlur={(e) => {
-              console.log("Start date onBlur triggered:", e.target.value);
-              handleDateChange("startDate", e.target.value);
-            }}
-            className="h-11 text-sm sm:h-9 sm:text-base"
-            data-testid="input-start-date"
-          />
-          {form.formState.errors.startDate && (
-            <p className="text-sm text-red-500">{form.formState.errors.startDate.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1.5 sm:space-y-2">
-          <Label htmlFor="endDate" className="text-sm font-medium">Ngày kết thúc *</Label>
-          <Input
-            id="endDate"
-            type="date"
-            value={watchedEndDate || ""}
-            onChange={(e) => {
-              console.log("End date onChange triggered:", e.target.value);
-              handleDateChange("endDate", e.target.value);
-            }}
-            onBlur={(e) => {
-              console.log("End date onBlur triggered:", e.target.value);
-              handleDateChange("endDate", e.target.value);
-            }}
-            className="h-11 text-sm sm:h-9 sm:text-base"
-            data-testid="input-end-date"
-          />
-          {form.formState.errors.endDate && (
-            <p className="text-sm text-red-500">{form.formState.errors.endDate.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Time Range (only if not full day) */}
-      {!watchedIsFullDay && (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
-          <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="startTime" className="text-sm font-medium">Giờ bắt đầu *</Label>
-            <Input
-              id="startTime"
-              type="time"
-              className="h-11 text-sm sm:h-9 sm:text-base"
-              {...form.register("startTime")}
-              data-testid="input-start-time"
-            />
-            {form.formState.errors.startTime && (
-              <p className="text-sm text-red-500">{form.formState.errors.startTime.message}</p>
+      <div className="flex-1 overflow-y-auto pb-1" style={{ minHeight: 0 }}>
+        <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2 sm:space-y-4">
+            {/* Staff Selection */}
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="staffId" className="text-sm font-medium">Cán bộ *</Label>
+            <Select 
+              value={form.watch("staffId")} 
+              onValueChange={(value) => form.setValue("staffId", value)}
+              data-testid="select-staff"
+            >
+              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
+                <SelectValue placeholder="Chọn cán bộ" />
+              </SelectTrigger>
+              <SelectContent>
+                {boardStaff.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.id}>
+                    {staff.positionShort} {staff.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.formState.errors.staffId && (
+              <p className="text-sm text-red-500">{form.formState.errors.staffId.message}</p>
             )}
           </div>
 
+          {/* Work Type */}
           <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="endTime" className="text-sm font-medium">Giờ kết thúc *</Label>
-            <Input
-              id="endTime"
-              type="time"
-              className="h-11 text-sm sm:h-9 sm:text-base"
-              {...form.register("endTime")}
-              data-testid="input-end-time"
-            />
-            {form.formState.errors.endTime && (
-              <p className="text-sm text-red-500">{form.formState.errors.endTime.message}</p>
+            <Label htmlFor="workType" className="text-sm font-medium">Nội dung công tác *</Label>
+            <Select 
+              value={form.watch("workType")} 
+              onValueChange={(value) => form.setValue("workType", value)}
+              data-testid="select-work-type"
+            >
+              <SelectTrigger className="h-11 text-sm sm:h-9 sm:text-base">
+                <SelectValue placeholder="Chọn nội dung công tác" />
+              </SelectTrigger>
+              <SelectContent>
+                {workTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.formState.errors.workType && (
+              <p className="text-sm text-red-500">{form.formState.errors.workType.message}</p>
             )}
           </div>
-        </div>
-      )}
 
-      {/* Custom Content (only for "Khác") */}
-      {watchedWorkType === "Khác" && (
-        <div className="space-y-1.5 sm:space-y-2">
-          <Label htmlFor="customContent" className="text-sm font-medium">Nội dung cụ thể</Label>
-          <Textarea
-            id="customContent"
-            placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
-            maxLength={200}
-            rows={3}
-            className="text-sm resize-none"
-            {...form.register("customContent")}
-            data-testid="textarea-custom-content"
-          />
-          {form.formState.errors.customContent && (
-            <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
+          {/* Full Day Checkbox */}
+          <div className="flex items-center space-x-2 py-1">
+            <Checkbox
+              id="isFullDay"
+              checked={watchedIsFullDay}
+              onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
+              data-testid="checkbox-full-day"
+            />
+            <Label htmlFor="isFullDay" className="text-xs sm:text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
+          </div>
+
+          {/* Date Range */}
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="startDate" className="text-sm font-medium">Ngày bắt đầu *</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={watchedStartDate || ""}
+                onChange={(e) => {
+                  console.log("Start date onChange triggered:", e.target.value);
+                  handleDateChange("startDate", e.target.value);
+                }}
+                onBlur={(e) => {
+                  console.log("Start date onBlur triggered:", e.target.value);
+                  handleDateChange("startDate", e.target.value);
+                }}
+                className="h-11 text-sm sm:h-9 sm:text-base"
+                data-testid="input-start-date"
+              />
+              {form.formState.errors.startDate && (
+                <p className="text-sm text-red-500">{form.formState.errors.startDate.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="endDate" className="text-sm font-medium">Ngày kết thúc *</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={watchedEndDate || ""}
+                onChange={(e) => {
+                  console.log("End date onChange triggered:", e.target.value);
+                  handleDateChange("endDate", e.target.value);
+                }}
+                onBlur={(e) => {
+                  console.log("End date onBlur triggered:", e.target.value);
+                  handleDateChange("endDate", e.target.value);
+                }}
+                className="h-11 text-sm sm:h-9 sm:text-base"
+                data-testid="input-end-date"
+              />
+              {form.formState.errors.endDate && (
+                <p className="text-sm text-red-500">{form.formState.errors.endDate.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Time Range (only if not full day) */}
+          {!watchedIsFullDay && (
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="startTime" className="text-sm font-medium">Giờ bắt đầu *</Label>
+                <Input
+                  id="startTime"
+                  type="time"
+                  className="h-11 text-sm sm:h-9 sm:text-base"
+                  {...form.register("startTime")}
+                  data-testid="input-start-time"
+                />
+                {form.formState.errors.startTime && (
+                  <p className="text-sm text-red-500">{form.formState.errors.startTime.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="endTime" className="text-sm font-medium">Giờ kết thúc *</Label>
+                <Input
+                  id="endTime"
+                  type="time"
+                  className="h-11 text-sm sm:h-9 sm:text-base"
+                  {...form.register("endTime")}
+                  data-testid="input-end-time"
+                />
+                {form.formState.errors.endTime && (
+                  <p className="text-sm text-red-500">{form.formState.errors.endTime.message}</p>
+                )}
+              </div>
+            </div>
           )}
-        </div>
-      )}
 
-      {/* Work Hours Info */}
-      <div className="bg-blue-50 p-2.5 sm:p-3 rounded-md text-xs text-blue-700">
-        <p className="mb-1"><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
-        <p className="mb-1"><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
-        {watchedWorkType === "Đi khách hàng" && (
-          <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
-        )}
+          {/* Custom Content (only for "Khác") */}
+          {watchedWorkType === "Khác" && (
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="customContent" className="text-sm font-medium">Nội dung cụ thể</Label>
+              <Textarea
+                id="customContent"
+                placeholder="Nhập nội dung cụ thể (tối đa 200 ký tự)"
+                maxLength={200}
+                rows={3}
+                className="text-sm resize-none"
+                {...form.register("customContent")}
+                data-testid="textarea-custom-content"
+              />
+              {form.formState.errors.customContent && (
+                <p className="text-sm text-red-500">{form.formState.errors.customContent.message}</p>
+              )}
+            </div>
+          )}
+
+          {/* Work Hours Info */}
+          <div className="bg-blue-50 p-2.5 sm:p-3 rounded-md text-xs text-blue-700">
+            <p className="mb-1"><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
+            <p className="mb-1"><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
+            {watchedWorkType === "Đi khách hàng" && (
+              <p><strong>Ghi chú:</strong> Loại "Đi khách hàng" sẽ có chữ trắng trên nền xanh</p>
+            )}
+            </div>
+          </form>
+        </div>
+        
+        <div className="flex-shrink-0 pt-3 mt-2 border-t border-gray-200 bg-white">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isLoading}
+              className="flex-1 h-10 text-sm"
+              data-testid="button-cancel"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="submit"
+              form="enhanced-schedule-form"
+              disabled={isLoading}
+              className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+              data-testid="button-submit"
+            >
+              {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
+            </Button>
+          </div>
+        </div>
       </div>
     </>
   );
 
-  const buttonGroup = (
-    <div className="flex gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleClose}
-        disabled={isLoading}
-        className="flex-1 h-10 text-sm"
-        data-testid="button-cancel"
-      >
-        Hủy
-      </Button>
-      <Button
-        type="submit"
-        form="enhanced-schedule-form"
-        disabled={isLoading}
-        className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-        data-testid="button-submit"
-      >
-        {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
-      </Button>
-    </div>
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={handleClose}>
+        <SheetContent 
+          side="bottom" 
+          className="h-[90vh] flex flex-col" 
+          data-testid="dialog-enhanced-schedule"
+        >
+          <SheetHeader className="p-4 border-b border-gray-200">
+            <SheetTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+              {title}
+            </SheetTitle>
+          </SheetHeader>
+          
+          <div className="flex-grow overflow-y-auto">
+            <form id="enhanced-schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="grid grid-cols-1 gap-4 p-4">
+              {/* Copy form fields here */}
+            </form>
+          </div>
+          
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1 h-10 text-sm"
+                data-testid="button-cancel"
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                form="enhanced-schedule-form"
+                className="flex-1 h-10 text-sm bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+                disabled={isLoading}
+                data-testid="button-submit"
+              >
+                {isLoading ? "Đang xử lý..." : (schedule ? "Cập nhật" : "Thêm")}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl overflow-hidden flex flex-col max-h-[80vh]" data-testid="dialog-enhanced-schedule">
+        <DialogHeader className="pb-3 flex-shrink-0">
+          <DialogTitle className="text-lg font-semibold text-center" data-testid="text-modal-title">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        {formFields}
+      </DialogContent>
+    </Dialog>
   );
 
   if (isMobile) {
