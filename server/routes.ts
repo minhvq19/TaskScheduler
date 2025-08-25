@@ -1323,7 +1323,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const validatedData = insertMeetingRoomReservationSchema.parse(req.body);
+      console.log("📝 REQUEST BODY:", req.body);
+      
+      let validatedData;
+      try {
+        validatedData = insertMeetingRoomReservationSchema.parse(req.body);
+        console.log("✅ VALIDATION SUCCESS:", validatedData);
+      } catch (validationError) {
+        console.log("❌ VALIDATION ERROR:", validationError);
+        throw validationError;
+      }
       
       // Check for conflicts with approved reservations
       const hasConflict = await storage.checkReservationConflict(
