@@ -202,7 +202,11 @@ export default function UserGroupManagement() {
           Quản lý nhóm quyền
         </h2>
         <Button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setEditingGroup(null);
+            form.reset();
+            setShowModal(true);
+          }}
           className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
           data-testid="button-add-group"
         >
@@ -288,7 +292,7 @@ export default function UserGroupManagement() {
       </Card>
 
       {/* Add/Edit Group Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
+      <Dialog open={showModal} onOpenChange={(open) => { if (!open) handleCloseModal(); else setShowModal(true); }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-group">
           <DialogHeader>
             <DialogTitle data-testid="text-modal-title">
