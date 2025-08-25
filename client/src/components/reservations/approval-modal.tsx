@@ -71,22 +71,39 @@ export default function ApprovalModal({
   };
 
   const formatDateTime = (dateTime: string) => {
-    return new Date(dateTime).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const date = new Date(dateTime);
+    // Use UTC time to avoid timezone conversion issues
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hour = String(date.getUTCHours()).padStart(2, '0');
+    const minute = String(date.getUTCMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hour}:${minute}`;
   };
 
   const formatDate = (dateTime: string) => {
-    return new Date(dateTime).toLocaleDateString("vi-VN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const date = new Date(dateTime);
+    // Use UTC time to avoid timezone conversion issues
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    const weekday = date.getUTCDay();
+    
+    const weekdays = ["Chủ Nhật", "Thế Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+    const months = [
+      "tháng 1", "tháng 2", "tháng 3", "tháng 4", "tháng 5", "tháng 6",
+      "tháng 7", "tháng 8", "tháng 9", "tháng 10", "tháng 11", "tháng 12"
+    ];
+    
+    return `${weekdays[weekday]}, ${day} ${months[month]}, ${year}`;
+  };
+
+  const formatTime = (dateTime: string) => {
+    const date = new Date(dateTime);
+    // Use UTC time to avoid timezone conversion issues
+    const hour = String(date.getUTCHours()).padStart(2, '0');
+    const minute = String(date.getUTCMinutes()).padStart(2, '0');
+    return `${hour}:${minute}`;
   };
 
   const getTimeDuration = () => {
@@ -143,13 +160,7 @@ export default function ApprovalModal({
                 <div>
                   <p className="text-sm text-gray-600">Thời gian</p>
                   <p className="font-semibold">
-                    {new Date(reservation.startDateTime).toLocaleTimeString("vi-VN", { 
-                      hour: "2-digit", 
-                      minute: "2-digit" 
-                    })} - {new Date(reservation.endDateTime).toLocaleTimeString("vi-VN", { 
-                      hour: "2-digit", 
-                      minute: "2-digit" 
-                    })}
+                    {formatTime(reservation.startDateTime)} - {formatTime(reservation.endDateTime)}
                     <span className="text-gray-500 ml-2">({getTimeDuration()})</span>
                   </p>
                 </div>
