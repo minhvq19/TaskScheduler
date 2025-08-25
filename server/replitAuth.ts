@@ -129,29 +129,64 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+  const sessionUser = (req.session as any)?.user;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  console.log("🔐 AUTH DEBUG:", {
+    hasSessionUser: !!sessionUser,
+    sessionUserId: sessionUser?.id,
+    sessionUserUsername: sessionUser?.username,
+    hasReqUser: !!user,
+    isAuthenticated: req.isAuthenticated(),
+    userKeys: user ? Object.keys(user) : null,
+    sessionKeys: sessionUser ? Object.keys(sessionUser) : null
+  });
+
+  // Check for local session authentication first
+  if (sessionUser?.id && sessionUser?.username) {
+    console.log("✅ AUTH: Local session authenticated");
+    return next();
+  }
+
+  // Check for Replit OAuth authentication
+  if (!req.isAuthenticated()) {
+    console.log("❌ AUTH: Not authenticated via Passport");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
+  // Check for Replit OAuth user
+  if (user?.expires_at) {
+    const now = Math.floor(Date.now() / 1000);
+    if (now <= user.expires_at) {
+      console.log("✅ AUTH: Replit OAuth authenticated");
+      return next();
+    }
+
+    const refreshToken = user.refresh_token;
+    if (!refreshToken) {
+      console.log("❌ AUTH: No refresh token");
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    try {
+      const config = await getOidcConfig();
+      const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+      updateUserSession(user, tokenResponse);
+      console.log("✅ AUTH: Refreshed token");
+      return next();
+    } catch (error) {
+      console.log("❌ AUTH: Token refresh failed");
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+  }
+
+  // Check for local system user (has id, username, userGroup)
+  if (user?.id && user?.username && user?.userGroup) {
+    console.log("✅ AUTH: Local user authenticated");
     return next();
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  console.log("❌ AUTH: All checks failed");
+  res.status(401).json({ message: "Unauthorized" });
 };
