@@ -410,6 +410,10 @@ export const insertMeetingRoomReservationSchema = createInsertSchema(meetingRoom
   updatedAt: true,
   requestedAt: true,
   approvedAt: true,
+  requestedBy: true, // Server will add this automatically
+  approvedBy: true, // Server will add this during approval
+  status: true, // Server will set to 'pending' automatically
+  rejectionReason: true, // Only used during approval/rejection
 }).extend({
   meetingContent: z.string().min(1, "Nội dung họp không được để trống").max(200, "Nội dung họp không được vượt quá 200 ký tự"),
   contactInfo: z.string().optional(),
