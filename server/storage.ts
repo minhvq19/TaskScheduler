@@ -861,6 +861,20 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(meetingRoomReservations.id, id))
       .returning();
+
+    // If approved, automatically create meeting schedule entry
+    if (status === "approved" && updated) {
+      await db.insert(meetingSchedules).values({
+        roomId: updated.roomId,
+        startDateTime: updated.startDateTime,
+        endDateTime: updated.endDateTime,
+        meetingContent: updated.meetingContent,
+        contactPerson: updated.contactInfo || "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
     return updated;
   }
 

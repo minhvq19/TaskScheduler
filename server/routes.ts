@@ -576,20 +576,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meeting-schedules', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
+  app.post('/api/meeting-schedules', requireAuth, async (req, res) => {
     try {
-      const validatedData = insertMeetingScheduleSchema.parse(req.body);
+      const sessionUser = (req.session as any)?.user;
+      const user = req.user as any;
       
-      // Kiểm tra quyền đặt lịch họp (chỉ áp dụng cho non-admin)
-      const userGroup = await storage.getUserGroup(req.user.userGroupId);
-      if (userGroup && userGroup.id !== 'admin-group') {
-        const hasPermissionForStaff = await storage.getSchedulePermissionsByUser(req.user.id);
-        if (hasPermissionForStaff.length === 0) {
-          return res.status(403).json({ 
-            message: "Bạn chưa được phân quyền tạo lịch họp" 
-          });
-        }
+      let userGroupName = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
       }
+      
+      // Check if user is "Thư ký cấp Chi nhánh" (only they can create/edit meeting schedules manually)
+      if (!userGroupName.includes("thư ký cấp chi nhánh")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Chi nhánh mới có quyền tạo lịch họp" 
+        });
+      }
+      
+      const validatedData = insertMeetingScheduleSchema.parse(req.body);
       
       const schedule = await storage.createMeetingSchedule(validatedData);
       res.status(201).json(schedule);
@@ -602,8 +611,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/meeting-schedules/:id', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
+  app.put('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
     try {
+      const sessionUser = (req.session as any)?.user;
+      const user = req.user as any;
+      
+      let userGroupName = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
+      }
+      
+      // Check if user is "Thư ký cấp Chi nhánh" (only they can edit meeting schedules)
+      if (!userGroupName.includes("thư ký cấp chi nhánh")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Chi nhánh mới có quyền sửa lịch họp" 
+        });
+      }
+      
       const validatedData = insertMeetingScheduleSchema.parse(req.body);
       const schedule = await storage.updateMeetingSchedule(req.params.id, validatedData);
       res.json(schedule);
@@ -616,8 +645,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meeting-schedules/:id', requireAuth, requirePermission('meetingSchedules', 'EDIT'), async (req, res) => {
+  app.delete('/api/meeting-schedules/:id', requireAuth, async (req, res) => {
     try {
+      const sessionUser = (req.session as any)?.user;
+      const user = req.user as any;
+      
+      let userGroupName = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
+      }
+      
+      // Check if user is "Thư ký cấp Chi nhánh" (only they can delete meeting schedules)
+      if (!userGroupName.includes("thư ký cấp chi nhánh")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Chi nhánh mới có quyền xóa lịch họp" 
+        });
+      }
+      
       await storage.deleteMeetingSchedule(req.params.id);
       res.status(200).json({ message: "Meeting schedule deleted successfully" });
     } catch (error) {
@@ -1323,16 +1372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("📝 REQUEST BODY:", req.body);
-      
-      let validatedData;
-      try {
-        validatedData = insertMeetingRoomReservationSchema.parse(req.body);
-        console.log("✅ VALIDATION SUCCESS:", validatedData);
-      } catch (validationError) {
-        console.log("❌ VALIDATION ERROR:", validationError);
-        throw validationError;
-      }
+      const validatedData = insertMeetingRoomReservationSchema.parse(req.body);
       
       // Check for conflicts with approved reservations
       const hasConflict = await storage.checkReservationConflict(
