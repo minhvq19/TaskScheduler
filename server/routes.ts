@@ -17,6 +17,7 @@ import {
   insertSchedulePermissionSchema,
   insertSystemConfigsSchema,
   insertHolidaySchema,
+  insertMeetingRoomReservationSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -1268,6 +1269,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user group:", error);
       res.status(500).json({ message: "Failed to delete user group" });
+    }
+  });
+
+  // Meeting Room Reservations Routes
+  // Get all reservations with filters and sorting
+  app.get("/api/meeting-room-reservations", isAuthenticated, async (req, res) => {
+    try {
+      const { status, sortBy } = req.query;
+      const reservations = await storage.getMeetingRoomReservations({
+        status: status as string,
+        sortBy: sortBy as string,
+      });
+      res.json(reservations);
+    } catch (error) {
+      console.error("Error fetching reservations:", error);
+      res.status(500).json({ message: "Không thể tải danh sách đăng ký" });
+    }
+  });
+
+  // Create new reservation (for Thư ký cấp Phòng only)
+  app.post("/api/meeting-room-reservations", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userGroupName = user?.userGroup?.name?.toLowerCase();
+      
+      // Check if user is "Thư ký cấp Phòng"
+      if (!userGroupName?.includes("thư ký cấp phòng")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Phòng mới có quyền đăng ký phòng họp" 
+        });
+      }
+
+      const validatedData = insertMeetingRoomReservationSchema.parse(req.body);
+      
+      // Check for conflicts with approved reservations
+      const hasConflict = await storage.checkReservationConflict(
+        validatedData.roomId,
+        validatedData.startDateTime,
+        validatedData.endDateTime
+      );
+      
+      if (hasConflict) {
+        return res.status(409).json({ 
+          message: "Phòng họp đã có lịch họp được duyệt trong khoảng thời gian này" 
+        });
+      }
+
+      const reservation = await storage.createMeetingRoomReservation({
+        ...validatedData,
+        requestedBy: user.id,
+      });
+      
+      res.status(201).json(reservation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          message: "Dữ liệu không hợp lệ", 
+          errors: error.errors 
+        });
+      } else {
+        console.error("Error creating reservation:", error);
+        res.status(500).json({ message: "Không thể tạo đăng ký phòng họp" });
+      }
+    }
+  });
+
+  // Approve/Reject reservation (for Thư ký cấp Chi nhánh only)
+  app.patch("/api/meeting-room-reservations/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userGroupName = user?.userGroup?.name?.toLowerCase();
+      
+      // Check if user is "Thư ký cấp Chi nhánh"
+      if (!userGroupName?.includes("thư ký cấp chi nhánh")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Chi nhánh mới có quyền phê duyệt" 
+        });
+      }
+
+      const { id } = req.params;
+      const { status, rejectionReason } = req.body;
+      
+      if (!["approved", "rejected"].includes(status)) {
+        return res.status(400).json({ 
+          message: "Trạng thái không hợp lệ" 
+        });
+      }
+
+      // If approving, check for conflicts again
+      if (status === "approved") {
+        const reservation = await storage.getMeetingRoomReservationById(id);
+        if (!reservation) {
+          return res.status(404).json({ message: "Không tìm thấy đăng ký" });
+        }
+
+        const hasConflict = await storage.checkReservationConflict(
+          reservation.roomId,
+          reservation.startDateTime,
+          reservation.endDateTime,
+          id // exclude current reservation
+        );
+        
+        if (hasConflict) {
+          return res.status(409).json({ 
+            message: "Không thể duyệt do trùng lịch với các đăng ký đã được duyệt khác" 
+          });
+        }
+      }
+
+      const updatedReservation = await storage.updateReservationStatus(
+        id,
+        status,
+        user.id,
+        rejectionReason
+      );
+      
+      res.json(updatedReservation);
+    } catch (error) {
+      console.error("Error updating reservation status:", error);
+      res.status(500).json({ message: "Không thể cập nhật trạng thái đăng ký" });
+    }
+  });
+
+  // Delete reservation (only pending ones, by requester only)
+  app.delete("/api/meeting-room-reservations/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const reservation = await storage.getMeetingRoomReservationById(id);
+      if (!reservation) {
+        return res.status(404).json({ message: "Không tìm thấy đăng ký" });
+      }
+
+      // Only allow deletion by the requester and only if pending
+      if (reservation.requestedBy !== user.id) {
+        return res.status(403).json({ 
+          message: "Bạn chỉ có thể xóa đăng ký do mình tạo" 
+        });
+      }
+
+      if (reservation.status !== "pending") {
+        return res.status(400).json({ 
+          message: "Chỉ có thể xóa đăng ký đang chờ duyệt" 
+        });
+      }
+
+      await storage.deleteMeetingRoomReservation(id);
+      res.json({ message: "Đã xóa đăng ký phòng họp" });
+    } catch (error) {
+      console.error("Error deleting reservation:", error);
+      res.status(500).json({ message: "Không thể xóa đăng ký" });
     }
   });
 

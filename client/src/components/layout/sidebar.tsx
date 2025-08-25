@@ -44,6 +44,7 @@ const menuItems = [
     items: [
       { id: "work-schedule", label: "Lịch công tác", icon: CalendarCheck },
       { id: "meeting-schedule", label: "Lịch phòng họp", icon: CalendarPlus },
+      { id: "meeting-room-reservation", label: "Đăng ký sử dụng phòng họp", icon: CalendarPlus },
       { id: "other-events", label: "Sự kiện khác", icon: Calendar },
       { id: "holiday-management", label: "Quản lý ngày lễ", icon: CalendarDays },
     ],

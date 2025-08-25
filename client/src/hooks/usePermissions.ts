@@ -72,6 +72,9 @@ export function usePermissions() {
       // Holiday management
       "holiday-management": canView("holidays"),
       
+      // Meeting room reservation (accessible by Thư ký cấp Phòng and Thư ký cấp Chi nhánh)
+      "meeting-room-reservation": canView("meetingSchedules"),
+      
       // System sections
       "permissions": canView("permissions"),
       "user-groups": canView("permissions"), // Same as permissions

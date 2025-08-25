@@ -6,6 +6,7 @@ import {
   eventCategories,
   workSchedules,
   meetingSchedules,
+  meetingRoomReservations,
   otherEvents,
   userGroups,
   systemUsers,
@@ -26,6 +27,8 @@ import {
   type InsertWorkSchedule,
   type MeetingSchedule,
   type InsertMeetingSchedule,
+  type MeetingRoomReservation,
+  type InsertMeetingRoomReservation,
   type OtherEvent,
   type InsertOtherEvent,
   type UserGroup,
@@ -137,6 +140,14 @@ export interface IStorage {
   createHoliday(holiday: InsertHoliday): Promise<Holiday>;
   updateHoliday(id: string, holiday: Partial<InsertHoliday>): Promise<Holiday>;
   deleteHoliday(id: string): Promise<void>;
+
+  // Meeting Room Reservations operations
+  getMeetingRoomReservations(filters?: { status?: string; sortBy?: string }): Promise<any[]>;
+  getMeetingRoomReservationById(id: string): Promise<MeetingRoomReservation | undefined>;
+  createMeetingRoomReservation(reservation: InsertMeetingRoomReservation & { requestedBy: string }): Promise<MeetingRoomReservation>;
+  updateReservationStatus(id: string, status: string, approvedBy: string, rejectionReason?: string): Promise<MeetingRoomReservation>;
+  deleteMeetingRoomReservation(id: string): Promise<void>;
+  checkReservationConflict(roomId: string, startDateTime: Date, endDateTime: Date, excludeId?: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -754,6 +765,136 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUserGroup(id: string): Promise<void> {
     await db.delete(userGroups).where(eq(userGroups.id, id));
+  }
+
+  // Meeting Room Reservations operations
+  async getMeetingRoomReservations(filters?: { status?: string; sortBy?: string }): Promise<any[]> {
+    let query = db
+      .select({
+        id: meetingRoomReservations.id,
+        roomId: meetingRoomReservations.roomId,
+        roomName: meetingRooms.name,
+        startDateTime: meetingRoomReservations.startDateTime,
+        endDateTime: meetingRoomReservations.endDateTime,
+        meetingContent: meetingRoomReservations.meetingContent,
+        contactInfo: meetingRoomReservations.contactInfo,
+        status: meetingRoomReservations.status,
+        requestedBy: meetingRoomReservations.requestedBy,
+        requestedAt: meetingRoomReservations.requestedAt,
+        approvedBy: meetingRoomReservations.approvedBy,
+        approvedAt: meetingRoomReservations.approvedAt,
+        rejectionReason: meetingRoomReservations.rejectionReason,
+        requestedByUsername: systemUsers.username,
+        approvedByUsername: systemUsers.username
+      })
+      .from(meetingRoomReservations)
+      .leftJoin(meetingRooms, eq(meetingRoomReservations.roomId, meetingRooms.id))
+      .leftJoin(systemUsers, eq(meetingRoomReservations.requestedBy, systemUsers.id))
+      .leftJoin({ approver: systemUsers }, eq(meetingRoomReservations.approvedBy, systemUsers.id));
+
+    // Apply status filter
+    if (filters?.status) {
+      if (filters.status === "approved") {
+        query = query.where(eq(meetingRoomReservations.status, "approved"));
+      } else if (filters.status === "pending") {
+        query = query.where(eq(meetingRoomReservations.status, "pending"));
+      } else if (filters.status === "rejected") {
+        query = query.where(eq(meetingRoomReservations.status, "rejected"));
+      }
+    }
+
+    // Apply sorting
+    if (filters?.sortBy === "newest") {
+      query = query.orderBy(desc(meetingRoomReservations.requestedAt));
+    } else if (filters?.sortBy === "oldest") {
+      query = query.orderBy(asc(meetingRoomReservations.requestedAt));
+    } else {
+      // Default to newest first
+      query = query.orderBy(desc(meetingRoomReservations.requestedAt));
+    }
+
+    return await query;
+  }
+
+  async getMeetingRoomReservationById(id: string): Promise<MeetingRoomReservation | undefined> {
+    const [reservation] = await db
+      .select()
+      .from(meetingRoomReservations)
+      .where(eq(meetingRoomReservations.id, id));
+    return reservation;
+  }
+
+  async createMeetingRoomReservation(reservation: InsertMeetingRoomReservation & { requestedBy: string }): Promise<MeetingRoomReservation> {
+    const [created] = await db
+      .insert(meetingRoomReservations)
+      .values({
+        ...reservation,
+        status: "pending",
+      })
+      .returning();
+    return created;
+  }
+
+  async updateReservationStatus(
+    id: string, 
+    status: string, 
+    approvedBy: string, 
+    rejectionReason?: string
+  ): Promise<MeetingRoomReservation> {
+    const [updated] = await db
+      .update(meetingRoomReservations)
+      .set({
+        status: status as "approved" | "rejected",
+        approvedBy,
+        approvedAt: new Date(),
+        rejectionReason,
+        updatedAt: new Date(),
+      })
+      .where(eq(meetingRoomReservations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMeetingRoomReservation(id: string): Promise<void> {
+    await db.delete(meetingRoomReservations).where(eq(meetingRoomReservations.id, id));
+  }
+
+  async checkReservationConflict(
+    roomId: string, 
+    startDateTime: Date, 
+    endDateTime: Date, 
+    excludeId?: string
+  ): Promise<boolean> {
+    let query = db
+      .select({ id: meetingRoomReservations.id })
+      .from(meetingRoomReservations)
+      .where(
+        and(
+          eq(meetingRoomReservations.roomId, roomId),
+          eq(meetingRoomReservations.status, "approved"),
+          // Check for time overlap: start < otherEnd AND end > otherStart
+          and(
+            lte(meetingRoomReservations.startDateTime, endDateTime),
+            gte(meetingRoomReservations.endDateTime, startDateTime)
+          )
+        )
+      );
+
+    // Exclude current reservation if updating
+    if (excludeId) {
+      query = query.where(and(
+        eq(meetingRoomReservations.roomId, roomId),
+        eq(meetingRoomReservations.status, "approved"),
+        and(
+          lte(meetingRoomReservations.startDateTime, endDateTime),
+          gte(meetingRoomReservations.endDateTime, startDateTime)
+        ),
+        // Add NOT condition for excludeId
+      ));
+    }
+
+    const conflicts = await query;
+    return conflicts.length > 0;
   }
 }
 

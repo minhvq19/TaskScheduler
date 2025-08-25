@@ -16,6 +16,7 @@ import MeetingSchedule from "@/components/meetings/meeting-schedule";
 import PermissionManagement from "@/components/permissions/permission-management";
 import UserGroupManagement from "@/components/permissions/user-group-management";
 import HolidayManagement from "@/components/holidays/holiday-management";
+import MeetingRoomReservation from "@/components/reservations/meeting-room-reservation";
 import SystemConfig from "@/pages/system-config";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
@@ -28,6 +29,7 @@ type Section =
   | "room-management"
   | "work-schedule"
   | "meeting-schedule"
+  | "meeting-room-reservation"
   | "other-events"
   | "permissions"
   | "user-groups"
@@ -132,6 +134,8 @@ export default function Dashboard() {
         return <WorkSchedule />;
       case "meeting-schedule":
         return <MeetingSchedule />;
+      case "meeting-room-reservation":
+        return <MeetingRoomReservation />;
       case "other-events":
         return <EventManagement />;
       case "permissions":

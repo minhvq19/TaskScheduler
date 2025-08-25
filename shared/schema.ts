@@ -165,6 +165,24 @@ export const schedulePermissions = pgTable("schedule_permissions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Meeting room reservations table
+export const meetingRoomReservations = pgTable("meeting_room_reservations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roomId: varchar("room_id").notNull(),
+  startDateTime: timestamp("start_date_time").notNull(),
+  endDateTime: timestamp("end_date_time").notNull(),
+  meetingContent: text("meeting_content").notNull(), // max 200 chars
+  contactInfo: text("contact_info"), // optional
+  status: varchar("status").notNull().default("pending"), // pending, approved, rejected
+  requestedBy: varchar("requested_by").notNull(), // user who made the request
+  requestedAt: timestamp("requested_at").defaultNow(),
+  approvedBy: varchar("approved_by"), // user who approved/rejected
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"), // if status is rejected
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const departmentRelations = relations(departments, ({ many }) => ({
   staff: many(staff),
@@ -181,6 +199,7 @@ export const staffRelations = relations(staff, ({ one, many }) => ({
 
 export const meetingRoomRelations = relations(meetingRooms, ({ many }) => ({
   meetingSchedules: many(meetingSchedules),
+  reservations: many(meetingRoomReservations),
 }));
 
 export const workScheduleRelations = relations(workSchedules, ({ one }) => ({
@@ -217,6 +236,8 @@ export const systemUserRelations = relations(systemUsers, ({ one, many }) => ({
   workSchedulesCreated: many(workSchedules, { relationName: "createdBy" }),
   workSchedulesUpdated: many(workSchedules, { relationName: "updatedBy" }),
   schedulePermissions: many(schedulePermissions),
+  reservationsRequested: many(meetingRoomReservations, { relationName: "requestedBy" }),
+  reservationsApproved: many(meetingRoomReservations, { relationName: "approvedBy" }),
 }));
 
 export const schedulePermissionRelations = relations(schedulePermissions, ({ one }) => ({
@@ -227,6 +248,21 @@ export const schedulePermissionRelations = relations(schedulePermissions, ({ one
   staff: one(staff, {
     fields: [schedulePermissions.staffId],
     references: [staff.id],
+  }),
+}));
+
+export const meetingRoomReservationRelations = relations(meetingRoomReservations, ({ one }) => ({
+  room: one(meetingRooms, {
+    fields: [meetingRoomReservations.roomId],
+    references: [meetingRooms.id],
+  }),
+  requestedByUser: one(systemUsers, {
+    fields: [meetingRoomReservations.requestedBy],
+    references: [systemUsers.id],
+  }),
+  approvedByUser: one(systemUsers, {
+    fields: [meetingRoomReservations.approvedBy],
+    references: [systemUsers.id],
   }),
 }));
 
@@ -368,6 +404,42 @@ export const insertSchedulePermissionSchema = createInsertSchema(schedulePermiss
   createdAt: true,
 });
 
+export const insertMeetingRoomReservationSchema = createInsertSchema(meetingRoomReservations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  requestedAt: true,
+  approvedAt: true,
+}).extend({
+  meetingContent: z.string().min(1, "Nội dung họp không được để trống").max(200, "Nội dung họp không được vượt quá 200 ký tự"),
+  contactInfo: z.string().optional(),
+  startDateTime: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      if (val.includes('T') && !val.includes('Z') && !val.includes('+') && !val.includes('-', 10)) {
+        return new Date(val);
+      }
+      return new Date(val);
+    }
+    return val;
+  }),
+  endDateTime: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      if (val.includes('T') && !val.includes('Z') && !val.includes('+') && !val.includes('-', 10)) {
+        return new Date(val);
+      }
+      return new Date(val);
+    }
+    return val;
+  }),
+}).refine((data) => {
+  const start = new Date(data.startDateTime);
+  const end = new Date(data.endDateTime);
+  return end > start;
+}, {
+  message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+  path: ["endDateTime"],
+});
+
 export const insertHolidaySchema = createInsertSchema(holidays).omit({
   id: true,
   createdAt: true,
@@ -424,5 +496,7 @@ export type Holiday = typeof holidays.$inferSelect;
 export type InsertHoliday = z.infer<typeof insertHolidaySchema>;
 export type SystemConfigs = typeof systemConfig.$inferSelect;
 export type InsertSystemConfigs = z.infer<typeof insertSystemConfigsSchema>;
+export type MeetingRoomReservation = typeof meetingRoomReservations.$inferSelect;
+export type InsertMeetingRoomReservation = z.infer<typeof insertMeetingRoomReservationSchema>;
 
 
