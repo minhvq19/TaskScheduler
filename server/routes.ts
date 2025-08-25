@@ -1476,7 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete reservation (only pending ones, by requester only)
+  // Delete reservation 
   app.delete("/api/meeting-room-reservations/:id", isAuthenticated, async (req, res) => {
     try {
       const sessionUser = (req.session as any)?.user;
@@ -1484,11 +1484,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       let userId = "";
+      let userGroupName = "";
       
-      // Get user ID from session (local auth) or req.user (OAuth)
+      // Get user info from session (local auth) or req.user (OAuth)
       if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
         userId = sessionUser.id;
       } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
         userId = user.id;
       }
       
@@ -1497,17 +1501,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Không tìm thấy đăng ký" });
       }
 
-      // Only allow deletion by the requester and only if pending
-      if (reservation.requestedBy !== userId) {
+      // Check permissions
+      const isBranchSecretary = userGroupName.includes("thư ký cấp chi nhánh");
+      const isRequester = reservation.requestedBy === userId;
+      
+      if (!isBranchSecretary && !isRequester) {
         return res.status(403).json({ 
-          message: "Bạn chỉ có thể xóa đăng ký do mình tạo" 
+          message: "Bạn không có quyền xóa đăng ký này" 
         });
       }
 
-      if (reservation.status !== "pending") {
+      // Regular users can only delete pending reservations they created
+      if (!isBranchSecretary && reservation.status !== "pending") {
         return res.status(400).json({ 
           message: "Chỉ có thể xóa đăng ký đang chờ duyệt" 
         });
+      }
+
+      // If deleting an approved reservation, also delete the corresponding meeting schedule
+      if (reservation.status === "approved") {
+        await storage.deleteMeetingScheduleByReservation(
+          reservation.roomId,
+          reservation.startDateTime,
+          reservation.endDateTime,
+          reservation.meetingContent
+        );
       }
 
       await storage.deleteMeetingRoomReservation(id);
@@ -1515,6 +1533,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting reservation:", error);
       res.status(500).json({ message: "Không thể xóa đăng ký" });
+    }
+  });
+
+  // Revoke approval for reservation (for Thư ký cấp Chi nhánh only)
+  app.patch("/api/meeting-room-reservations/:id/revoke", isAuthenticated, async (req, res) => {
+    try {
+      const sessionUser = (req.session as any)?.user;
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      let userGroupName = "";
+      let userId = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+        userId = sessionUser.id;
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
+        userId = user.id;
+      }
+      
+      // Check if user is "Thư ký cấp Chi nhánh"
+      if (!userGroupName.includes("thư ký cấp chi nhánh")) {
+        return res.status(403).json({ 
+          message: "Chỉ Thư ký cấp Chi nhánh mới có quyền hủy duyệt" 
+        });
+      }
+
+      const reservation = await storage.getMeetingRoomReservationById(id);
+      if (!reservation) {
+        return res.status(404).json({ message: "Không tìm thấy đăng ký" });
+      }
+
+      if (reservation.status !== "approved") {
+        return res.status(400).json({ 
+          message: "Chỉ có thể hủy duyệt các đăng ký đã được phê duyệt" 
+        });
+      }
+
+      // Delete the corresponding meeting schedule
+      await storage.deleteMeetingScheduleByReservation(
+        reservation.roomId,
+        reservation.startDateTime,
+        reservation.endDateTime,
+        reservation.meetingContent
+      );
+
+      // Revoke the approval (reset to pending)
+      const revokedReservation = await storage.updateReservationStatus(
+        id,
+        "pending",
+        userId,
+        "Đã hủy duyệt bởi Thư ký cấp Chi nhánh"
+      );
+      
+      res.json(revokedReservation);
+    } catch (error) {
+      console.error("Error revoking reservation:", error);
+      res.status(500).json({ message: "Không thể hủy duyệt đăng ký" });
     }
   });
 

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Check, X, Calendar, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, Check, X, Calendar, Clock, Undo2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -77,14 +77,47 @@ export default function MeetingRoomReservation() {
     },
   });
 
+  // Revoke approval mutation
+  const revokeApprovalMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("PATCH", `/api/meeting-room-reservations/${id}/revoke`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/meeting-room-reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/meeting-schedules"] });
+      toast({
+        title: "Thành công",
+        description: "Đã hủy duyệt đăng ký phòng họp.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lỗi",
+        description: error.message || "Không thể hủy duyệt đăng ký.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEdit = (reservation: any) => {
     setEditingReservation(reservation);
     setShowReservationModal(true);
   };
 
   const handleDelete = (reservation: any) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đăng ký này?")) {
+    const isApproved = reservation.status === "approved";
+    const confirmMessage = isApproved 
+      ? "Bạn có chắc chắn muốn xóa đăng ký đã được phê duyệt này? Lịch họp tương ứng cũng sẽ bị xóa."
+      : "Bạn có chắc chắn muốn xóa đăng ký này?";
+      
+    if (window.confirm(confirmMessage)) {
       deleteReservationMutation.mutate(reservation.id);
+    }
+  };
+
+  const handleRevokeApproval = (reservation: any) => {
+    if (window.confirm("Bạn có chắc chắn muốn hủy duyệt đăng ký này? Lịch họp tương ứng sẽ bị xóa và trạng thái sẽ về 'Chờ duyệt'.")) {
+      revokeApprovalMutation.mutate(reservation.id);
     }
   };
 
@@ -264,10 +297,25 @@ export default function MeetingRoomReservation() {
                             </Button>
                           )}
                           
-                          {/* Delete for requester on pending items */}
-                          {isSecretary && 
-                           reservation.requestedBy === (user as any)?.id && 
-                           reservation.status === "pending" && (
+                          {/* Revoke approval for Branch Secretary on approved items */}
+                          {isBranchSecretary && reservation.status === "approved" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRevokeApproval(reservation)}
+                              className="text-orange-600 hover:text-orange-700"
+                              title="Hủy duyệt"
+                              data-testid={`button-revoke-${reservation.id}`}
+                            >
+                              <Undo2 className="w-4 h-4" />
+                            </Button>
+                          )}
+
+                          {/* Delete for requester on pending items OR Branch Secretary on any items */}
+                          {((isSecretary && 
+                            reservation.requestedBy === (user as any)?.id && 
+                            reservation.status === "pending") ||
+                           (isBranchSecretary)) && (
                             <Button
                               variant="ghost"
                               size="sm"

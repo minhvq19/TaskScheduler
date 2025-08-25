@@ -550,6 +550,25 @@ export class DatabaseStorage implements IStorage {
     await db.delete(meetingSchedules).where(eq(meetingSchedules.id, id));
   }
 
+  // Delete meeting schedule by reservation details (for when deleting approved reservations)
+  async deleteMeetingScheduleByReservation(
+    roomId: string, 
+    startDateTime: Date, 
+    endDateTime: Date, 
+    meetingContent: string
+  ): Promise<void> {
+    await db
+      .delete(meetingSchedules)
+      .where(
+        and(
+          eq(meetingSchedules.roomId, roomId),
+          eq(meetingSchedules.startDateTime, startDateTime),
+          eq(meetingSchedules.endDateTime, endDateTime),
+          eq(meetingSchedules.meetingContent, meetingContent)
+        )
+      );
+  }
+
   // Other events operations
   async getOtherEvents(startDate?: Date, endDate?: Date): Promise<OtherEvent[]> {
     const conditions = [];
