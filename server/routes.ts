@@ -1291,11 +1291,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new reservation (for Thư ký cấp Phòng only)
   app.post("/api/meeting-room-reservations", isAuthenticated, async (req, res) => {
     try {
+      const sessionUser = (req.session as any)?.user;
       const user = req.user as any;
-      const userGroupName = user?.userGroup?.name?.toLowerCase();
+      
+      let userGroupName = "";
+      let userId = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+        userId = sessionUser.id;
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
+        userId = user.id;
+      }
+      
+      console.log("🔐 PERMISSION CHECK:", {
+        userGroupName,
+        userId,
+        hasSessionUser: !!sessionUser,
+        sessionUserId: sessionUser?.id,
+        hasReqUser: !!user,
+        includesSecretary: userGroupName.includes("thư ký cấp phòng")
+      });
       
       // Check if user is "Thư ký cấp Phòng"
-      if (!userGroupName?.includes("thư ký cấp phòng")) {
+      if (!userGroupName.includes("thư ký cấp phòng")) {
         return res.status(403).json({ 
           message: "Chỉ Thư ký cấp Phòng mới có quyền đăng ký phòng họp" 
         });
@@ -1318,7 +1340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const reservation = await storage.createMeetingRoomReservation({
         ...validatedData,
-        requestedBy: user.id,
+        requestedBy: userId,
       });
       
       res.status(201).json(reservation);
@@ -1338,11 +1360,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Approve/Reject reservation (for Thư ký cấp Chi nhánh only)
   app.patch("/api/meeting-room-reservations/:id/status", isAuthenticated, async (req, res) => {
     try {
+      const sessionUser = (req.session as any)?.user;
       const user = req.user as any;
-      const userGroupName = user?.userGroup?.name?.toLowerCase();
+      
+      let userGroupName = "";
+      let userId = "";
+      
+      // Get user info from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        const userWithGroup = await storage.getSystemUserWithGroup(sessionUser.id);
+        userGroupName = userWithGroup?.userGroup?.name?.toLowerCase() || "";
+        userId = sessionUser.id;
+      } else if (user?.id) {
+        userGroupName = user?.userGroup?.name?.toLowerCase() || "";
+        userId = user.id;
+      }
       
       // Check if user is "Thư ký cấp Chi nhánh"
-      if (!userGroupName?.includes("thư ký cấp chi nhánh")) {
+      if (!userGroupName.includes("thư ký cấp chi nhánh")) {
         return res.status(403).json({ 
           message: "Chỉ Thư ký cấp Chi nhánh mới có quyền phê duyệt" 
         });
@@ -1381,7 +1416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedReservation = await storage.updateReservationStatus(
         id,
         status,
-        user.id,
+        userId,
         rejectionReason
       );
       
@@ -1395,8 +1430,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete reservation (only pending ones, by requester only)
   app.delete("/api/meeting-room-reservations/:id", isAuthenticated, async (req, res) => {
     try {
+      const sessionUser = (req.session as any)?.user;
       const user = req.user as any;
       const { id } = req.params;
+      
+      let userId = "";
+      
+      // Get user ID from session (local auth) or req.user (OAuth)
+      if (sessionUser?.id) {
+        userId = sessionUser.id;
+      } else if (user?.id) {
+        userId = user.id;
+      }
       
       const reservation = await storage.getMeetingRoomReservationById(id);
       if (!reservation) {
@@ -1404,7 +1449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Only allow deletion by the requester and only if pending
-      if (reservation.requestedBy !== user.id) {
+      if (reservation.requestedBy !== userId) {
         return res.status(403).json({ 
           message: "Bạn chỉ có thể xóa đăng ký do mình tạo" 
         });

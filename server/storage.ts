@@ -769,7 +769,8 @@ export class DatabaseStorage implements IStorage {
 
   // Meeting Room Reservations operations
   async getMeetingRoomReservations(filters?: { status?: string; sortBy?: string }): Promise<any[]> {
-    let query = db
+    // Get reservations with joins to get room names and usernames  
+    const rawResults = await db
       .select({
         id: meetingRoomReservations.id,
         roomId: meetingRoomReservations.roomId,
@@ -784,36 +785,44 @@ export class DatabaseStorage implements IStorage {
         approvedBy: meetingRoomReservations.approvedBy,
         approvedAt: meetingRoomReservations.approvedAt,
         rejectionReason: meetingRoomReservations.rejectionReason,
-        requestedByUsername: systemUsers.username,
-        approvedByUsername: systemUsers.username
       })
       .from(meetingRoomReservations)
       .leftJoin(meetingRooms, eq(meetingRoomReservations.roomId, meetingRooms.id))
-      .leftJoin(systemUsers, eq(meetingRoomReservations.requestedBy, systemUsers.id))
-      .leftJoin({ approver: systemUsers }, eq(meetingRoomReservations.approvedBy, systemUsers.id));
+      .where(
+        filters?.status && filters.status !== "all" 
+          ? eq(meetingRoomReservations.status, filters.status as any)
+          : undefined
+      )
+      .orderBy(
+        filters?.sortBy === "oldest" 
+          ? asc(meetingRoomReservations.requestedAt)
+          : desc(meetingRoomReservations.requestedAt)
+      );
 
-    // Apply status filter
-    if (filters?.status) {
-      if (filters.status === "approved") {
-        query = query.where(eq(meetingRoomReservations.status, "approved"));
-      } else if (filters.status === "pending") {
-        query = query.where(eq(meetingRoomReservations.status, "pending"));
-      } else if (filters.status === "rejected") {
-        query = query.where(eq(meetingRoomReservations.status, "rejected"));
+    // Get usernames separately to avoid circular references
+    const results = [];
+    for (const reservation of rawResults) {
+      let requestedByUsername = "Unknown";
+      let approvedByUsername = "";
+      
+      if (reservation.requestedBy) {
+        const requester = await this.getSystemUser(reservation.requestedBy);
+        requestedByUsername = requester?.username || "Unknown";
       }
+      
+      if (reservation.approvedBy) {
+        const approver = await this.getSystemUser(reservation.approvedBy);
+        approvedByUsername = approver?.username || "";
+      }
+      
+      results.push({
+        ...reservation,
+        requestedByUsername,
+        approvedByUsername,
+      });
     }
-
-    // Apply sorting
-    if (filters?.sortBy === "newest") {
-      query = query.orderBy(desc(meetingRoomReservations.requestedAt));
-    } else if (filters?.sortBy === "oldest") {
-      query = query.orderBy(asc(meetingRoomReservations.requestedAt));
-    } else {
-      // Default to newest first
-      query = query.orderBy(desc(meetingRoomReservations.requestedAt));
-    }
-
-    return await query;
+    
+    return results;
   }
 
   async getMeetingRoomReservationById(id: string): Promise<MeetingRoomReservation | undefined> {
