@@ -164,7 +164,22 @@ export default function UserGroupManagement() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingGroup(null);
-    form.reset();
+    form.reset({
+      name: "",
+      description: "",
+      permissions: {
+        staff: "NONE",
+        departments: "NONE",
+        rooms: "NONE",
+        categories: "NONE",
+        workSchedules: "NONE",
+        meetingSchedules: "NONE",
+        otherEvents: "NONE",
+        permissions: "NONE",
+        systemConfig: "NONE",
+        holidays: "NONE",
+      },
+    });
   };
 
   const onSubmit = (data: FormData) => {
@@ -204,7 +219,22 @@ export default function UserGroupManagement() {
         <Button
           onClick={() => {
             setEditingGroup(null);
-            form.reset();
+            form.reset({
+              name: "",
+              description: "",
+              permissions: {
+                staff: "NONE",
+                departments: "NONE",
+                rooms: "NONE",
+                categories: "NONE",
+                workSchedules: "NONE",
+                meetingSchedules: "NONE",
+                otherEvents: "NONE",
+                permissions: "NONE",
+                systemConfig: "NONE",
+                holidays: "NONE",
+              },
+            });
             setShowModal(true);
           }}
           className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
@@ -292,7 +322,7 @@ export default function UserGroupManagement() {
       </Card>
 
       {/* Add/Edit Group Modal */}
-      <Dialog open={showModal} onOpenChange={(open) => { if (!open) handleCloseModal(); else setShowModal(true); }}>
+      <Dialog open={showModal} onOpenChange={(open) => { setShowModal(open); if (!open) { setEditingGroup(null); form.reset(); } }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-group">
           <DialogHeader>
             <DialogTitle data-testid="text-modal-title">
