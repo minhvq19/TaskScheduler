@@ -334,8 +334,6 @@ export default function EnhancedScheduleModal({
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hasClosedSuccessfully, setHasClosedSuccessfully] = useState(false);
-  const [lastScheduleId, setLastScheduleId] = useState<string | null>(null);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -366,16 +364,12 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Không tự mở modal - chỉ mở khi user click trigger
-  // useEffect tự mở đã bị loại bỏ để tránh xung đột
-
-  // Mở modal khi có schedule và trigger được click, nhưng không mở lại sau khi đã lưu
+  // Đơn giản: mở modal khi có schedule để edit
   useEffect(() => {
-    if (schedule && !hasClosedSuccessfully) {
-      console.log('Opening modal for schedule:', schedule.id);
+    if (schedule) {
       setIsOpen(true);
     }
-  }, [schedule, hasClosedSuccessfully]);
+  }, [schedule]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -475,20 +469,13 @@ export default function EnhancedScheduleModal({
       return res.json();
     },
     onSuccess: () => {
-      console.log('Mutation onSuccess - before actions:', { scheduleId: schedule?.id });
+      console.log('Mutation success - closing modal and clearing schedule');
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
-      // Đánh dấu đã đóng thành công và đóng modal
-      setHasClosedSuccessfully(true);
+      // Đóng modal và clear schedule ngay lập tức
       setIsOpen(false);
-      console.log('Mutation onSuccess - modal closed, hasClosedSuccessfully=true');
-      
-      // Gọi callback để clear editingSchedule sau một delay ngắn
-      setTimeout(() => {
-        console.log('Calling handleEditSuccess to clear editingSchedule');
-        onSuccess?.();
-      }, 100);
+      onSuccess?.();
     },
   });
 
