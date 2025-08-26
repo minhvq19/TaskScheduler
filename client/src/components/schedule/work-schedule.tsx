@@ -123,6 +123,7 @@ export default function WorkSchedule() {
   });
 
   const handleEdit = (schedule: WorkSchedule) => {
+    console.log('handleEdit called for schedule:', schedule.id);
     setEditingSchedule(schedule);
   };
 

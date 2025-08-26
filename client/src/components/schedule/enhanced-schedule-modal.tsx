@@ -339,6 +339,19 @@ export default function EnhancedScheduleModal({
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
+  // Debug viewport info
+  useEffect(() => {
+    console.log('Viewport info:', {
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      devicePixelRatio: window.devicePixelRatio,
+      isMobile: isMobile,
+      userAgent: navigator.userAgent
+    });
+  }, [isMobile]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -353,25 +366,17 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Mở modal khi có schedule để edit, nhưng không mở lại sau khi đã lưu thành công
-  useEffect(() => {
-    console.log('useEffect auto-open:', { 
-      schedule: schedule?.id, 
-      hasClosedSuccessfully, 
-      willOpen: schedule && !hasClosedSuccessfully 
-    });
-    if (schedule && !hasClosedSuccessfully) {
-      setIsOpen(true);
-    }
-  }, [schedule, hasClosedSuccessfully]);
+  // Không tự mở modal - chỉ mở khi user click trigger
+  // useEffect tự mở đã bị loại bỏ để tránh xung đột
 
-  // Reset flag khi có schedule mới (khác ID)
+  // Mở modal khi có schedule và trigger được click
   useEffect(() => {
-    if (schedule && schedule.id !== lastScheduleId) {
+    if (schedule) {
+      console.log('Opening modal for schedule:', schedule.id);
+      setIsOpen(true);
       setHasClosedSuccessfully(false);
-      setLastScheduleId(schedule.id);
     }
-  }, [schedule, lastScheduleId]);
+  }, [schedule]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
