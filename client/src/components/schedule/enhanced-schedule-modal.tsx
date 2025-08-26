@@ -309,11 +309,17 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Lọc chỉ lấy cán bộ thuộc Ban giám đốc
+  // Fetch edit permissions to filter staff based on user's assigned staff permissions
+  const { data: editPermissions } = useQuery<{editableStaffIds: string[]}>({
+    queryKey: ["/api/user-edit-permissions"],
+  });
+
+  // Lọc chỉ lấy cán bộ thuộc Ban giám đốc và có quyền chỉnh sửa
   const boardDept = departments.find((d: any) => d.name.toLowerCase().includes("ban giám đốc"));
-  const staffList = allStaff.filter((s: any) => s.departmentId === boardDept?.id).sort((a: any, b: any) => 
-    (a.displayOrder || 0) - (b.displayOrder || 0)
-  );
+  const staffList = allStaff
+    .filter((s: any) => s.departmentId === boardDept?.id)
+    .filter((s: any) => editPermissions?.editableStaffIds?.includes(s.id) || false)
+    .sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
