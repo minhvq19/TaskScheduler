@@ -511,17 +511,7 @@ export default function WorkSchedule() {
           schedule={editingSchedule}
           onSuccess={handleEditSuccess}
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              // Trigger manual modal open
-              document.querySelector('[data-modal-trigger]')?.click();
-            }}
-            className="hidden"
-          >
-            Hidden Edit Trigger
-          </Button>
+          <div style={{ display: 'none' }}>Edit Trigger</div>
         </EnhancedScheduleModal>
       )}
     </div>
