@@ -44,11 +44,9 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const workTypes = [
-  { value: "Làm việc tại CN", label: "Làm việc tại CN" },
   { value: "Nghỉ phép", label: "Nghỉ phép" },
   { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
-  { value: "Đi công tác trong nước", label: "Đi công tác trong nước" },
-  { value: "Đi công tác nước ngoài", label: "Đi công tác NN" },
+  { value: "Đi công tác NN", label: "Đi công tác NN" },
   { value: "Khác", label: "Khác" },
 ];
 

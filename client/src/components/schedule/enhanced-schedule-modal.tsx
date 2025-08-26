@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -53,13 +54,26 @@ import { useIsMobile } from "@/hooks/use-mobile"; // Import hook để kiểm tr
 const formSchema = z
   .object({
     staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
-    content: z.string().min(1, "Vui lòng nhập nội dung công tác"),
+    workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
+    customContent: z.string().max(200).optional(),
     isAllDay: z.boolean().default(false),
     startDate: z.date({ required_error: "Vui lòng chọn ngày bắt đầu" }),
     endDate: z.date({ required_error: "Vui lòng chọn ngày kết thúc" }),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
   })
+  .refine(
+    (data) => {
+      if (data.workType === "Khác") {
+        return data.customContent && data.customContent.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Vui lòng nhập nội dung chi tiết khi chọn 'Khác'",
+      path: ["customContent"],
+    }
+  )
   .refine(
     (data) => {
       if (data.isAllDay) return true;
@@ -82,6 +96,13 @@ const formSchema = z
   );
 
 type FormValues = z.infer<typeof formSchema>;
+
+const workTypes = [
+  { value: "Nghỉ phép", label: "Nghỉ phép" },
+  { value: "Trực lãnh đạo", label: "Trực lãnh đạo" },
+  { value: "Đi công tác NN", label: "Đi công tác NN" },
+  { value: "Khác", label: "Khác" },
+];
 
 // API client
 
@@ -127,17 +148,48 @@ const ScheduleFormContent = ({
 
       <FormField
         control={form.control}
-        name="content"
+        name="workType"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Nội dung công tác *</FormLabel>
-            <FormControl>
-              <Input placeholder="Nhập nội dung công tác" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn nội dung công tác" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {workTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
       />
+
+      {form.watch("workType") === "Khác" && (
+        <FormField
+          control={form.control}
+          name="customContent"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nội dung chi tiết *</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Nhập nội dung chi tiết (tối đa 200 ký tự)" 
+                  maxLength={200}
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
 
       <FormField
         control={form.control}
@@ -323,12 +375,20 @@ export default function EnhancedScheduleModal({
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
+      // Tạo content từ workType và customContent
+      const content = values.workType === "Khác" ? values.customContent : values.workType;
+      
+      const payload = {
+        ...values,
+        content,
+      };
+      
       const res = await fetch("/api/work-schedules", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         throw new Error("Failed to create schedule");
@@ -347,7 +407,8 @@ export default function EnhancedScheduleModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       staffId: schedule?.staffId.toString() || "",
-      content: schedule?.content || "",
+      workType: schedule?.content || "",
+      customContent: "",
       isAllDay: schedule?.isAllDay || false,
       startDate: schedule?.startDate
         ? new Date(schedule.startDate)
@@ -361,7 +422,8 @@ export default function EnhancedScheduleModal({
   useEffect(() => {
     form.reset({
       staffId: schedule?.staffId.toString() || "",
-      content: schedule?.content || "",
+      workType: schedule?.content || "",
+      customContent: "",
       isAllDay: schedule?.isAllDay || false,
       startDate: schedule?.startDate
         ? new Date(schedule.startDate)
