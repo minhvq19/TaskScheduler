@@ -512,7 +512,7 @@ export default function EnhancedScheduleModal({
   // Render Drawer cho Mobile
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) onSuccess?.(); }}>
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent>
           <DrawerHeader className="text-left">
@@ -545,7 +545,7 @@ export default function EnhancedScheduleModal({
 
   // Render Dialog cho Desktop
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) onSuccess?.(); }}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -561,7 +561,7 @@ export default function EnhancedScheduleModal({
           />
         </div>
         <DialogFooter>
-          <Button onClick={() => { setIsOpen(false); onSuccess?.(); }} variant="outline">
+          <Button onClick={() => setIsOpen(false)} variant="outline">
             Hủy
           </Button>
           <Button
