@@ -369,6 +369,9 @@ export default function EnhancedScheduleModal({
   useEffect(() => {
     if (schedule && !shouldPreventOpen) {
       setIsOpen(true);
+    } else if (!schedule) {
+      // Reset flag khi không còn schedule để edit tiếp theo hoạt động bình thường
+      setShouldPreventOpen(false);
     }
   }, [schedule, shouldPreventOpen]);
 
@@ -471,18 +474,19 @@ export default function EnhancedScheduleModal({
     },
     onSuccess: () => {
       console.log('Mutation success - closing modal and clearing schedule');
-      queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
-      // Ngăn modal mở lại và đóng modal
-      setShouldPreventOpen(true);
+      // Đóng modal ngay lập tức
       setIsOpen(false);
       
-      // Clear schedule sau một chút để đảm bảo modal đã đóng
-      setTimeout(() => {
-        onSuccess?.();
-        setShouldPreventOpen(false); // Reset cho lần edit tiếp theo
-      }, 50);
+      // Ngăn modal mở lại
+      setShouldPreventOpen(true);
+      
+      // Clear schedule ngay lập tức để không trigger useEffect
+      onSuccess?.();
+      
+      // Invalidate queries sau khi đã clear schedule
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
     },
   });
 
