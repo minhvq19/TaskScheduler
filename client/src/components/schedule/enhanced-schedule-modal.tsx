@@ -375,12 +375,34 @@ export default function EnhancedScheduleModal({
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      // Tạo content từ workType và customContent
-      const content = values.workType === "Khác" ? values.customContent : values.workType;
+      // Convert form data to API format
+      let startDateTime: Date;
+      let endDateTime: Date;
+      
+      if (values.isAllDay) {
+        // Cả ngày: 8:00 - 17:30
+        startDateTime = new Date(values.startDate);
+        startDateTime.setHours(8, 0, 0, 0);
+        
+        endDateTime = new Date(values.endDate);
+        endDateTime.setHours(17, 30, 0, 0);
+      } else {
+        // Theo giờ cụ thể
+        const [startHour, startMinute] = values.startTime.split(':');
+        startDateTime = new Date(values.startDate);
+        startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
+        
+        const [endHour, endMinute] = values.endTime.split(':');
+        endDateTime = new Date(values.endDate);
+        endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+      }
       
       const payload = {
-        ...values,
-        content,
+        staffId: values.staffId,
+        workType: values.workType,
+        customContent: values.workType === "Khác" ? values.customContent : undefined,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
       };
       
       const url = schedule ? `/api/work-schedules/${schedule.id}` : "/api/work-schedules";
@@ -422,19 +444,22 @@ export default function EnhancedScheduleModal({
 
   useEffect(() => {
     if (schedule) {
-      // Xác định workType và customContent từ nội dung hiện có
-      const standardTypes = ["Nghỉ phép", "Trực lãnh đạo", "Đi công tác NN"];
-      const isStandardType = standardTypes.includes(schedule.content);
+      const startDate = new Date(schedule.startDateTime);
+      const endDate = new Date(schedule.endDateTime);
+      
+      // Kiểm tra xem có phải "cả ngày" không (8:00-17:30)
+      const isAllDay = startDate.getHours() === 8 && startDate.getMinutes() === 0 && 
+                       endDate.getHours() === 17 && endDate.getMinutes() === 30;
       
       form.reset({
         staffId: schedule.staffId.toString(),
-        workType: isStandardType ? schedule.content : "Khác",
-        customContent: isStandardType ? "" : schedule.content,
-        isAllDay: schedule.isAllDay,
-        startDate: schedule.startDate ? new Date(schedule.startDate) : new Date(),
-        endDate: schedule.endDate ? new Date(schedule.endDate) : new Date(),
-        startTime: schedule.startTime || "",
-        endTime: schedule.endTime || "",
+        workType: schedule.workType,
+        customContent: schedule.customContent || "",
+        isAllDay: isAllDay,
+        startDate: startDate,
+        endDate: endDate,
+        startTime: isAllDay ? "" : format(startDate, "HH:mm"),
+        endTime: isAllDay ? "" : format(endDate, "HH:mm"),
       });
     }
   }, [schedule, form]);

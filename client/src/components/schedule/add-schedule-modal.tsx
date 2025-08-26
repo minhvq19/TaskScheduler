@@ -192,10 +192,6 @@ export default function AddScheduleModal({
   // --- EFFECTS ---
   useEffect(() => {
     if (schedule) {
-      // Xác định workType và customContent từ nội dung hiện có
-      const standardTypes = ["Nghỉ phép", "Trực lãnh đạo", "Đi công tác NN"];
-      const isStandardType = standardTypes.includes(schedule.content || schedule.workType);
-      
       form.reset({
         staffId: schedule.staffId,
         startDateTime: format(
@@ -206,8 +202,8 @@ export default function AddScheduleModal({
           new Date(schedule.endDateTime),
           "yyyy-MM-dd'T'HH:mm",
         ),
-        workType: isStandardType ? (schedule.content || schedule.workType) : "Khác",
-        customContent: isStandardType ? "" : (schedule.content || schedule.customContent || ""),
+        workType: schedule.workType,
+        customContent: schedule.customContent || "",
       });
     } else {
       form.reset({
@@ -222,12 +218,8 @@ export default function AddScheduleModal({
 
   // --- EVENT HANDLERS ---
   const onSubmit = (data: FormData) => {
-    // Tạo content từ workType và customContent
-    const content = data.workType === "Khác" ? data.customContent : data.workType;
-    
     const payload = {
       ...data,
-      content,
       customContent: data.workType === "Khác" ? data.customContent : undefined,
     };
     
