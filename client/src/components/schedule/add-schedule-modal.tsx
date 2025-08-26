@@ -94,11 +94,19 @@ export default function AddScheduleModal({
     queryKey: ["/api/departments"],
   });
 
+  // Fetch edit permissions to filter staff based on user's assigned staff permissions
+  const { data: editPermissions } = useQuery<{editableStaffIds: string[]}>({
+    queryKey: ["/api/user-edit-permissions"],
+  });
+
   const boardDept = departments.find((d) =>
     d.name.toLowerCase().includes("ban giám đốc"),
   );
+  
+  // Filter board staff based on user's edit permissions
   const boardStaff = allStaff
     .filter((s) => s.departmentId === boardDept?.id)
+    .filter((s) => editPermissions?.editableStaffIds?.includes(s.id) || false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // --- HELPER FUNCTIONS ---
