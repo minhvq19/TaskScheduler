@@ -334,6 +334,7 @@ export default function EnhancedScheduleModal({
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasClosedSuccessfully, setHasClosedSuccessfully] = useState(false);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -353,8 +354,15 @@ export default function EnhancedScheduleModal({
 
   // Auto open when schedule is set for editing
   useEffect(() => {
-    if (schedule) {
+    if (schedule && !hasClosedSuccessfully) {
       setIsOpen(true);
+    }
+  }, [schedule, hasClosedSuccessfully]);
+
+  // Reset flag khi schedule thay đổi từ null thành có giá trị (editing mới)
+  useEffect(() => {
+    if (schedule) {
+      setHasClosedSuccessfully(false);
     }
   }, [schedule]);
 
@@ -459,7 +467,8 @@ export default function EnhancedScheduleModal({
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
-      // Đóng modal trước, sau đó gọi callback để tránh race condition
+      // Đánh dấu đã đóng thành công để ngăn tự mở lại
+      setHasClosedSuccessfully(true);
       setIsOpen(false);
       
       // Delay callback để đảm bảo modal đã đóng hoàn toàn
