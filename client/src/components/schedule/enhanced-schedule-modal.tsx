@@ -334,7 +334,6 @@ export default function EnhancedScheduleModal({
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [shouldPreventOpen, setShouldPreventOpen] = useState(false);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -365,15 +364,7 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Mở modal khi có schedule, nhưng ngăn mở lại sau khi đã lưu
-  useEffect(() => {
-    if (schedule && !shouldPreventOpen) {
-      setIsOpen(true);
-    } else if (!schedule) {
-      // Reset flag khi không còn schedule để edit tiếp theo hoạt động bình thường
-      setShouldPreventOpen(false);
-    }
-  }, [schedule, shouldPreventOpen]);
+  // KHÔNG tự mở modal - chỉ mở khi user click trigger
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -475,18 +466,15 @@ export default function EnhancedScheduleModal({
     onSuccess: () => {
       console.log('Mutation success - closing modal and clearing schedule');
       
-      // Đóng modal ngay lập tức
+      // Đóng modal
       setIsOpen(false);
       
-      // Ngăn modal mở lại
-      setShouldPreventOpen(true);
-      
-      // Clear schedule ngay lập tức để không trigger useEffect
-      onSuccess?.();
-      
-      // Invalidate queries sau khi đã clear schedule
+      // Refresh data
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+      
+      // Clear schedule để đóng modal
+      onSuccess?.();
     },
   });
 
@@ -523,7 +511,7 @@ export default function EnhancedScheduleModal({
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerTrigger asChild data-modal-trigger>{children}</DrawerTrigger>
         <DrawerContent>
           <DrawerHeader className="text-left">
             <DrawerTitle>{title}</DrawerTitle>
@@ -556,7 +544,7 @@ export default function EnhancedScheduleModal({
   // Render Dialog cho Desktop
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild data-modal-trigger>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
