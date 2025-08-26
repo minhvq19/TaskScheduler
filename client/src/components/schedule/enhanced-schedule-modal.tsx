@@ -335,6 +335,7 @@ export default function EnhancedScheduleModal({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasClosedSuccessfully, setHasClosedSuccessfully] = useState(false);
+  const [lastScheduleId, setLastScheduleId] = useState<string | null>(null);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -352,19 +353,20 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Auto open when schedule is set for editing
+  // Mở modal khi có schedule để edit, nhưng không mở lại sau khi đã lưu thành công
   useEffect(() => {
     if (schedule && !hasClosedSuccessfully) {
       setIsOpen(true);
     }
   }, [schedule, hasClosedSuccessfully]);
 
-  // Reset flag khi schedule thay đổi từ null thành có giá trị (editing mới)
+  // Reset flag khi có schedule mới (khác ID)
   useEffect(() => {
-    if (schedule) {
+    if (schedule && schedule.id !== lastScheduleId) {
       setHasClosedSuccessfully(false);
+      setLastScheduleId(schedule.id);
     }
-  }, [schedule]);
+  }, [schedule, lastScheduleId]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
