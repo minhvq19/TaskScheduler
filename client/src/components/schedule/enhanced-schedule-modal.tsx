@@ -355,6 +355,11 @@ export default function EnhancedScheduleModal({
 
   // Mở modal khi có schedule để edit, nhưng không mở lại sau khi đã lưu thành công
   useEffect(() => {
+    console.log('useEffect auto-open:', { 
+      schedule: schedule?.id, 
+      hasClosedSuccessfully, 
+      willOpen: schedule && !hasClosedSuccessfully 
+    });
     if (schedule && !hasClosedSuccessfully) {
       setIsOpen(true);
     }
@@ -466,15 +471,18 @@ export default function EnhancedScheduleModal({
       return res.json();
     },
     onSuccess: () => {
+      console.log('Mutation onSuccess - before actions:', { scheduleId: schedule?.id });
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
       // Đánh dấu đã đóng thành công để ngăn tự mở lại
       setHasClosedSuccessfully(true);
       setIsOpen(false);
+      console.log('Mutation onSuccess - set hasClosedSuccessfully=true, isOpen=false');
       
       // Delay callback để đảm bảo modal đã đóng hoàn toàn
       setTimeout(() => {
+        console.log('Mutation onSuccess - calling parent onSuccess');
         onSuccess?.();
       }, 50);
     },
