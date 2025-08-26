@@ -344,6 +344,22 @@ export default function EnhancedScheduleModal({
     }
   }, [schedule]);
 
+  // Reset form khi đóng modal
+  useEffect(() => {
+    if (!isOpen && !schedule) {
+      form.reset({
+        staffId: "",
+        workType: "",
+        customContent: "",
+        isAllDay: false,
+        startDate: new Date(),
+        endDate: new Date(),
+        startTime: "",
+        endTime: "",
+      });
+    }
+  }, [isOpen, schedule, form]);
+
   // Fetch staff và departments
   const { data: allStaff = [] } = useQuery({
     queryKey: ["staff"],
@@ -388,11 +404,11 @@ export default function EnhancedScheduleModal({
         endDateTime.setHours(17, 30, 0, 0);
       } else {
         // Theo giờ cụ thể
-        const [startHour, startMinute] = values.startTime.split(':');
+        const [startHour, startMinute] = (values.startTime || "08:00").split(':');
         startDateTime = new Date(values.startDate);
         startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
         
-        const [endHour, endMinute] = values.endTime.split(':');
+        const [endHour, endMinute] = (values.endTime || "17:30").split(':');
         endDateTime = new Date(values.endDate);
         endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
       }
@@ -460,6 +476,18 @@ export default function EnhancedScheduleModal({
         endDate: endDate,
         startTime: isAllDay ? "" : format(startDate, "HH:mm"),
         endTime: isAllDay ? "" : format(endDate, "HH:mm"),
+      });
+    } else {
+      // Reset form khi không có schedule (thêm mới)
+      form.reset({
+        staffId: "",
+        workType: "",
+        customContent: "",
+        isAllDay: false,
+        startDate: new Date(),
+        endDate: new Date(),
+        startTime: "",
+        endTime: "",
       });
     }
   }, [schedule, form]);
