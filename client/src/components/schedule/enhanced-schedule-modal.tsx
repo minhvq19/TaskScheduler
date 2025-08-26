@@ -358,19 +358,24 @@ export default function EnhancedScheduleModal({
     }
   }, [schedule]);
 
-  // Reset form khi đóng modal
+  // Reset form khi đóng modal và không có schedule (thêm mới)
   useEffect(() => {
     if (!isOpen && !schedule) {
-      form.reset({
-        staffId: "",
-        workType: "",
-        customContent: "",
-        isAllDay: false,
-        startDate: new Date(),
-        endDate: new Date(),
-        startTime: "",
-        endTime: "",
-      });
+      // Đặt timeout nhỏ để đảm bảo modal đã đóng hoàn toàn
+      const timeoutId = setTimeout(() => {
+        form.reset({
+          staffId: "",
+          workType: "",
+          customContent: "",
+          isAllDay: false,
+          startDate: new Date(),
+          endDate: new Date(),
+          startTime: "",
+          endTime: "",
+        });
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isOpen, schedule, form]);
 
@@ -453,8 +458,12 @@ export default function EnhancedScheduleModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+      
+      // Nếu đang chỉnh sửa, gọi callback để clear schedule trước khi đóng modal
+      if (schedule) {
+        onSuccess?.();
+      }
       setIsOpen(false);
-      onSuccess?.();
     },
   });
 
