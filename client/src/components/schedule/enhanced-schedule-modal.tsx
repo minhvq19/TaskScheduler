@@ -337,6 +337,20 @@ export default function EnhancedScheduleModal({
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      staffId: "",
+      workType: "",
+      customContent: "",
+      isAllDay: false,
+      startDate: new Date(),
+      endDate: new Date(),
+      startTime: "",
+      endTime: "",
+    },
+  });
+
   // Auto open when schedule is set for editing
   useEffect(() => {
     if (schedule) {
@@ -441,20 +455,6 @@ export default function EnhancedScheduleModal({
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       setIsOpen(false);
       onSuccess?.();
-    },
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      staffId: "",
-      workType: "",
-      customContent: "",
-      isAllDay: false,
-      startDate: new Date(),
-      endDate: new Date(),
-      startTime: "",
-      endTime: "",
     },
   });
 
