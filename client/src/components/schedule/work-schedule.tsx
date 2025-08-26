@@ -138,6 +138,11 @@ export default function WorkSchedule() {
     setEditingSchedule(null);
   };
 
+  const handleEditSuccess = () => {
+    console.log('handleEditSuccess - clearing editingSchedule');
+    setEditingSchedule(null);
+  };
+
   const navigateWeek = (direction: 'prev' | 'next') => {
     setCurrentWeek(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
   };
@@ -504,10 +509,7 @@ export default function WorkSchedule() {
       {editingSchedule && (
         <EnhancedScheduleModal
           schedule={editingSchedule}
-          onSuccess={() => {
-            setEditingSchedule(null);
-            queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
-          }}
+          onSuccess={handleEditSuccess}
         >
           <div style={{ display: 'none' }}>Edit Trigger</div>
         </EnhancedScheduleModal>

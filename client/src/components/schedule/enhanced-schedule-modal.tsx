@@ -480,16 +480,9 @@ export default function EnhancedScheduleModal({
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
-      // Đánh dấu đã đóng thành công để ngăn tự mở lại
-      setHasClosedSuccessfully(true);
+      // Chỉ đóng modal, không gọi callback để tránh xung đột
       setIsOpen(false);
-      console.log('Mutation onSuccess - set hasClosedSuccessfully=true, isOpen=false');
-      
-      // Delay callback để đảm bảo modal đã đóng hoàn toàn
-      setTimeout(() => {
-        console.log('Mutation onSuccess - calling parent onSuccess');
-        onSuccess?.();
-      }, 50);
+      console.log('Mutation onSuccess - modal closed, no callback called');
     },
   });
 
