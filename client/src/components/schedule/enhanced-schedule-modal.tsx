@@ -334,6 +334,7 @@ export default function EnhancedScheduleModal({
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldPreventOpen, setShouldPreventOpen] = useState(false);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -364,12 +365,12 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Đơn giản: mở modal khi có schedule để edit
+  // Mở modal khi có schedule, nhưng ngăn mở lại sau khi đã lưu
   useEffect(() => {
-    if (schedule) {
+    if (schedule && !shouldPreventOpen) {
       setIsOpen(true);
     }
-  }, [schedule]);
+  }, [schedule, shouldPreventOpen]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -473,9 +474,15 @@ export default function EnhancedScheduleModal({
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
       
-      // Đóng modal và clear schedule ngay lập tức
+      // Ngăn modal mở lại và đóng modal
+      setShouldPreventOpen(true);
       setIsOpen(false);
-      onSuccess?.();
+      
+      // Clear schedule sau một chút để đảm bảo modal đã đóng
+      setTimeout(() => {
+        onSuccess?.();
+        setShouldPreventOpen(false); // Reset cho lần edit tiếp theo
+      }, 50);
     },
   });
 
