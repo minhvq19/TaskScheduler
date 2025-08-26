@@ -383,15 +383,18 @@ export default function EnhancedScheduleModal({
         content,
       };
       
-      const res = await fetch("/api/work-schedules", {
-        method: "POST",
+      const url = schedule ? `/api/work-schedules/${schedule.id}` : "/api/work-schedules";
+      const method = schedule ? "PUT" : "POST";
+      
+      const res = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        throw new Error("Failed to create schedule");
+        throw new Error(schedule ? "Failed to update schedule" : "Failed to create schedule");
       }
       return res.json();
     },
@@ -406,32 +409,34 @@ export default function EnhancedScheduleModal({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      staffId: schedule?.staffId.toString() || "",
-      workType: schedule?.content || "",
+      staffId: "",
+      workType: "",
       customContent: "",
-      isAllDay: schedule?.isAllDay || false,
-      startDate: schedule?.startDate
-        ? new Date(schedule.startDate)
-        : new Date(),
-      endDate: schedule?.endDate ? new Date(schedule.endDate) : new Date(),
-      startTime: schedule?.startTime || "",
-      endTime: schedule?.endTime || "",
+      isAllDay: false,
+      startDate: new Date(),
+      endDate: new Date(),
+      startTime: "",
+      endTime: "",
     },
   });
 
   useEffect(() => {
-    form.reset({
-      staffId: schedule?.staffId.toString() || "",
-      workType: schedule?.content || "",
-      customContent: "",
-      isAllDay: schedule?.isAllDay || false,
-      startDate: schedule?.startDate
-        ? new Date(schedule.startDate)
-        : new Date(),
-      endDate: schedule?.endDate ? new Date(schedule.endDate) : new Date(),
-      startTime: schedule?.startTime || "",
-      endTime: schedule?.endTime || "",
-    });
+    if (schedule) {
+      // Xác định workType và customContent từ nội dung hiện có
+      const standardTypes = ["Nghỉ phép", "Trực lãnh đạo", "Đi công tác NN"];
+      const isStandardType = standardTypes.includes(schedule.content);
+      
+      form.reset({
+        staffId: schedule.staffId.toString(),
+        workType: isStandardType ? schedule.content : "Khác",
+        customContent: isStandardType ? "" : schedule.content,
+        isAllDay: schedule.isAllDay,
+        startDate: schedule.startDate ? new Date(schedule.startDate) : new Date(),
+        endDate: schedule.endDate ? new Date(schedule.endDate) : new Date(),
+        startTime: schedule.startTime || "",
+        endTime: schedule.endTime || "",
+      });
+    }
   }, [schedule, form]);
 
   const onSubmit = (values: FormValues) => {
