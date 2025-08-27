@@ -334,6 +334,7 @@ export default function EnhancedScheduleModal({
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldClose, setShouldClose] = useState(false);
   const isMobile = useIsMobile(); // Sử dụng hook
   const queryClient = useQueryClient();
 
@@ -364,12 +365,14 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Mở modal khi có schedule
+  // Mở modal khi có schedule, nhưng không mở lại nếu đã được đóng
   useEffect(() => {
-    if (schedule) {
+    if (schedule && !shouldClose) {
       setIsOpen(true);
+    } else if (!schedule) {
+      setShouldClose(false); // Reset cho lần tiếp theo
     }
-  }, [schedule]);
+  }, [schedule, shouldClose]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -471,15 +474,14 @@ export default function EnhancedScheduleModal({
     onSuccess: () => {
       console.log('Mutation success');
       
-      // Đóng modal trước khi làm bất cứ điều gì khác
+      // Đánh dấu nên đóng modal và đóng ngay
+      setShouldClose(true);
       setIsOpen(false);
       
-      // Sử dụng requestAnimationFrame để đảm bảo modal đóng hoàn toàn
-      requestAnimationFrame(() => {
-        onSuccess?.(); // Clear editingSchedule
-        queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
-      });
+      // Clear schedule và refresh data
+      onSuccess?.();
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
     },
   });
 
