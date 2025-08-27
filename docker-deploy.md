@@ -70,8 +70,8 @@ docker compose exec app npm run db:push
 
 ## Bước 6: Kiểm tra
 
-- Ứng dụng: http://10.21.118.100:12500
-- Health check: http://10.21.118.100:12500/api/health
+- Ứng dụng: http://xx.xx.xx.xx:12500
+- Health check: http://xx.xx.xx.xx:12500/api/health
 
 ## Quản lý ứng dụng
 
