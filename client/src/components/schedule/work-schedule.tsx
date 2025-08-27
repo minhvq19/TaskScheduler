@@ -10,6 +10,7 @@ import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, eachDayOfInterval, isSameDay, startOfDay, getDay } from "date-fns";
 import { vi } from "date-fns/locale";
 import EnhancedScheduleModal from "./enhanced-schedule-modal";
+import AddScheduleModal from "./add-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
 import { useSystemColors } from "@/hooks/useSystemColors";
 
@@ -207,22 +208,14 @@ export default function WorkSchedule() {
           Quản trị lịch công tác
         </h2>
         {canEdit("workSchedules") && editPermissions && editPermissions.editableStaffIds.length > 0 && (
-          <EnhancedScheduleModal
-            schedule={editingSchedule}
-            onSuccess={() => {
-              setShowAddModal(false);
-              setEditingSchedule(null);
-              queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
-            }}
+          <Button
+            className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
+            onClick={() => setShowAddModal(true)}
+            data-testid="button-add-schedule"
           >
-            <Button
-              className="bg-bidv-teal hover:bg-bidv-teal/90 text-white"
-              data-testid="button-add-schedule"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Thêm lịch công tác
-            </Button>
-          </EnhancedScheduleModal>
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm lịch công tác
+          </Button>
         )}
       </div>
 
@@ -505,15 +498,18 @@ export default function WorkSchedule() {
         </CardContent>
       </Card>
 
+      {/* Add Schedule Modal */}
+      <AddScheduleModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
+      
       {/* Edit Schedule Modal */}
-      {editingSchedule && (
-        <EnhancedScheduleModal
-          schedule={editingSchedule}
-          onSuccess={handleEditSuccess}
-        >
-          <div style={{ display: 'none' }}>Edit Trigger</div>
-        </EnhancedScheduleModal>
-      )}
+      <EnhancedScheduleModal
+        isOpen={!!editingSchedule}
+        onClose={() => setEditingSchedule(null)}
+        schedule={editingSchedule}
+      />
     </div>
   );
 }
