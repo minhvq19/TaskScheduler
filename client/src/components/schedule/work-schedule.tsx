@@ -511,13 +511,7 @@ export default function WorkSchedule() {
           schedule={editingSchedule}
           onSuccess={handleEditSuccess}
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Sửa
-          </Button>
+          <div style={{ display: 'none' }}>Edit Trigger</div>
         </EnhancedScheduleModal>
       )}
     </div>

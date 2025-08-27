@@ -364,7 +364,12 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Modal chỉ mở khi user click trigger - KHÔNG tự mở
+  // Mở modal khi có schedule
+  useEffect(() => {
+    if (schedule) {
+      setIsOpen(true);
+    }
+  }, [schedule]);
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -464,17 +469,17 @@ export default function EnhancedScheduleModal({
       return res.json();
     },
     onSuccess: () => {
-      console.log('Mutation success - closing modal and clearing');
+      console.log('Mutation success');
       
-      // Clear schedule NGAY LẬP TỨC để ngăn modal mở lại
-      onSuccess?.();
-      
-      // Đóng modal
+      // Đóng modal trước khi làm bất cứ điều gì khác
       setIsOpen(false);
       
-      // Refresh data
-      queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+      // Sử dụng requestAnimationFrame để đảm bảo modal đóng hoàn toàn
+      requestAnimationFrame(() => {
+        onSuccess?.(); // Clear editingSchedule
+        queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
+      });
     },
   });
 
