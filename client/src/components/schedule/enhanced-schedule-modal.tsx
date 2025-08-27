@@ -364,12 +364,7 @@ export default function EnhancedScheduleModal({
     },
   });
 
-  // Tự mở modal khi có schedule để edit
-  useEffect(() => {
-    if (schedule) {
-      setIsOpen(true);
-    }
-  }, [schedule]);
+  // Modal chỉ mở khi user click trigger - KHÔNG tự mở
 
   // Reset form chỉ khi cần thiết cho thêm mới
   useEffect(() => {
@@ -516,7 +511,7 @@ export default function EnhancedScheduleModal({
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger asChild data-modal-trigger>{children}</DrawerTrigger>
+        <DrawerTrigger asChild onClick={() => setIsOpen(true)}>{children}</DrawerTrigger>
         <DrawerContent>
           <DrawerHeader className="text-left">
             <DrawerTitle>{title}</DrawerTitle>
@@ -549,7 +544,7 @@ export default function EnhancedScheduleModal({
   // Render Dialog cho Desktop
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild data-modal-trigger>{children}</DialogTrigger>
+      <DialogTrigger asChild onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
