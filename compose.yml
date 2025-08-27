@@ -35,9 +35,8 @@ services:
       PGPASSWORD: bidv_secure_password_2024
       PGDATABASE: bidv_calendar
       SESSION_SECRET: bidv_calendar_session_secret_key_2024_production_random_64_chars
-      REPL_ID: bidv-calendar-production
-      ISSUER_URL: https://replit.com/oidc
-      REPLIT_DOMAINS: 10.21.118.100:12500
+      # OFFLINE MODE - Quan trọng cho môi trường mạng nội bộ
+      OFFLINE_MODE: "true"
     ports:
       - "12500:5000"
     networks:
@@ -48,6 +47,7 @@ services:
     restart: unless-stopped
     volumes:
       - uploads:/app/uploads
+      - static_uploads:/app/dist/public/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s
@@ -58,6 +58,8 @@ volumes:
   postgres_data:
     driver: local
   uploads:
+    driver: local
+  static_uploads:
     driver: local
 
 networks:
