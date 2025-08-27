@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuthentication } from "./authConfig";
 import {
   insertDepartmentSchema,
   insertStaffSchema,
@@ -104,8 +104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - auto-detect offline/online mode
+  const { isAuthenticated } = await setupAuthentication(app);
 
   // Static serving for uploaded images - try both paths for compatibility
   app.use('/uploads', express.static(path.join(process.cwd(), 'dist', 'public', 'uploads')));
