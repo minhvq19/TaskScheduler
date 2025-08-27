@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bidv_postgres
+    environment:
+      POSTGRES_DB: bidv_calendar
+      POSTGRES_USER: bidv_app
+      POSTGRES_PASSWORD: bidv_secure_password_2024
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - bidv_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bidv_app -d bidv_calendar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: bidv_calendar_app
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://bidv_app:bidv_secure_password_2024@postgres:5432/bidv_calendar
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: bidv_app
+      PGPASSWORD: bidv_secure_password_2024
+      PGDATABASE: bidv_calendar
+      SESSION_SECRET: bidv_calendar_session_secret_key_2024_production_random_64_chars
+      REPL_ID: bidv-calendar-production
+      ISSUER_URL: https://replit.com/oidc
+      REPLIT_DOMAINS: 10.21.118.100:12500
+    ports:
+      - "12500:5000"
+    networks:
+      - bidv_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads:
+    driver: local
+
+networks:
+  bidv_network:
+    driver: bridge
