@@ -469,17 +469,17 @@ export default function EnhancedScheduleModal({
       return res.json();
     },
     onSuccess: () => {
-      console.log('Mutation success - closing modal first');
+      console.log('Mutation success - closing modal and clearing');
       
-      // Đóng modal trước
+      // Clear schedule NGAY LẬP TỨC để ngăn modal mở lại
+      onSuccess?.();
+      
+      // Đóng modal
       setIsOpen(false);
       
-      // Delay ngắn rồi mới clear schedule và refresh
-      setTimeout(() => {
-        onSuccess?.(); // Clear editingSchedule
-        queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
-      }, 100);
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/work-schedules"] });
     },
   });
 
