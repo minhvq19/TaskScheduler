@@ -1,0 +1,40 @@
+/* Local Roboto font definitions - hoạt động offline */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Roboto Light'), local('Roboto-Light'),
+       url('./roboto-v30-latin-300.woff2') format('woff2'),
+       url('./roboto-v30-latin-300.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('./roboto-v30-latin-regular.woff2') format('woff2'),
+       url('./roboto-v30-latin-regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('Roboto Medium'), local('Roboto-Medium'),
+       url('./roboto-v30-latin-500.woff2') format('woff2'),
+       url('./roboto-v30-latin-500.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Roboto Bold'), local('Roboto-Bold'),
+       url('./roboto-v30-latin-700.woff2') format('woff2'),
+       url('./roboto-v30-latin-700.woff') format('woff');
+}
