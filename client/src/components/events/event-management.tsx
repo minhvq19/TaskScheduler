@@ -42,17 +42,15 @@ const formSchema = insertOtherEventSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-// Hàm hỗ trợ phân tích datetime để kiểm tra trạng thái
+// Hàm hỗ trợ phân tích datetime để kiểm tra trạng thái (giống pattern của các module khác)
 const parseLocalDateTime = (dateTime: string | Date): Date => {
   if (dateTime instanceof Date) {
     return dateTime;
   }
   
-  // Để kiểm tra trạng thái, chúng ta cần đối tượng Date thực tế
-  const dateTimeString = dateTime.toString();
-  const cleanString = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
-  const localDate = new Date(cleanString);
-  return localDate;
+  // Datetime từ server đã ở UTC, parse trực tiếp như các module khác
+  const parsedDate = new Date(dateTime.toString());
+  return parsedDate;
 };
 
 export default function EventManagement() {
@@ -85,10 +83,14 @@ export default function EventManagement() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      // Convert datetime-local input to proper ISO string (avoid timezone issues)
+      const startDateTime = new Date(data.startDateTime);
+      const endDateTime = new Date(data.endDateTime);
+      
       const formData = new FormData();
       formData.append("shortName", data.shortName);
-      formData.append("startDateTime", data.startDateTime);
-      formData.append("endDateTime", data.endDateTime);
+      formData.append("startDateTime", startDateTime.toISOString());
+      formData.append("endDateTime", endDateTime.toISOString());
       formData.append("content", data.content);
       
       // Append multiple images
@@ -128,10 +130,14 @@ export default function EventManagement() {
   // Update event mutation
   const updateEventMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      // Convert datetime-local input to proper ISO string (avoid timezone issues)
+      const startDateTime = new Date(data.startDateTime);
+      const endDateTime = new Date(data.endDateTime);
+      
       const formData = new FormData();
       formData.append("shortName", data.shortName);
-      formData.append("startDateTime", data.startDateTime);
-      formData.append("endDateTime", data.endDateTime);
+      formData.append("startDateTime", startDateTime.toISOString());
+      formData.append("endDateTime", endDateTime.toISOString());
       formData.append("content", data.content);
       
       // Include existing images that haven't been removed
