@@ -76,10 +76,39 @@ npm start
 - Không cần Replit authentication
 
 ### Tạo tài khoản admin đầu tiên
+
+**⚠️ LƯU Ý QUAN TRỌNG**: Password được mã hóa bằng bcrypt, không thể insert trực tiếp!
+
+**Cách 1: Sử dụng script tự động (Khuyên dùng)**
+```bash
+# Cài đặt dependencies
+npm install bcrypt pg
+
+# Chạy script tạo admin
+node create-admin-user.js
+```
+
+**Cách 2: Thủ công với bcrypt**
+```javascript
+// Trong Node.js console
+const bcrypt = require('bcrypt');
+const password = 'AdminBiDV@2025';
+bcrypt.hash(password, 10).then(hash => console.log(hash));
+// Kết quả: $2b$10$... (copy hash này)
+```
+
+Sau đó insert vào database:
 ```sql
--- Kết nối PostgreSQL và chạy:
-INSERT INTO system_users (username, password_hash, user_group_id)
-VALUES ('admin', '$2b$10$...', 'admin-group-id');
+-- 1. Tạo user group (nếu chưa có)
+INSERT INTO user_groups (id, name, description, permissions)
+VALUES (gen_random_uuid(), 'Quản trị viên', 'Quản trị hệ thống', '{}');
+
+-- 2. Lấy group ID
+SELECT id FROM user_groups WHERE name = 'Quản trị viên';
+
+-- 3. Tạo system user với password đã hash
+INSERT INTO system_users (id, username, password, first_name, last_name, user_group_id, is_active)
+VALUES (gen_random_uuid(), 'admin', '$2b$10$...HASH_TỪ_BCRYPT...', 'System', 'Administrator', 'GROUP_ID_TỪ_BƯỚC_2', true);
 ```
 
 ## Kiểm tra hoạt động
