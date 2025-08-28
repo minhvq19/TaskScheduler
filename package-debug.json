@@ -1,0 +1,14 @@
+{
+  "name": "debug-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "debug-login": "node debug-login.js",
+    "check-user": "node check-user-in-db.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.3",
+    "bcrypt": "^5.1.1"
+  }
+}

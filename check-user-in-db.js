@@ -1,6 +1,6 @@
 // Script kiểm tra user trong database
-const { Client } = require('pg');
-const bcrypt = require('bcrypt');
+import { Client } from 'pg';
+import bcrypt from 'bcrypt';
 
 // Cấu hình database (thay đổi theo môi trường của bạn)
 const DB_CONFIG = {

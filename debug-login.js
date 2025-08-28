@@ -1,5 +1,5 @@
 // Script debug login trực tiếp để kiểm tra vấn đề
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 async function testLogin() {
   const baseUrl = 'http://10.21.118.100:12500';
