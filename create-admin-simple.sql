@@ -16,7 +16,6 @@ INSERT INTO system_users (
     first_name, 
     last_name, 
     user_group_id, 
-    is_active, 
     created_at, 
     updated_at
 ) VALUES (
@@ -26,11 +25,10 @@ INSERT INTO system_users (
     'System',
     'Administrator',
     (SELECT id FROM user_groups WHERE name = 'Quản trị viên' LIMIT 1),
-    true,
     NOW(),
     NOW()
 );
 
 -- Kiểm tra kết quả
 SELECT 'Admin user created successfully' as status;
-SELECT username, first_name, last_name, is_active FROM system_users WHERE username = 'admin';
+SELECT username, first_name, last_name FROM system_users WHERE username = 'admin';
