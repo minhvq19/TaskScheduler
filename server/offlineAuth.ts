@@ -16,9 +16,11 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: 'sessionid', // Explicit session name
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // False cho local dev
+      secure: false, // Force false for local development
+      sameSite: 'lax', // Add sameSite policy
       maxAge: sessionTtl,
     },
   });
