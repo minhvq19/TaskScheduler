@@ -1,8 +1,8 @@
-# Hướng dẫn Triển khai Hệ thống Quản lý Lịch Công tác BIDV trên Ubuntu Server (Offline)
+# Hướng dẫn Triển khai Hệ thống Quản lý Lịch Công tác [ your_organization ] trên Ubuntu Server (Offline)
 
 ## 📋 Tổng quan
 
-Hướng dẫn này giúp bạn triển khai hoàn chỉnh hệ thống quản lý lịch công tác BIDV trên Ubuntu Server 24.03 với PostgreSQL local, hoạt động hoàn toàn offline.
+Hướng dẫn này giúp bạn triển khai hoàn chỉnh hệ thống quản lý lịch công tác [ your_organization ] trên Ubuntu Server 24.03 với PostgreSQL local, hoạt động hoàn toàn offline.
 
 ## 🔧 Yêu cầu hệ thống
 
@@ -108,18 +108,18 @@ sudo netplan apply
 
 ```bash
 # Clone repository
-git clone https://github.com/your-repo/bidv-calendar-system.git
-cd bidv-calendar-system
+git clone https://github.com/your-repo/[ your_organization ]-calendar-system.git
+cd [ your_organization ]-calendar-system
 ```
 
 #### Option B: Copy từ USB/Local (Offline)
 
 ```bash
 # Copy source code từ USB hoặc network share
-sudo mkdir -p /opt/bidv-calendar
-sudo chown $USER:$USER /opt/bidv-calendar
-cp -r /path/to/source/* /opt/bidv-calendar/
-cd /opt/bidv-calendar
+sudo mkdir -p /opt/[ your_organization ]-calendar
+sudo chown $USER:$USER /opt/[ your_organization ]-calendar
+cp -r /path/to/source/* /opt/[ your_organization ]-calendar/
+cd /opt/[ your_organization ]-calendar
 ```
 
 ### 2.2 Cấu hình Environment Variables
@@ -128,20 +128,20 @@ cd /opt/bidv-calendar
 # Tạo file .env
 cat > .env << 'EOF'
 # Database Configuration
-DATABASE_URL=postgresql://bidv_app:bidv_secure_password_2024@postgres:5432/bidv_calendar
-POSTGRES_DB=bidv_calendar
-POSTGRES_USER=bidv_app
-POSTGRES_PASSWORD=bidv_secure_password_2024
+DATABASE_URL=postgresql://[ your_organization ]_app:[ your_organization ]_secure_password_2024@postgres:5432/[ your_organization ]_calendar
+POSTGRES_DB=[ your_organization ]_calendar
+POSTGRES_USER=[ your_organization ]_app
+POSTGRES_PASSWORD=[ your_organization ]_secure_password_2024
 
 # Application Configuration
 NODE_ENV=production
 PORT=12500
 OFFLINE_MODE=true
-SESSION_SECRET=bidv-calendar-secret-production-2025
+SESSION_SECRET=[ your_organization ]-calendar-secret-production-2025
 
 # Security Settings
-TRUSTED_ORIGINS=http://10.21.118.100:12500,https://10.21.118.100:12500
-CORS_ORIGIN=http://10.21.118.100:12500
+TRUSTED_ORIGINS=http://[ your_local_ip:port ],https://[ your_local_ip:port ]
+CORS_ORIGIN=http://[ your_local_ip:port ]
 
 # Upload Configuration
 MAX_UPLOAD_SIZE=10485760
@@ -160,9 +160,9 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: bidv_calendar
-      POSTGRES_USER: bidv_app
-      POSTGRES_PASSWORD: bidv_secure_password_2024
+      POSTGRES_DB: [ your_organization ]_calendar
+      POSTGRES_USER: [ your_organization ]_app
+      POSTGRES_PASSWORD: [ your_organization ]_secure_password_2024
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql-scripts:/docker-entrypoint-initdb.d
@@ -170,7 +170,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bidv_app -d bidv_calendar"]
+      test: ["CMD-SHELL", "pg_isready -U [ your_organization ]_app -d [ your_organization ]_calendar"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -180,11 +180,11 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://bidv_app:bidv_secure_password_2024@postgres:5432/bidv_calendar
+      - DATABASE_URL=postgresql://[ your_organization ]_app:[ your_organization ]_secure_password_2024@postgres:5432/[ your_organization ]_calendar
       - NODE_ENV=production
       - PORT=12500
       - OFFLINE_MODE=true
-      - SESSION_SECRET=bidv-calendar-secret-production-2025
+      - SESSION_SECRET=[ your_organization ]-calendar-secret-production-2025
     ports:
       - "12500:12500"
     volumes:
@@ -229,10 +229,10 @@ docker-compose logs -f
 docker-compose ps
 
 # Test database connection
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -c "SELECT version();"
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -c "SELECT version();"
 
 # Test application health
-curl http://10.21.118.100:12500/api/health
+curl http://[ your_local_ip:port ]/api/health
 ```
 
 ### 3.3 Chạy Database Schema Migration
@@ -242,7 +242,7 @@ curl http://10.21.118.100:12500/api/health
 docker-compose exec app npm run db:push
 
 # Hoặc chạy trực tiếp trong container
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar < admin-permissions.sql
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar < admin-permissions.sql
 ```
 
 ---
@@ -253,29 +253,29 @@ docker-compose exec postgres psql -U bidv_app -d bidv_calendar < admin-permissio
 
 ```bash
 # Copy script SQL vào container
-docker cp create-admin-simple.sql bidv-calendar-postgres-1:/tmp/
-docker cp admin-permissions.sql bidv-calendar-postgres-1:/tmp/
+docker cp create-admin-simple.sql [ your_organization ]-calendar-postgres-1:/tmp/
+docker cp admin-permissions.sql [ your_organization ]-calendar-postgres-1:/tmp/
 
 # Chạy script tạo admin user
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -f /tmp/create-admin-simple.sql
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -f /tmp/create-admin-simple.sql
 
 # Chạy script phân quyền
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -f /tmp/admin-permissions.sql
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -f /tmp/admin-permissions.sql
 ```
 
 ### 4.2 Thông tin đăng nhập Admin
 
 ```
-URL: http://10.21.118.100:12500
+URL: http://[ your_local_ip:port ]
 Username: admin
-Password: AdminBiDV@2025
+Password: Admin[ your_organization ]@2025
 ```
 
 ### 4.3 Kiểm tra Permissions
 
 ```bash
 # Kiểm tra user groups và permissions
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -c "
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -c "
 SELECT 
   ug.name, 
   ug.description, 
@@ -285,7 +285,7 @@ ORDER BY ug.name;
 "
 
 # Kiểm tra admin user
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -c "
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -c "
 SELECT 
   su.username,
   ug.name as user_group,
@@ -307,7 +307,7 @@ WHERE su.username = 'admin';
 sudo apt install -y nginx
 
 # Tạo config file
-sudo nano /etc/nginx/sites-available/bidv-calendar
+sudo nano /etc/nginx/sites-available/[ your_organization ]-calendar
 ```
 
 ```nginx
@@ -349,7 +349,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/bidv-calendar /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/[ your_organization ]-calendar /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -416,20 +416,20 @@ sudo systemctl restart docker
 
 ```bash
 # Tạo script monitor
-sudo nano /usr/local/bin/bidv-monitor.sh
+sudo nano /usr/local/bin/[ your_organization ]-monitor.sh
 ```
 
 ```bash
 #!/bin/bash
-# BIDV Calendar System Monitor
+# [ your_organization ] Calendar System Monitor
 
-echo "=== BIDV Calendar System Status ==="
+echo "=== [ your_organization ] Calendar System Status ==="
 echo "Date: $(date)"
 echo ""
 
 # Docker services status
 echo "📦 Docker Services:"
-docker-compose -f /opt/bidv-calendar/compose.yml ps
+docker-compose -f /opt/[ your_organization ]-calendar/compose.yml ps
 
 echo ""
 echo "💾 System Resources:"
@@ -444,35 +444,35 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:12500/api/health || echo
 
 echo ""
 echo "📊 Database Status:"
-docker-compose -f /opt/bidv-calendar/compose.yml exec -T postgres pg_isready -U bidv_app -d bidv_calendar
+docker-compose -f /opt/[ your_organization ]-calendar/compose.yml exec -T postgres pg_isready -U [ your_organization ]_app -d [ your_organization ]_calendar
 
 echo ""
 echo "📝 Recent Logs (last 10 lines):"
-docker-compose -f /opt/bidv-calendar/compose.yml logs --tail=10 app
+docker-compose -f /opt/[ your_organization ]-calendar/compose.yml logs --tail=10 app
 ```
 
 ```bash
 # Make executable
-sudo chmod +x /usr/local/bin/bidv-monitor.sh
+sudo chmod +x /usr/local/bin/[ your_organization ]-monitor.sh
 
 # Add to crontab for hourly monitoring
-echo "0 * * * * /usr/local/bin/bidv-monitor.sh >> /var/log/bidv-monitor.log 2>&1" | sudo crontab -
+echo "0 * * * * /usr/local/bin/[ your_organization ]-monitor.sh >> /var/log/[ your_organization ]-monitor.log 2>&1" | sudo crontab -
 ```
 
 ### 6.2 Backup Script
 
 ```bash
 # Tạo backup script
-sudo nano /usr/local/bin/bidv-backup.sh
+sudo nano /usr/local/bin/[ your_organization ]-backup.sh
 ```
 
 ```bash
 #!/bin/bash
-# BIDV Calendar Backup Script
+# [ your_organization ] Calendar Backup Script
 
-BACKUP_DIR="/opt/backups/bidv-calendar"
+BACKUP_DIR="/opt/backups/[ your_organization ]-calendar"
 DATE=$(date +%Y%m%d_%H%M%S)
-APP_DIR="/opt/bidv-calendar"
+APP_DIR="/opt/[ your_organization ]-calendar"
 
 # Create backup directory
 mkdir -p $BACKUP_DIR
@@ -481,11 +481,11 @@ echo "🔄 Starting backup at $(date)"
 
 # Backup database
 echo "📊 Backing up database..."
-docker-compose -f $APP_DIR/compose.yml exec -T postgres pg_dump -U bidv_app bidv_calendar > $BACKUP_DIR/database_$DATE.sql
+docker-compose -f $APP_DIR/compose.yml exec -T postgres pg_dump -U [ your_organization ]_app [ your_organization ]_calendar > $BACKUP_DIR/database_$DATE.sql
 
 # Backup uploaded files
 echo "📁 Backing up uploads..."
-docker run --rm -v bidv-calendar_uploads_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/uploads_$DATE.tar.gz -C /data .
+docker run --rm -v [ your_organization ]-calendar_uploads_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/uploads_$DATE.tar.gz -C /data .
 
 # Backup configuration
 echo "⚙️ Backing up configuration..."
@@ -501,19 +501,19 @@ echo "✅ Backup completed at $(date)"
 
 ```bash
 # Make executable và schedule daily backup
-sudo chmod +x /usr/local/bin/bidv-backup.sh
-echo "0 2 * * * /usr/local/bin/bidv-backup.sh >> /var/log/bidv-backup.log 2>&1" | sudo crontab -
+sudo chmod +x /usr/local/bin/[ your_organization ]-backup.sh
+echo "0 2 * * * /usr/local/bin/[ your_organization ]-backup.sh >> /var/log/[ your_organization ]-backup.log 2>&1" | sudo crontab -
 ```
 
 ### 6.3 Log Rotation
 
 ```bash
 # Cấu hình logrotate
-sudo nano /etc/logrotate.d/bidv-calendar
+sudo nano /etc/logrotate.d/[ your_organization ]-calendar
 ```
 
 ```
-/opt/bidv-calendar/logs/*.log {
+/opt/[ your_organization ]-calendar/logs/*.log {
     daily
     missingok
     rotate 30
@@ -522,7 +522,7 @@ sudo nano /etc/logrotate.d/bidv-calendar
     notifempty
     create 644 root root
     postrotate
-        docker-compose -f /opt/bidv-calendar/compose.yml restart app
+        docker-compose -f /opt/[ your_organization ]-calendar/compose.yml restart app
     endscript
 }
 ```
@@ -550,7 +550,7 @@ docker-compose up -d
 #### Vấn đề: Database connection failed
 ```bash
 # Kiểm tra PostgreSQL
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -c "SELECT 1;"
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -c "SELECT 1;"
 
 # Reset database
 docker-compose down -v
@@ -561,10 +561,10 @@ docker-compose up -d
 #### Vấn đề: Login không hoạt động
 ```bash
 # Kiểm tra admin user
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -c "SELECT * FROM system_users WHERE username='admin';"
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -c "SELECT * FROM system_users WHERE username='admin';"
 
 # Chạy lại admin setup
-docker-compose exec postgres psql -U bidv_app -d bidv_calendar -f /tmp/admin-permissions.sql
+docker-compose exec postgres psql -U [ your_organization ]_app -d [ your_organization ]_calendar -f /tmp/admin-permissions.sql
 ```
 
 ### 7.2 Performance Tuning
@@ -625,7 +625,7 @@ services:
 ### 8.2 Post-deployment Checklist
 - [ ] All containers running (`docker-compose ps`)
 - [ ] Database accessible (`docker-compose exec postgres psql`)
-- [ ] Web application accessible (http://10.21.118.100:12500)
+- [ ] Web application accessible (http://[ your_local_ip:port ])
 - [ ] Admin login successful
 - [ ] All menu items visible for admin
 - [ ] File upload working
@@ -649,9 +649,9 @@ services:
 ## 📞 Support và Documentation
 
 ### Thông tin liên hệ
-- **System Administrator**: [Your Contact Info]
-- **Technical Support**: [Support Contact]
-- **Documentation**: `/opt/bidv-calendar/docs/`
+- **System Administrator**: Vũ Quang Minh
+- **Technical Support**: minhvq86@gmail.com
+- **Documentation**: `/opt/[ your_organization ]-calendar/docs/`
 
 ### Useful Commands
 ```bash
@@ -662,18 +662,18 @@ docker-compose logs -f
 docker-compose restart app
 
 # Database shell
-docker-compose exec postgres psql -U bidv_app bidv_calendar
+docker-compose exec postgres psql -U [ your_organization ]_app [ your_organization ]_calendar
 
 # Application shell
 docker-compose exec app /bin/bash
 
 # System monitoring
-/usr/local/bin/bidv-monitor.sh
+/usr/local/bin/[ your_organization ]-monitor.sh
 
 # Manual backup
-/usr/local/bin/bidv-backup.sh
+/usr/local/bin/[ your_organization ]-backup.sh
 ```
 
 ---
 
-**🎉 Chúc mừng! Hệ thống Quản lý Lịch Công tác BIDV đã được triển khai thành công trên Ubuntu Server!**
+**🎉 Chúc mừng! Hệ thống Quản lý Lịch Công tác [ your_organization ] đã được triển khai thành công trên Ubuntu Server!**
