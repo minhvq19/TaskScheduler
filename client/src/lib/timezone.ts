@@ -45,8 +45,16 @@ export const convertToLocalTime = (utcTime: Date | string): Date => {
   const date = new Date(utcTime);
   
   if (config.isOfflineMode) {
-    // Local environment: Add timezone offset
-    return new Date(date.getTime() + (config.timezoneOffset * 60 * 60 * 1000));
+    // Local environment: Database is in UTC, need to add timezone offset for display
+    const localTime = new Date(date.getTime() + (config.timezoneOffset * 60 * 60 * 1000));
+    console.log('🕐 convertToLocalTime:', {
+      input: utcTime,
+      utcDate: date,
+      localTime,
+      offset: config.timezoneOffset,
+      isOfflineMode: config.isOfflineMode
+    });
+    return localTime;
   }
   
   // Internet environment: Return as-is (existing logic preserved)
@@ -69,12 +77,19 @@ export const convertToUTC = (localTime: Date | string): Date => {
 export const formatTimeForDisplay = (utcTime: Date | string): string => {
   const localTime = convertToLocalTime(utcTime);
   
-  // Format consistently for both environments
-  return localTime.toLocaleTimeString('vi-VN', {
+  const formatted = localTime.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
   });
+  
+  console.log('🕐 formatTimeForDisplay:', {
+    input: utcTime,
+    localTime,
+    formatted
+  });
+  
+  return formatted;
 };
 
 export const formatDateTimeForDisplay = (utcTime: Date | string): string => {

@@ -10,7 +10,8 @@ import {
   convertToLocalTime, 
   getCurrentLocalTime,
   isTimeInRange,
-  getTimeConfig 
+  getTimeConfig,
+  debugTimezone 
 } from "@/lib/timezone";
 
 interface DisplayData {
@@ -49,6 +50,11 @@ export default function PublicDisplay() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(15); // Sẽ được cập nhật từ cấu hình
   const [isPaused, setIsPaused] = useState(false);
+
+  // Debug timezone on component mount
+  useEffect(() => {
+    debugTimezone();
+  }, []);
 
   // Cập nhật thời gian mỗi giây với timezone handling
   useEffect(() => {
