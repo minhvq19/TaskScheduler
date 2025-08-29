@@ -5,6 +5,14 @@ import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import React from "react";
 import "../styles/display-4k.css";
+import { 
+  formatTimeForDisplay, 
+  formatDateTimeForDisplay, 
+  convertToLocalTime, 
+  getCurrentLocalTime,
+  isTimeInRange,
+  getTimeConfig 
+} from "@/lib/timezone";
 
 // Hiển thị 4K được tối ưu hóa cho độ phân giải 3840x2160 (TV 65")
 const SCREENS = [
@@ -20,10 +28,10 @@ export default function PublicDisplay4K() {
   const [timeRemaining, setTimeRemaining] = useState(15);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Cập nhật thời gian mỗi giây
+  // Cập nhật thời gian mỗi giây với timezone handling
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(getCurrentLocalTime());
     }, 1000);
 
     return () => clearInterval(interval);

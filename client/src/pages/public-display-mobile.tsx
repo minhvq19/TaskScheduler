@@ -5,6 +5,14 @@ import { vi } from "date-fns/locale";
 import { useSystemColors } from "@/hooks/useSystemColors";
 import { ChevronLeft, ChevronRight, Pause, Play, Calendar, Clock, Users } from "lucide-react";
 import "@/styles/mobile-display.css";
+import { 
+  formatTimeForDisplay, 
+  formatDateTimeForDisplay, 
+  convertToLocalTime, 
+  getCurrentLocalTime,
+  isTimeInRange,
+  getTimeConfig 
+} from "@/lib/timezone";
 
 // Interface dữ liệu hiển thị
 interface DisplayData {
@@ -84,10 +92,10 @@ export default function PublicDisplayMobile() {
   // State để quản lý tuần hiện tại cho work schedule - di chuyển lên parent để persist
   const [workWeekOffset, setWorkWeekOffset] = useState(0);
 
-  // Cập nhật thời gian hiện tại mỗi giây
+  // Cập nhật thời gian hiện tại mỗi giây với timezone handling
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(getCurrentLocalTime());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -288,17 +296,17 @@ export default function PublicDisplayMobile() {
                               if (isMultiDay) {
                                 if (format(currentDay, 'yyyy-MM-dd') === format(scheduleStartDate, 'yyyy-MM-dd')) {
                                   // Ngày đầu
-                                  timeDisplay = `${format(startTime, 'HH:mm')} - 12:00`;
+                                  timeDisplay = `${formatTimeForDisplay(schedule.startDateTime)} - 12:00`;
                                 } else if (format(currentDay, 'yyyy-MM-dd') === format(scheduleEndDate, 'yyyy-MM-dd')) {
                                   // Ngày cuối
-                                  timeDisplay = `08:00 - ${format(endTime, 'HH:mm')}`;
+                                  timeDisplay = `08:00 - ${formatTimeForDisplay(schedule.endDateTime)}`;
                                 } else {
                                   // Ngày giữa
                                   timeDisplay = '08:00 - 12:00';
                                 }
                               } else {
                                 // Lịch trong ngày
-                                timeDisplay = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
+                                timeDisplay = `${formatTimeForDisplay(schedule.startDateTime)} - ${formatTimeForDisplay(schedule.endDateTime)}`;
                               }
 
                               return (
@@ -432,23 +440,15 @@ export default function PublicDisplayMobile() {
     const isRoomBusy = (roomId: string, checkTime: Date) => {
       // Chỉ kiểm tra trạng thái thời gian thực cho ngày hôm nay
       if (currentDateOffset !== 0) return false;
+      
       return Array.isArray(meetingSchedules) ? meetingSchedules.some((meeting: any) => {
-        const meetingStart = new Date(meeting.startDateTime);
-        const meetingEnd = new Date(meeting.endDateTime);
+        const meetingStart = convertToLocalTime(meeting.startDateTime);
+        const meetingEnd = convertToLocalTime(meeting.endDateTime);
+        const localCheckTime = getCurrentLocalTime();
         
-        // Chuyển đổi thời gian hiện tại sang UTC+7 để so sánh với database UTC
-        // Database lưu UTC nhưng thực tế là giờ địa phương UTC+7
-        const localCheckTime = new Date(checkTime.getTime() + 7 * 60 * 60 * 1000);
-        
-        // Không cần debug log nữa
-        // if (meeting.meetingContent?.includes('BIDV direct') || meeting.meetingContent?.includes('Họp trực tuyến')) {
-        //   console.log('Debug room busy check (NEW):', {});
-        // }
-        
-        // Sử dụng roomId thay vì meetingRoomId và so sánh với thời gian địa phương
+        // Sử dụng isTimeInRange utility để so sánh đúng timezone
         return meeting.roomId === roomId && 
-               localCheckTime.getTime() >= meetingStart.getTime() && 
-               localCheckTime.getTime() < meetingEnd.getTime();
+               isTimeInRange(localCheckTime, meetingStart, meetingEnd);
       }) : false;
     };
 
@@ -619,13 +619,13 @@ export default function PublicDisplayMobile() {
                         
                         let displayStartTime, displayEndTime;
                         if (meetingStartDate === currentDayDate) {
-                          displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, "0")}:${String(utcStartTime.getUTCMinutes()).padStart(2, "0")}`;
+                          displayStartTime = formatTimeForDisplay(currentMeeting.startDateTime);
                         } else {
                           displayStartTime = "00:00";
                         }
                         
                         if (meetingEndDate === currentDayDate) {
-                          displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, "0")}:${String(utcEndTime.getUTCMinutes()).padStart(2, "0")}`;
+                          displayEndTime = formatTimeForDisplay(currentMeeting.endDateTime);
                         } else {
                           displayEndTime = "23:59";
                         }
@@ -651,9 +651,11 @@ export default function PublicDisplayMobile() {
                         const utcStartTime = new Date(nextMeeting.startDateTime);
                         const utcEndTime = new Date(nextMeeting.endDateTime);
                         
-                        // Hiển thị ngày và giờ bắt đầu cho cuộc họp tiếp theo
-                        const startDisplay = `${String(utcStartTime.getUTCDate()).padStart(2, '0')}/${String(utcStartTime.getUTCMonth() + 1).padStart(2, '0')} ${String(utcStartTime.getUTCHours()).padStart(2, '0')}:${String(utcStartTime.getUTCMinutes()).padStart(2, '0')}`;
-                        const endDisplay = `${String(utcEndTime.getUTCHours()).padStart(2, '0')}:${String(utcEndTime.getUTCMinutes()).padStart(2, '0')}`;
+                        // Hiển thị ngày và giờ bắt đầu cho cuộc họp tiếp theo với timezone handling
+                        const localStart = convertToLocalTime(nextMeeting.startDateTime);
+                        const localEnd = convertToLocalTime(nextMeeting.endDateTime);
+                        const startDisplay = `${String(localStart.getDate()).padStart(2, '0')}/${String(localStart.getMonth() + 1).padStart(2, '0')} ${formatTimeForDisplay(nextMeeting.startDateTime)}`;
+                        const endDisplay = formatTimeForDisplay(nextMeeting.endDateTime);
                         return `${startDisplay} - ${endDisplay}`;
                       })()}
                       {nextMeeting.contactPerson && ` • Người liên hệ: ${nextMeeting.contactPerson}`}
@@ -679,13 +681,13 @@ export default function PublicDisplayMobile() {
                         
                         let displayStartTime, displayEndTime;
                         if (meetingStartDate === selectedDateKey) {
-                          displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, "0")}:${String(utcStartTime.getUTCMinutes()).padStart(2, "0")}`;
+                          displayStartTime = formatTimeForDisplay(meeting.startDateTime);
                         } else {
                           displayStartTime = "00:00";
                         }
                         
                         if (meetingEndDate === selectedDateKey) {
-                          displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, "0")}:${String(utcEndTime.getUTCMinutes()).padStart(2, "0")}`;
+                          displayEndTime = formatTimeForDisplay(meeting.endDateTime);
                         } else {
                           displayEndTime = "23:59";
                         }
@@ -748,25 +750,14 @@ export default function PublicDisplayMobile() {
     if (eventsLoading) return <div className="text-center text-gray-500">Đang tải dữ liệu...</div>;
     if (!otherEvents) return <div className="text-center text-gray-500">Không có dữ liệu sự kiện</div>;
 
-    // Lọc sự kiện active và trong khoảng thời gian hiện tại
-    // Sử dụng thời gian địa phương UTC+7 (giống logic meeting rooms)
-    const now = new Date();
-    const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+    // Lọc sự kiện active và trong khoảng thời gian hiện tại với timezone handling
+    const now = getCurrentLocalTime();
     
     const currentEvents = Array.isArray(otherEvents) ? otherEvents.filter((event: any) => {
-      const startDate = new Date(event.startDateTime);
-      const endDate = new Date(event.endDateTime);
+      const startDate = convertToLocalTime(event.startDateTime);
+      const endDate = convertToLocalTime(event.endDateTime);
       
-      // Debug để kiểm tra thời gian với timezone
-      // console.log('Event filter check (UTC+7):', {
-      //   eventName: event.shortName,
-      //   startDate: startDate.toISOString(),
-      //   endDate: endDate.toISOString(),
-      //   localNow: localNow.toISOString(),
-      //   isActive: startDate <= localNow && localNow <= endDate
-      // });
-      
-      return startDate <= localNow && localNow <= endDate;
+      return startDate <= now && now <= endDate;
     }) : [];
     
     if (currentEvents.length === 0) {

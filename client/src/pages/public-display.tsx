@@ -4,6 +4,14 @@ import { format, addDays, startOfDay, eachDayOfInterval, getDay } from "date-fns
 import { vi } from "date-fns/locale";
 import { useSystemColors } from "@/hooks/useSystemColors";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { 
+  formatTimeForDisplay, 
+  formatDateTimeForDisplay, 
+  convertToLocalTime, 
+  getCurrentLocalTime,
+  isTimeInRange,
+  getTimeConfig 
+} from "@/lib/timezone";
 
 interface DisplayData {
   workSchedules: any[];
@@ -42,10 +50,10 @@ export default function PublicDisplay() {
   const [timeRemaining, setTimeRemaining] = useState(15); // Sẽ được cập nhật từ cấu hình
   const [isPaused, setIsPaused] = useState(false);
 
-  // Cập nhật thời gian mỗi giây
+  // Cập nhật thời gian mỗi giây với timezone handling
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(getCurrentLocalTime());
     }, 1000);
 
     return () => clearInterval(interval);
@@ -332,9 +340,9 @@ export default function PublicDisplay() {
                     {schedules.slice(0, 8).map((schedule, idx) => {
                       const isWorkAtBranch = schedule.workType === "Làm việc tại CN";
                       
-                      // Check if this is a full day schedule using system work hours
-                      const startTime = format(parseLocalDateTime(schedule.startDateTime), "HH:mm");
-                      const endTime = format(parseLocalDateTime(schedule.endDateTime), "HH:mm");
+                      // Check if this is a full day schedule using system work hours with timezone handling
+                      const startTime = formatTimeForDisplay(schedule.startDateTime);
+                      const endTime = formatTimeForDisplay(schedule.endDateTime);
                       const isFullDay = startTime === workHours.start && endTime === workHours.end;
                       
                       return (
@@ -360,7 +368,7 @@ export default function PublicDisplay() {
                                   ? schedule.customContent 
                                   : schedule.workType === "Đi công tác nước ngoài" 
                                     ? "Đi công tác NN" 
-                                    : schedule.workType}{isFullDay ? " - (Cả ngày)" : ` - (${format(parseLocalDateTime(schedule.startDateTime), "HH:mm", { locale: vi })} – ${format(parseLocalDateTime(schedule.endDateTime), "HH:mm", { locale: vi })})`}
+                                    : schedule.workType}{isFullDay ? " - (Cả ngày)" : ` - (${formatTimeForDisplay(schedule.startDateTime)} – ${formatTimeForDisplay(schedule.endDateTime)})`}
                               </div>
                               {/* Line 2: Detailed content (only for custom content when workType is not "Khác") */}
                               {schedule.workType !== "Khác" && schedule.customContent && (
@@ -426,16 +434,11 @@ export default function PublicDisplay() {
   // Helper function to parse datetime for status checking and display with proper timezone
   const parseLocalDateTime = (dateTime: string | Date): Date => {
     if (dateTime instanceof Date) {
-      return dateTime;
+      return convertToLocalTime(dateTime);
     }
     
-    // The datetime from server is already in UTC, just parse it directly
-    // No need to add timezone offset since the server data is already correctly stored
-    const parsedDate = new Date(dateTime.toString());
-    
-    console.log('Original:', dateTime.toString(), 'UTC:', parsedDate.toISOString(), 'Vietnam:', parsedDate.toISOString());
-    
-    return parsedDate;
+    // Convert from UTC to local time for proper status checking
+    return convertToLocalTime(dateTime.toString());
   };
 
   const renderMeetingScheduleTable = () => {
@@ -747,12 +750,23 @@ export default function PublicDisplay() {
                   >
                     {dayMeetings.map((meeting: any, meetingIndex: number) => {
                       
-                      // Format time only for grid display
+                      // Format time only for grid display with timezone handling
                       const formatTime = (dateTimeString: string): string => {
-                        const dateTime = dateTimeString.replace('T', ' ').replace('Z', '').split('.')[0];
-                        const [datePart, timePart] = dateTime.split(' ');
-                        const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
-                        return `${hour}:${minute}`;
+                        const config = getTimeConfig();
+                        const date = new Date(dateTimeString);
+                        
+                        if (config.isOfflineMode) {
+                          // Local environment: Add timezone offset for display
+                          const localTime = new Date(date.getTime() + (config.timezoneOffset * 60 * 60 * 1000));
+                          const hour = String(localTime.getUTCHours()).padStart(2, '0');
+                          const minute = String(localTime.getUTCMinutes()).padStart(2, '0');
+                          return `${hour}:${minute}`;
+                        } else {
+                          // Internet environment: Use existing UTC logic
+                          const hour = String(date.getUTCHours()).padStart(2, '0');
+                          const minute = String(date.getUTCMinutes()).padStart(2, '0');
+                          return `${hour}:${minute}`;
+                        }
                       };
 
                       // Calculate actual time range for current day using UTC dates
@@ -766,16 +780,16 @@ export default function PublicDisplay() {
 
                       let displayStartTime, displayEndTime;
 
-                      // If meeting starts on current day, show actual UTC time
+                      // If meeting starts on current day, show time with timezone handling
                       if (meetingStartDate === currentDayDate) {
-                        displayStartTime = `${String(utcStartTime.getUTCHours()).padStart(2, '0')}:${String(utcStartTime.getUTCMinutes()).padStart(2, '0')}`;
+                        displayStartTime = formatTime(meeting.startDateTime);
                       } else {
                         displayStartTime = "00:00";
                       }
 
-                      // If meeting ends on current day, show actual UTC time
+                      // If meeting ends on current day, show time with timezone handling
                       if (meetingEndDate === currentDayDate) {
-                        displayEndTime = `${String(utcEndTime.getUTCHours()).padStart(2, '0')}:${String(utcEndTime.getUTCMinutes()).padStart(2, '0')}`;
+                        displayEndTime = formatTime(meeting.endDateTime);
                       } else {
                         displayEndTime = "23:59";
                       }
@@ -783,10 +797,10 @@ export default function PublicDisplay() {
                       const timeRange = `${displayStartTime} - ${displayEndTime}`;
 
 
-                      // Determine meeting status
-                      const now = new Date();
-                      const meetingStart = parseLocalDateTime(meeting.startDateTime);
-                      const meetingEnd = parseLocalDateTime(meeting.endDateTime);
+                      // Determine meeting status with timezone handling
+                      const now = getCurrentLocalTime();
+                      const meetingStart = convertToLocalTime(meeting.startDateTime);
+                      const meetingEnd = convertToLocalTime(meeting.endDateTime);
                       
                       let statusColor = "#10b981"; // green - completed
                       let statusText = "Đã kết thúc";
