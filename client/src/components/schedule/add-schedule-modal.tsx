@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -17,16 +18,27 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useToast } from "@/hooks/use-toast";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { apiRequest } from "@/lib/queryClient";
-import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Department } from "@shared/schema";
+import { insertWorkScheduleSchema, type WorkSchedule, type Staff, type Department, type SystemConfigs } from "@shared/schema";
 import { z } from "zod";
-import { format, isBefore, startOfDay, isSameDay } from "date-fns";
+import { format, isBefore, startOfDay, isSameDay, isWeekend } from "date-fns";
 
 const formSchema = z.object({
   staffId: z.string().min(1, "Vui lòng chọn cán bộ"),
-  startDateTime: z.string().min(1, "Vui lòng chọn ngày giờ bắt đầu"),
-  endDateTime: z.string().min(1, "Vui lòng chọn ngày giờ kết thúc"),
+  startDate: z.string().min(1, "Vui lòng chọn ngày bắt đầu"),
+  endDate: z.string().min(1, "Vui lòng chọn ngày kết thúc"),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
   workType: z.string().min(1, "Vui lòng chọn nội dung công tác"),
   customContent: z.string().max(200).optional(),
+  isFullDay: z.boolean().default(false),
+}).refine((data) => {
+  if (!data.isFullDay) {
+    return data.startTime && data.endTime;
+  }
+  return true;
+}, {
+  message: "Vui lòng chọn giờ bắt đầu và kết thúc khi không chọn cả ngày",
+  path: ["startTime"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,21 +67,34 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     mode: "onChange",
     defaultValues: {
       staffId: "",
-      startDateTime: "",
-      endDateTime: "",
+      startDate: "",
+      endDate: "",
+      startTime: "",
+      endTime: "",
       workType: "",
       customContent: "",
+      isFullDay: false,
     },
   });
 
   const watchedWorkType = form.watch("workType");
-  const watchedStartDateTime = form.watch("startDateTime");
-  const watchedEndDateTime = form.watch("endDateTime");
+  const watchedIsFullDay = form.watch("isFullDay");
+  const watchedStartDate = form.watch("startDate");
+  const watchedEndDate = form.watch("endDate");
 
-  // Fetch holidays
+  // Fetch system configuration and holidays
+  const { data: systemConfigs = [] } = useQuery<SystemConfigs[]>({
+    queryKey: ["/api/system-config"],
+  });
+  
   const { data: holidays = [] } = useQuery<any[]>({
     queryKey: ["/api/holidays"],
   });
+  
+  // Get work hours from config
+  const workStartTime = systemConfigs.find(c => c.key === 'work_hours.start_time')?.value || '08:00';
+  const workEndTime = systemConfigs.find(c => c.key === 'work_hours.end_time')?.value || '17:30';
+  const allowWeekendSchedule = systemConfigs.find(c => c.key === 'policies.allow_weekend_schedule')?.value === 'true';
 
   // Check if a date is a holiday
   const isHoliday = (dateString: string) => {
@@ -93,26 +118,27 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     });
   };
 
-  // Handle datetime input change to prevent weekend and holiday selection
-  const handleDateTimeChange = (field: "startDateTime" | "endDateTime", value: string) => {
-    console.log(`handleDateTimeChange called for ${field} with value:`, value);
+  // Handle date input change to prevent weekend and holiday selection
+  const handleDateChange = (field: "startDate" | "endDate", value: string) => {
+    console.log(`handleDateChange called for ${field} with value:`, value);
     
     if (value) {
       const selectedDate = new Date(value);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
       
-      console.log(`Selected datetime: ${value}, day of week: ${dayOfWeek}`);
+      console.log(`Selected date: ${value}, day of week: ${dayOfWeek}`);
       
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
+      // Check weekend restriction based on system config
+      if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
         console.log("Weekend detected, preventing selection");
         // Reset the field and show error
         form.setValue(field, "");
         form.setError(field, {
-          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+          message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
         });
         toast({
           title: "Lỗi",
-          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+          description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
           variant: "destructive",
         });
         return;
@@ -136,7 +162,19 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
       // If valid weekday and not holiday, clear any previous errors and set value
       form.clearErrors(field);
       form.setValue(field, value);
+      
+      // Auto-fill endDate when startDate is set and isFullDay is checked
+      if (field === "startDate" && watchedIsFullDay) {
+        form.setValue("endDate", value);
+        form.clearErrors("endDate");
+      }
     }
+  };
+  
+  const isValidWorkTime = (timeString: string) => {
+    if (!timeString) return true;
+    // Check if time is within work hours
+    return timeString >= workStartTime && timeString <= workEndTime;
   };
 
   // Fetch staff (filter for Ban Giám đốc)
@@ -154,11 +192,31 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
     (a.displayOrder || 0) - (b.displayOrder || 0)
   );
 
+  // Set default times when full day is checked
+  useEffect(() => {
+    if (watchedIsFullDay) {
+      form.setValue("startTime", workStartTime);
+      form.setValue("endTime", workEndTime);
+      
+      // Auto-fill endDate with startDate when full day is checked
+      if (watchedStartDate) {
+        form.setValue("endDate", watchedStartDate);
+        form.clearErrors("endDate");
+      }
+    }
+  }, [watchedIsFullDay, workStartTime, workEndTime, form, watchedStartDate]);
+  
   // Create schedule mutation
   const createScheduleMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
+      const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
+      
       const payload = {
-        ...data,
+        staffId: data.staffId,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
+        workType: data.workType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("POST", "/api/work-schedules", payload);
@@ -184,8 +242,14 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
   // Update schedule mutation
   const updateScheduleMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
+      const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
+      
       const payload = {
-        ...data,
+        staffId: data.staffId,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
+        workType: data.workType,
         customContent: data.workType === "Khác" ? data.customContent : undefined,
       };
       await apiRequest("PUT", `/api/work-schedules/${schedule?.id}`, payload);
@@ -210,60 +274,84 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
 
   useEffect(() => {
     if (schedule) {
+      const startDate = new Date(schedule.startDateTime);
+      const endDate = new Date(schedule.endDateTime);
+      
+      const startTimeStr = format(startDate, "HH:mm");
+      const endTimeStr = format(endDate, "HH:mm");
+      
+      // Check if it's a full day (matches work hours)
+      const isFullDay = startTimeStr === workStartTime && endTimeStr === workEndTime;
+
       form.reset({
         staffId: schedule.staffId,
-        startDateTime: format(new Date(schedule.startDateTime), "yyyy-MM-dd'T'HH:mm"),
-        endDateTime: format(new Date(schedule.endDateTime), "yyyy-MM-dd'T'HH:mm"),
+        startDate: format(startDate, "yyyy-MM-dd"),
+        endDate: format(endDate, "yyyy-MM-dd"),
+        startTime: startTimeStr,
+        endTime: endTimeStr,
         workType: schedule.workType,
         customContent: schedule.customContent || "",
+        isFullDay: isFullDay,
       });
     } else {
       form.reset({
         staffId: "",
-        startDateTime: "",
-        endDateTime: "",
+        startDate: "",
+        endDate: "",
+        startTime: "",
+        endTime: "",
         workType: "",
         customContent: "",
+        isFullDay: false,
       });
     }
-  }, [schedule, form]);
+  }, [schedule, form, workStartTime, workEndTime]);
 
   // Monitor form values and prevent weekends
   useEffect(() => {
-    const checkAndPreventWeekends = (field: "startDateTime" | "endDateTime", value: string) => {
+    const checkAndPreventWeekends = (field: "startDate" | "endDate", value: string) => {
       if (value) {
         const selectedDate = new Date(value);
         const dayOfWeek = selectedDate.getDay();
         
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          console.log(`Weekend detected in useEffect for ${field}, clearing value`);
+        // Check weekend restriction based on system config
+        if (!allowWeekendSchedule && (dayOfWeek === 0 || dayOfWeek === 6)) {
+          console.log(`Weekend detected in useEffect for ${field}, clearing value due to policy`);
           form.setValue(field, "");
           form.setError(field, {
-            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)"
+            message: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống"
           });
           toast({
             title: "Lỗi",
-            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật)",
+            description: "Không thể chọn ngày cuối tuần (Thứ 7, Chủ nhật) - Bị cấm bởi chính sách hệ thống",
             variant: "destructive",
           });
         }
       }
     };
 
-    if (watchedStartDateTime) {
-      checkAndPreventWeekends("startDateTime", watchedStartDateTime);
+    if (watchedStartDate) {
+      checkAndPreventWeekends("startDate", watchedStartDate);
     }
-    if (watchedEndDateTime) {
-      checkAndPreventWeekends("endDateTime", watchedEndDateTime);
+    if (watchedEndDate) {
+      checkAndPreventWeekends("endDate", watchedEndDate);
     }
-  }, [watchedStartDateTime, watchedEndDateTime, form, toast]);
+  }, [watchedStartDate, watchedEndDate, form, toast, allowWeekendSchedule]);
 
   const onSubmit = (data: FormData) => {
-    const startDateTime = new Date(data.startDateTime);
-    const endDateTime = new Date(data.endDateTime);
-    const now = new Date();
-    
+    // Validate times if not full day
+    if (!data.isFullDay && data.startTime && !isValidWorkTime(data.startTime)) {
+      form.setError("startTime", { message: `Giờ bắt đầu phải trong khoảng ${workStartTime} - ${workEndTime}` });
+      return;
+    }
 
+    if (!data.isFullDay && data.endTime && !isValidWorkTime(data.endTime)) {
+      form.setError("endTime", { message: `Giờ kết thúc phải trong khoảng ${workStartTime} - ${workEndTime}` });
+      return;
+    }
+    
+    const startDateTime = new Date(`${data.startDate}T${data.startTime || workStartTime}:00`);
+    const endDateTime = new Date(`${data.endDate}T${data.endTime || workEndTime}:00`);
 
     // Validate end time is after start time
     if (endDateTime <= startDateTime) {
@@ -317,59 +405,112 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
               )}
             </div>
 
+            {/* Full Day Checkbox */}
+            <div className="flex items-center space-x-2 py-1">
+              <Checkbox
+                id="isFullDay"
+                checked={watchedIsFullDay}
+                onCheckedChange={(checked) => form.setValue("isFullDay", checked as boolean)}
+                data-testid="checkbox-full-day"
+              />
+              <Label htmlFor="isFullDay" className="text-xs sm:text-sm">Cả ngày ({workStartTime} - {workEndTime})</Label>
+            </div>
+
+            {/* Date Range */}
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
               <div>
-                <Label htmlFor="startDateTime" className="block text-sm font-medium text-gray-700 mb-2">
-                  Ngày giờ bắt đầu *
+                <Label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày bắt đầu *
                 </Label>
                 <Input
-                  id="startDateTime"
-                  type="datetime-local"
-                  value={watchedStartDateTime || ""}
+                  id="startDate"
+                  type="date"
+                  value={watchedStartDate || ""}
                   onChange={(e) => {
-                    console.log("Start datetime onChange triggered:", e.target.value);
-                    handleDateTimeChange("startDateTime", e.target.value);
+                    console.log("Start date onChange triggered:", e.target.value);
+                    handleDateChange("startDate", e.target.value);
                   }}
                   onBlur={(e) => {
-                    console.log("Start datetime onBlur triggered:", e.target.value);
-                    handleDateTimeChange("startDateTime", e.target.value);
+                    console.log("Start date onBlur triggered:", e.target.value);
+                    handleDateChange("startDate", e.target.value);
                   }}
                   className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
-                  data-testid="input-start-time"
+                  data-testid="input-start-date"
                 />
-                {form.formState.errors.startDateTime && (
+                {form.formState.errors.startDate && (
                   <p className="text-red-600 text-sm mt-1">
-                    {form.formState.errors.startDateTime.message}
+                    {form.formState.errors.startDate.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="endDateTime" className="block text-sm font-medium text-gray-700 mb-2">
-                  Ngày giờ kết thúc *
+                <Label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày kết thúc *
                 </Label>
                 <Input
-                  id="endDateTime"
-                  type="datetime-local"
-                  value={watchedEndDateTime || ""}
+                  id="endDate"
+                  type="date"
+                  value={watchedEndDate || ""}
                   onChange={(e) => {
-                    console.log("End datetime onChange triggered:", e.target.value);
-                    handleDateTimeChange("endDateTime", e.target.value);
+                    console.log("End date onChange triggered:", e.target.value);
+                    handleDateChange("endDate", e.target.value);
                   }}
                   onBlur={(e) => {
-                    console.log("End datetime onBlur triggered:", e.target.value);
-                    handleDateTimeChange("endDateTime", e.target.value);
+                    console.log("End date onBlur triggered:", e.target.value);
+                    handleDateChange("endDate", e.target.value);
                   }}
                   className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
-                  data-testid="input-end-time"
+                  data-testid="input-end-date"
                 />
-                {form.formState.errors.endDateTime && (
+                {form.formState.errors.endDate && (
                   <p className="text-red-600 text-sm mt-1">
-                    {form.formState.errors.endDateTime.message}
+                    {form.formState.errors.endDate.message}
                   </p>
                 )}
               </div>
             </div>
+
+            {/* Time Range (only if not full day) */}
+            {!watchedIsFullDay && (
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
+                <div>
+                  <Label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
+                    Giờ bắt đầu *
+                  </Label>
+                  <Input
+                    id="startTime"
+                    type="time"
+                    {...form.register("startTime")}
+                    className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                    data-testid="input-start-time"
+                  />
+                  {form.formState.errors.startTime && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {form.formState.errors.startTime.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
+                    Giờ kết thúc *
+                  </Label>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    {...form.register("endTime")}
+                    className="h-11 text-sm sm:h-9 sm:text-base focus:ring-2 focus:ring-bidv-teal focus:border-transparent"
+                    data-testid="input-end-time"
+                  />
+                  {form.formState.errors.endTime && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {form.formState.errors.endTime.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="workType" className="block text-sm font-medium text-gray-700 mb-2">
@@ -423,22 +564,11 @@ export default function AddScheduleModal({ isOpen, onClose, schedule }: AddSched
             )}
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 sm:p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-2 sm:ml-3">
-                <h4 className="text-xs font-medium text-yellow-800">Lưu ý quan trọng</h4>
-                <p className="text-xs text-yellow-700 mt-0.5 sm:mt-1">
-                  • Không thể chọn ngày giờ quá khứ<br/>
-                  • Mỗi cá nhân chỉ được phép có tối đa 5 lịch công tác trong cùng một ngày<br/>
-                  • Hệ thống sẽ kiểm tra và cảnh báo nếu vượt quá giới hạn
-                </p>
-              </div>
-            </div>
+          {/* Work Hours Info */}
+          <div className="bg-blue-50 p-2.5 sm:p-3 rounded-md text-xs text-blue-700">
+            <p className="mb-1"><strong>Giờ làm việc:</strong> {workStartTime} - {workEndTime}</p>
+            <p className="mb-1"><strong>Lưu ý:</strong> {allowWeekendSchedule ? "Không thể chọn ngày lễ" : "Không thể chọn ngày cuối tuần (T7, CN) hoặc ngày lễ"}</p>
+            <p><strong>Định dạng ngày:</strong> Ngày sẽ hiển thị theo định dạng dd/mm/yyyy</p>
           </div>
 
           </form>
