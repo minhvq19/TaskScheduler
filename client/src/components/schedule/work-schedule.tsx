@@ -13,6 +13,10 @@ import EnhancedScheduleModal from "./enhanced-schedule-modal";
 import AddScheduleModal from "./add-schedule-modal";
 import type { WorkSchedule, Staff, Department } from "@shared/schema";
 import { useSystemColors } from "@/hooks/useSystemColors";
+import { 
+  formatTimeForDisplay, 
+  convertToLocalTime 
+} from "@/lib/timezone";
 
 export default function WorkSchedule() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -331,7 +335,7 @@ export default function WorkSchedule() {
                                   
                                   // Nếu ngày hiện tại là ngày bắt đầu lịch
                                   if (currentDay.getTime() === scheduleStartDay.getTime()) {
-                                    displayStartTime = format(scheduleStartDate, "HH:mm");
+                                    displayStartTime = formatTimeForDisplay(schedule.startDateTime);
                                   } else {
                                     // Ngày giữa hoặc ngày cuối: bắt đầu từ giờ làm việc
                                     displayStartTime = workHours.start;
@@ -339,7 +343,7 @@ export default function WorkSchedule() {
                                   
                                   // Nếu ngày hiện tại là ngày kết thúc lịch
                                   if (currentDay.getTime() === scheduleEndDay.getTime()) {
-                                    displayEndTime = format(scheduleEndDate, "HH:mm");
+                                    displayEndTime = formatTimeForDisplay(schedule.endDateTime);
                                   } else {
                                     // Ngày đầu hoặc ngày giữa: kết thúc vào giờ làm việc
                                     displayEndTime = workHours.end;
